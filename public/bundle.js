@@ -31269,40 +31269,18 @@ ${reason}`);
   // frontend/editor.js
   console.log("editor.js loaded");
   var username = prompt("Enter your name:", "anonymous") || "anonymous";
-  var presetColors = [
-    "#e6194b",
-    "#3cb44b",
-    "#ffe119",
-    "#4363d8",
-    "#f58231",
-    "#911eb4",
-    "#46f0f0",
-    "#f032e6",
-    "#bcf60c",
-    "#fabebe",
-    "#008080",
-    "#e6beff",
-    "#9a6324",
-    "#fffac8",
-    "#800000",
-    "#aaffc3",
-    "#808000",
-    "#ffd8b1",
-    "#000075",
-    "#808080"
-  ];
   var userColor = localStorage.getItem("userColor");
   if (!userColor) {
-    userColor = presetColors[Math.floor(Math.random() * presetColors.length)];
+    userColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
     localStorage.setItem("userColor", userColor);
   }
   window.addEventListener("DOMContentLoaded", () => {
-    const usernameEl = document.getElementById("local-username");
+    const room = "my-room";
     const roomNameEl = document.getElementById("room-name");
     const userListEl = document.getElementById("user-list");
-    const room = "my-room";
-    if (usernameEl) usernameEl.textContent = username;
+    const usernameEl = document.getElementById("local-username");
     if (roomNameEl) roomNameEl.textContent = room;
+    if (usernameEl) usernameEl.textContent = username;
     const ydoc = new Doc();
     const ytext = ydoc.getText("codemirror");
     const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
@@ -31311,6 +31289,8 @@ ${reason}`);
       name: username,
       color: userColor
     });
+    const userLabel = document.querySelector("#toolbar > div:nth-child(2)");
+    if (userLabel) userLabel.innerHTML = `User: ${username}`;
     function updateUserList() {
       if (!userListEl) return;
       const states = Array.from(provider.awareness.getStates().values());

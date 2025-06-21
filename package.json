@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "npx esbuild frontend/editor.js --bundle --outfile=public/bundle.js --servedir=public",
-    "build": "esbuild frontend/editor.js --bundle --outfile=frontend/bundle.js", 
+    "build": "esbuild frontend/editor.js --bundle --outfile=public/bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -12,7 +12,7 @@
     "@codemirror/view": "^6.37.2",
     "codemirror": "^6.0.2",
     "y-codemirror.next": "^0.3.5",
-    "y-websocket": "^1.4.5",
+    "y-websocket": "^1.5.4",
     "yjs": "^13.6.27"
   },
   "devDependencies": {
