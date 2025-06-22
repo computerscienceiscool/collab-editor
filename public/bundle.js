@@ -1332,8 +1332,8 @@
     if (structs != null) {
       const lastStruct = structs[structs.length - 1];
       const clockState = lastStruct.id.clock + lastStruct.length;
-      for (let i = 0, del = deletes[i]; i < deletes.length && del.clock < clockState; del = deletes[++i]) {
-        iterateStructs(transaction, structs, del.clock, del.len, f);
+      for (let i = 0, del2 = deletes[i]; i < deletes.length && del2.clock < clockState; del2 = deletes[++i]) {
+        iterateStructs(transaction, structs, del2.clock, del2.len, f);
       }
     }
   });
@@ -5034,8 +5034,8 @@
       this.right = this.right.right;
     }
   };
-  var findNextPosition = (transaction, pos, count) => {
-    while (pos.right !== null && count > 0) {
+  var findNextPosition = (transaction, pos, count2) => {
+    while (pos.right !== null && count2 > 0) {
       switch (pos.right.content.constructor) {
         case ContentFormat:
           if (!pos.right.deleted) {
@@ -5048,11 +5048,11 @@
           break;
         default:
           if (!pos.right.deleted) {
-            if (count < pos.right.length) {
-              getItemCleanStart(transaction, createID(pos.right.id.client, pos.right.id.clock + count));
+            if (count2 < pos.right.length) {
+              getItemCleanStart(transaction, createID(pos.right.id.client, pos.right.id.clock + count2));
             }
             pos.index += pos.right.length;
-            count -= pos.right.length;
+            count2 -= pos.right.length;
           }
           break;
       }
@@ -8308,6 +8308,207 @@
   }
   glo[importIdentifier] = true;
 
+  // node_modules/lib0/indexeddb.js
+  var rtop = (request) => create4((resolve, reject) => {
+    request.onerror = (event) => reject(new Error(event.target.error));
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+  var openDB = (name2, initDB) => create4((resolve, reject) => {
+    const request = indexedDB.open(name2);
+    request.onupgradeneeded = (event) => initDB(event.target.result);
+    request.onerror = (event) => reject(create3(event.target.error));
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      db.onversionchange = () => {
+        db.close();
+      };
+      resolve(db);
+    };
+  });
+  var deleteDB = (name2) => rtop(indexedDB.deleteDatabase(name2));
+  var createStores = (db, definitions) => definitions.forEach(
+    (d) => (
+      // @ts-ignore
+      db.createObjectStore.apply(db, d)
+    )
+  );
+  var transact2 = (db, stores, access = "readwrite") => {
+    const transaction = db.transaction(stores, access);
+    return stores.map((store) => getStore(transaction, store));
+  };
+  var count = (store, range) => rtop(store.count(range));
+  var get = (store, key) => rtop(store.get(key));
+  var del = (store, key) => rtop(store.delete(key));
+  var put = (store, item, key) => rtop(store.put(item, key));
+  var addAutoKey = (store, item) => rtop(store.add(item));
+  var getAll = (store, range, limit) => rtop(store.getAll(range, limit));
+  var queryFirst = (store, query, direction) => {
+    let first = null;
+    return iterateKeys(store, query, (key) => {
+      first = key;
+      return false;
+    }, direction).then(() => first);
+  };
+  var getLastKey = (store, range = null) => queryFirst(store, range, "prev");
+  var iterateOnRequest = (request, f) => create4((resolve, reject) => {
+    request.onerror = reject;
+    request.onsuccess = async (event) => {
+      const cursor = event.target.result;
+      if (cursor === null || await f(cursor) === false) {
+        return resolve();
+      }
+      cursor.continue();
+    };
+  });
+  var iterateKeys = (store, keyrange, f, direction = "next") => iterateOnRequest(store.openKeyCursor(keyrange, direction), (cursor) => f(cursor.key));
+  var getStore = (t2, store) => t2.objectStore(store);
+  var createIDBKeyRangeUpperBound = (upper, upperOpen) => IDBKeyRange.upperBound(upper, upperOpen);
+  var createIDBKeyRangeLowerBound = (lower, lowerOpen) => IDBKeyRange.lowerBound(lower, lowerOpen);
+
+  // node_modules/y-indexeddb/src/y-indexeddb.js
+  var customStoreName = "custom";
+  var updatesStoreName = "updates";
+  var PREFERRED_TRIM_SIZE = 500;
+  var fetchUpdates = (idbPersistence, beforeApplyUpdatesCallback = () => {
+  }, afterApplyUpdatesCallback = () => {
+  }) => {
+    const [updatesStore] = transact2(
+      /** @type {IDBDatabase} */
+      idbPersistence.db,
+      [updatesStoreName]
+    );
+    return getAll(updatesStore, createIDBKeyRangeLowerBound(idbPersistence._dbref, false)).then((updates) => {
+      if (!idbPersistence._destroyed) {
+        beforeApplyUpdatesCallback(updatesStore);
+        transact(idbPersistence.doc, () => {
+          updates.forEach((val) => applyUpdate(idbPersistence.doc, val));
+        }, idbPersistence, false);
+        afterApplyUpdatesCallback(updatesStore);
+      }
+    }).then(() => getLastKey(updatesStore).then((lastKey) => {
+      idbPersistence._dbref = lastKey + 1;
+    })).then(() => count(updatesStore).then((cnt) => {
+      idbPersistence._dbsize = cnt;
+    })).then(() => updatesStore);
+  };
+  var storeState = (idbPersistence, forceStore = true) => fetchUpdates(idbPersistence).then((updatesStore) => {
+    if (forceStore || idbPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
+      addAutoKey(updatesStore, encodeStateAsUpdate(idbPersistence.doc)).then(() => del(updatesStore, createIDBKeyRangeUpperBound(idbPersistence._dbref, true))).then(() => count(updatesStore).then((cnt) => {
+        idbPersistence._dbsize = cnt;
+      }));
+    }
+  });
+  var IndexeddbPersistence = class extends Observable {
+    /**
+     * @param {string} name
+     * @param {Y.Doc} doc
+     */
+    constructor(name2, doc3) {
+      super();
+      this.doc = doc3;
+      this.name = name2;
+      this._dbref = 0;
+      this._dbsize = 0;
+      this._destroyed = false;
+      this.db = null;
+      this.synced = false;
+      this._db = openDB(
+        name2,
+        (db) => createStores(db, [
+          ["updates", { autoIncrement: true }],
+          ["custom"]
+        ])
+      );
+      this.whenSynced = create4((resolve) => this.on("synced", () => resolve(this)));
+      this._db.then((db) => {
+        this.db = db;
+        const beforeApplyUpdatesCallback = (updatesStore) => addAutoKey(updatesStore, encodeStateAsUpdate(doc3));
+        const afterApplyUpdatesCallback = () => {
+          if (this._destroyed) return this;
+          this.synced = true;
+          this.emit("synced", [this]);
+        };
+        fetchUpdates(this, beforeApplyUpdatesCallback, afterApplyUpdatesCallback);
+      });
+      this._storeTimeout = 1e3;
+      this._storeTimeoutId = null;
+      this._storeUpdate = (update, origin) => {
+        if (this.db && origin !== this) {
+          const [updatesStore] = transact2(
+            /** @type {IDBDatabase} */
+            this.db,
+            [updatesStoreName]
+          );
+          addAutoKey(updatesStore, update);
+          if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
+            if (this._storeTimeoutId !== null) {
+              clearTimeout(this._storeTimeoutId);
+            }
+            this._storeTimeoutId = setTimeout(() => {
+              storeState(this, false);
+              this._storeTimeoutId = null;
+            }, this._storeTimeout);
+          }
+        }
+      };
+      doc3.on("update", this._storeUpdate);
+      this.destroy = this.destroy.bind(this);
+      doc3.on("destroy", this.destroy);
+    }
+    destroy() {
+      if (this._storeTimeoutId) {
+        clearTimeout(this._storeTimeoutId);
+      }
+      this.doc.off("update", this._storeUpdate);
+      this.doc.off("destroy", this.destroy);
+      this._destroyed = true;
+      return this._db.then((db) => {
+        db.close();
+      });
+    }
+    /**
+     * Destroys this instance and removes all data from indexeddb.
+     *
+     * @return {Promise<void>}
+     */
+    clearData() {
+      return this.destroy().then(() => {
+        deleteDB(this.name);
+      });
+    }
+    /**
+     * @param {String | number | ArrayBuffer | Date} key
+     * @return {Promise<String | number | ArrayBuffer | Date | any>}
+     */
+    get(key) {
+      return this._db.then((db) => {
+        const [custom] = transact2(db, [customStoreName], "readonly");
+        return get(custom, key);
+      });
+    }
+    /**
+     * @param {String | number | ArrayBuffer | Date} key
+     * @param {String | number | ArrayBuffer | Date} value
+     * @return {Promise<String | number | ArrayBuffer | Date>}
+     */
+    set(key, value) {
+      return this._db.then((db) => {
+        const [custom] = transact2(db, [customStoreName]);
+        return put(custom, value, key);
+      });
+    }
+    /**
+     * @param {String | number | ArrayBuffer | Date} key
+     * @return {Promise<undefined>}
+     */
+    del(key) {
+      return this._db.then((db) => {
+        const [custom] = transact2(db, [customStoreName]);
+        return del(custom, key);
+      });
+    }
+  };
+
   // node_modules/lib0/broadcastchannel.js
   var channels = /* @__PURE__ */ new Map();
   var LocalStoragePolyfill = class {
@@ -10480,24 +10681,24 @@ ${reason}`);
     In cases where your value depends only on a single field, you'll
     want to use the [`from`](https://codemirror.net/6/docs/ref/#state.Facet.from) method instead.
     */
-    compute(deps, get) {
+    compute(deps, get2) {
       if (this.isStatic)
         throw new Error("Can't compute a static facet");
-      return new FacetProvider(deps, this, 1, get);
+      return new FacetProvider(deps, this, 1, get2);
     }
     /**
     Create an extension that computes zero or more values for this
     facet from a state.
     */
-    computeN(deps, get) {
+    computeN(deps, get2) {
       if (this.isStatic)
         throw new Error("Can't compute a static facet");
-      return new FacetProvider(deps, this, 2, get);
+      return new FacetProvider(deps, this, 2, get2);
     }
-    from(field, get) {
-      if (!get)
-        get = (x) => x;
-      return this.compute([field], (state) => get(state.field(field)));
+    from(field, get2) {
+      if (!get2)
+        get2 = (x) => x;
+      return this.compute([field], (state) => get2(state.field(field)));
     }
   };
   function sameArray(a, b) {
@@ -10579,7 +10780,7 @@ ${reason}`);
     let providerTypes = providers.map((p) => p.type);
     let dynamic = providerAddrs.filter((p) => !(p & 1));
     let idx = addresses[facet.id] >> 1;
-    function get(state) {
+    function get2(state) {
       let values = [];
       for (let i = 0; i < providerAddrs.length; i++) {
         let value = getAddr(state, providerAddrs[i]);
@@ -10595,13 +10796,13 @@ ${reason}`);
       create(state) {
         for (let addr of providerAddrs)
           ensureAddr(state, addr);
-        state.values[idx] = get(state);
+        state.values[idx] = get2(state);
         return 1;
       },
       update(state, tr) {
         if (!ensureAll(state, dynamic))
           return 0;
-        let value = get(state);
+        let value = get2(state);
         if (facet.compare(value, state.values[idx]))
           return 0;
         state.values[idx] = value;
@@ -10614,7 +10815,7 @@ ${reason}`);
           state.values[idx] = oldValue;
           return 0;
         }
-        let value = get(state);
+        let value = get2(state);
         if (facet.compare(value, oldValue)) {
           state.values[idx] = oldValue;
           return 0;
@@ -16995,14 +17196,14 @@ ${reason}`);
       return;
     let dropPos = view.posAtCoords({ x: event.clientX, y: event.clientY }, false);
     let { draggedContent } = view.inputState;
-    let del = direct && draggedContent && dragMovesSelection(view, event) ? { from: draggedContent.from, to: draggedContent.to } : null;
+    let del2 = direct && draggedContent && dragMovesSelection(view, event) ? { from: draggedContent.from, to: draggedContent.to } : null;
     let ins = { from: dropPos, insert: text2 };
-    let changes = view.state.changes(del ? [del, ins] : ins);
+    let changes = view.state.changes(del2 ? [del2, ins] : ins);
     view.focus();
     view.dispatch({
       changes,
       selection: { anchor: changes.mapPos(dropPos, -1), head: changes.mapPos(dropPos, 1) },
-      userEvent: del ? "move.drop" : "input.drop"
+      userEvent: del2 ? "move.drop" : "input.drop"
     });
     view.inputState.draggedContent = null;
   }
@@ -31282,9 +31483,25 @@ ${reason}`);
     if (roomNameEl) roomNameEl.textContent = room;
     if (usernameEl) usernameEl.textContent = username;
     const ydoc = new Doc();
+    const persistence = new IndexeddbPersistence(room, ydoc);
+    persistence.once("synced", () => {
+      console.log("IndexedDB content loaded");
+    });
     const ytext = ydoc.getText("codemirror");
     const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
     console.log("Yjs + Provider initialized");
+    const offlineBanner = document.getElementById("offline-banner");
+    if (offlineBanner) {
+      offlineBanner.style.display = navigator.onLine ? "none" : "block";
+    }
+    window.addEventListener("offline", () => {
+      console.warn("Browser is offline");
+      if (offlineBanner) offlineBanner.style.display = "block";
+    });
+    window.addEventListener("online", () => {
+      console.info("Browser is back online");
+      if (offlineBanner) offlineBanner.style.display = "none";
+    });
     provider.awareness.setLocalStateField("user", {
       name: username,
       color: userColor

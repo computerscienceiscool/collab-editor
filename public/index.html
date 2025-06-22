@@ -45,7 +45,31 @@
     <div>User: <span id="local-username">?</span></div>
     <div id="user-list"></div>
   </div>
+  <div id="offline-banner" style="
+  display: none;
+  background-color: yellow;
+  color: black;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;">
+  OFFLINE MODE – Changes will be saved when reconnected.
+ </div>
   <div id="editor"></div>
   <script src="bundle.js"></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => {
+          console.log('Service worker registered:', reg.scope);
+        })
+        .catch(err => {
+          console.warn('Service worker registration failed:', err);
+        });
+    }
+  </script>
 </body>
 </html>

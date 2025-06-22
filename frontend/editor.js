@@ -1,5 +1,7 @@
 
 import * as Y from 'yjs'
+import { IndexeddbPersistence } from 'y-indexeddb';
+
 import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
@@ -29,9 +31,35 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Yjs doc and provider
   const ydoc = new Y.Doc()
+  const persistence = new IndexeddbPersistence(room, ydoc);
+
+  // Optional: log once local content is loaded
+  persistence.once('synced', () => {
+    console.log('IndexedDB content loaded');
+  }); 
+   
+
+    
   const ytext = ydoc.getText('codemirror')
   const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc)
   console.log("Yjs + Provider initialized")
+  
+  const offlineBanner = document.getElementById('offline-banner');
+  if (offlineBanner) {
+    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
+  }
+
+
+
+  window.addEventListener('offline', () => {
+    console.warn('Browser is offline');
+    if (offlineBanner) offlineBanner.style.display = 'block';
+  });
+
+  window.addEventListener('online', () => {
+    console.info('Browser is back online');
+    if (offlineBanner) offlineBanner.style.display = 'none';
+  });
 
   // Set local user awareness
   provider.awareness.setLocalStateField('user', {

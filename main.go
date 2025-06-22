@@ -8,12 +8,16 @@ import (
 )
 
 func handleSave(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Failed to read body", 500)
 		return
 	}
-	err = os.WriteFile("doc.yjs", body, 0644) // potentially replace with better locking
+	err = os.WriteFile("doc.yjs", body, 0644)
 	if err != nil {
 		http.Error(w, "Failed to write file", 500)
 		return
@@ -22,6 +26,10 @@ func handleSave(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLoad(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	data, err := os.ReadFile("doc.yjs")
 	if err != nil {
 		http.Error(w, "File not found", 404)
@@ -33,9 +41,13 @@ func handleLoad(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fs := http.FileServer(http.Dir("public"))
 	http.Handle("/", fs)
+
 	http.HandleFunc("/save", handleSave)
 	http.HandleFunc("/load", handleLoad)
 
 	log.Println("Go server running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

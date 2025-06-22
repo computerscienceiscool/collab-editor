@@ -55,3 +55,13 @@ rebuild: clean install build
 all: install build restart
 	@echo "Starting services..."
 	@make -j2 ws run
+
+stop:
+	@echo "Killing anything on ports 8080 and 1234..."
+	@-fuser -k 8080/tcp 2>/dev/null || true
+	@-fuser -k 1234/tcp 2>/dev/null || true
+
+start:
+	@echo "Restarting ports and running all services..."
+	@make restart
+	@make -j3 ws run serve
