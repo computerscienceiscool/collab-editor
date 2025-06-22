@@ -41,13 +41,13 @@
 
 ##  Offline Support — Step-by-Step
 
-- [ ] **Install y-indexeddb**  
+- [x] **Install y-indexeddb**  
   Run the following in your project root:  
   ```bash
   npm install y-indexeddb
   ```
 
-- [ ] **Import and Initialize Persistence**  
+- [x] **Import and Initialize Persistence**  
   In `editor.js`, add:  
   ```js
   import { IndexeddbPersistence } from 'y-indexeddb';
@@ -55,7 +55,7 @@
   const persistence = new IndexeddbPersistence(room, ydoc);
   ```
 
-- [ ] **Add Sync Confirmation**  
+- [x] **Add Sync Confirmation**  
   Still in `editor.js`, confirm IndexedDB content loaded with:  
   ```js
   persistence.once('synced', () => {
@@ -63,7 +63,7 @@
   });
   ```
 
-- [ ] **Ensure Dual Provider Setup**  
+- [x] **Ensure Dual Provider Setup**  
   Make sure `WebsocketProvider` and `IndexeddbPersistence` both use the same `Y.Doc` (`ydoc`).  
   This is already likely the case:
   ```js
@@ -72,13 +72,13 @@
   const persistence = new IndexeddbPersistence(room, ydoc);
   ```
 
-- [ ] **Test Offline Behavior**  
+- [x] **Test Offline Behavior**  
   - Stop the WebSocket server (`Ctrl+C` in its terminal tab).  
   - Reload the browser page.  
   - Confirm previously entered content still appears.  
   - Restart the server and confirm it resyncs when it comes back online.
 
-- [ ] **(Optional) Add Service Worker**  
+- [x] **(Optional) Add Service Worker**  
   This is **not required**, but for full offline support (including HTML/CSS/JS):  
   - Add a basic `service-worker.js` file to cache site assets.  
   - Register it in `index.html` via:  
@@ -94,12 +94,12 @@
 ## 📦 Yjs Tutorial: Offline Support & Shared Types
 
 ### 🔌 Offline Support with `y-indexeddb`
-- [ ] **Install & Import:** Add the `y-indexeddb` package and import `IndexeddbPersistence`.
-- [ ] **Initialize Persistence:** Create a new `IndexeddbPersistence(roomName, ydoc)` instance.
-- [ ] **Confirm Integration:** Log `"initial content loaded"` using `.once('synced')` to verify loading from local IndexedDB.
-- [ ] **Dual Provider Setup:** Ensure `WebsocketProvider` and `IndexeddbPersistence` both operate on the same Y.Doc.
-- [ ] **Simulate Offline Mode:** Reload the page without the WebSocket server and verify content loads from the local store.
-- [ ] **Optionally Add Service Worker:** Add a service worker to cache the HTML/CSS/JS for full offline access.
+- [x] **Install & Import:** Add the `y-indexeddb` package and import `IndexeddbPersistence`.
+- [x] **Initialize Persistence:** Create a new `IndexeddbPersistence(roomName, ydoc)` instance.
+- [x] **Confirm Integration:** Log `"initial content loaded"` using `.once('synced')` to verify loading from local IndexedDB.
+- [x] **Dual Provider Setup:** Ensure `WebsocketProvider` and `IndexeddbPersistence` both operate on the same Y.Doc.
+- [x] **Simulate Offline Mode:** Reload the page without the WebSocket server and verify content loads from the local store.
+- [x] **Optionally Add Service Worker:** Add a service worker to cache the HTML/CSS/JS for full offline access.
 
 ---
 
