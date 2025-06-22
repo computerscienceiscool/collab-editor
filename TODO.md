@@ -39,6 +39,56 @@
 
 ---
 
+##  Offline Support — Step-by-Step
+
+- [ ] **Install y-indexeddb**  
+  Run the following in your project root:  
+  ```bash
+  npm install y-indexeddb
+  ```
+
+- [ ] **Import and Initialize Persistence**  
+  In `editor.js`, add:  
+  ```js
+  import { IndexeddbPersistence } from 'y-indexeddb';
+
+  const persistence = new IndexeddbPersistence(room, ydoc);
+  ```
+
+- [ ] **Add Sync Confirmation**  
+  Still in `editor.js`, confirm IndexedDB content loaded with:  
+  ```js
+  persistence.once('synced', () => {
+    console.log('initial content loaded');
+  });
+  ```
+
+- [ ] **Ensure Dual Provider Setup**  
+  Make sure `WebsocketProvider` and `IndexeddbPersistence` both use the same `Y.Doc` (`ydoc`).  
+  This is already likely the case:
+  ```js
+  const ydoc = new Y.Doc();
+  const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc);
+  const persistence = new IndexeddbPersistence(room, ydoc);
+  ```
+
+- [ ] **Test Offline Behavior**  
+  - Stop the WebSocket server (`Ctrl+C` in its terminal tab).  
+  - Reload the browser page.  
+  - Confirm previously entered content still appears.  
+  - Restart the server and confirm it resyncs when it comes back online.
+
+- [ ] **(Optional) Add Service Worker**  
+  This is **not required**, but for full offline support (including HTML/CSS/JS):  
+  - Add a basic `service-worker.js` file to cache site assets.  
+  - Register it in `index.html` via:  
+    ```js
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+    ```
+
+
 ---
 
 ## 📦 Yjs Tutorial: Offline Support & Shared Types
