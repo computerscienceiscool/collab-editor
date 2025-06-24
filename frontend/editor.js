@@ -1,13 +1,11 @@
 import { Decoration, ViewPlugin, ViewUpdate } from '@codemirror/view'
 import * as Y from 'yjs'
 import { IndexeddbPersistence } from 'y-indexeddb';
-import { yCollab, yCursorPlugin } from 'y-codemirror.next'
+import { yCollab } from 'y-codemirror.next'
 import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
-import { yCollab } from 'y-codemirror.next'
-import { Decoration, DecorationSet, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 console.log("editor.js loaded")
 
@@ -72,6 +70,51 @@ window.addEventListener("DOMContentLoaded", () => {
   const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
   if (userLabel) userLabel.innerHTML = `User: ${username}`
 
+const remoteCursorPlugin = ViewPlugin.fromClass(class {
+  constructor(view) {
+    this.view = view;
+    this.decorations = this.buildDecorations();
+  }
+
+  update(update) {
+    if (update.docChanged || update.transactions.some(tr => tr.annotation("awareness"))) {
+      this.decorations = this.buildDecorations();
+    }
+  }
+
+  buildDecorations() {
+    const builder = [];
+
+    const states = Array.from(provider.awareness.getStates().entries());
+    for (const [clientID, state] of states) {
+      if (clientID === ydoc.clientID) continue; // skip self
+      const cursor = state.cursor;
+      const user = state.user;
+      if (!cursor || !user) continue;
+
+      const pos = cursor.head;
+      if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
+
+      const deco = Decoration.widget({
+        widget: new CursorWidget(user),
+        side: -1
+      }).range(pos);
+      builder.push(deco);
+    }
+
+    return Decoration.set(builder);
+  }
+
+  destroy() {}
+
+}, {
+  decorations: v => v.decorations
+});
+
+
+
+
+
   // Render list of connected users
   function updateUserList() {
     if (!userListEl) return
@@ -121,7 +164,7 @@ try {
       yCollab(ytext, provider.awareness, {
         awareness: provider.awareness,
         clientID: ydoc.clientID
-      })
+      }),
         remoteCursorPlugin    //  Custom cursor plugin
     ]
   })
@@ -170,37 +213,6 @@ const cursorPlugin = ViewPlugin.fromClass(class {
 })
 
 
-class CursorWidget {
-  constructor(name, color) {
-    this.name = name
-    this.color = color
-  }
-
-  toDOM() {
-    const cursorEl = document.createElement('span')
-    cursorEl.style.borderLeft = `2px solid ${this.color}`
-    cursorEl.style.marginLeft = '-1px'
-    cursorEl.style.height = '1em'
-    cursorEl.style.position = 'relative'
-    cursorEl.style.zIndex = 10
-
-    const label = document.createElement('div')
-    label.textContent = this.name
-    label.style.position = 'absolute'
-    label.style.top = '-1.2em'
-    label.style.left = '0'
-    label.style.backgroundColor = this.color
-    label.style.color = '#fff'
-    label.style.padding = '0 4px'
-    label.style.fontSize = '10px'
-    label.style.borderRadius = '4px'
-
-    cursorEl.appendChild(label)
-    return cursorEl
-  }
-
-  ignoreEvent() { return true }
-}
 
 
 const view = new EditorView({
@@ -222,46 +234,6 @@ view.dispatch({
 
 
 
-const remoteCursorPlugin = ViewPlugin.fromClass(class {
-  constructor(view) {
-    this.view = view;
-    this.decorations = this.buildDecorations();
-  }
-
-  update(update) {
-    if (update.docChanged || update.transactions.some(tr => tr.annotation("awareness"))) {
-      this.decorations = this.buildDecorations();
-    }
-  }
-
-  buildDecorations() {
-    const builder = [];
-
-    const states = Array.from(provider.awareness.getStates().entries());
-    for (const [clientID, state] of states) {
-      if (clientID === ydoc.clientID) continue; // skip self
-      const cursor = state.cursor;
-      const user = state.user;
-      if (!cursor || !user) continue;
-
-      const pos = cursor.head;
-      if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
-
-      const deco = Decoration.widget({
-        widget: new CursorWidget(user),
-        side: -1
-      }).range(pos);
-      builder.push(deco);
-    }
-
-    return Decoration.set(builder);
-  }
-
-  destroy() {}
-
-}, {
-  decorations: v => v.decorations
-});
 
 class CursorWidget {
   constructor(user) {
@@ -293,3 +265,5 @@ class CursorWidget {
 
   ignoreEvent() { return true; }
 }
+});
+
