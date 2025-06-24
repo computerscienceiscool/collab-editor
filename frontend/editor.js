@@ -7,6 +7,7 @@ import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
 import { yCollab } from 'y-codemirror.next'
+import { Decoration, DecorationSet, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 console.log("editor.js loaded")
 
@@ -121,7 +122,7 @@ try {
         awareness: provider.awareness,
         clientID: ydoc.clientID
       })
-        cursorPlugin    //  Custom cursor plugin
+        remoteCursorPlugin    //  Custom cursor plugin
     ]
   })
   console.log("EditorState created", state)
@@ -218,3 +219,77 @@ view.dispatch({
   })
 })
 
+
+
+
+const remoteCursorPlugin = ViewPlugin.fromClass(class {
+  constructor(view) {
+    this.view = view;
+    this.decorations = this.buildDecorations();
+  }
+
+  update(update) {
+    if (update.docChanged || update.transactions.some(tr => tr.annotation("awareness"))) {
+      this.decorations = this.buildDecorations();
+    }
+  }
+
+  buildDecorations() {
+    const builder = [];
+
+    const states = Array.from(provider.awareness.getStates().entries());
+    for (const [clientID, state] of states) {
+      if (clientID === ydoc.clientID) continue; // skip self
+      const cursor = state.cursor;
+      const user = state.user;
+      if (!cursor || !user) continue;
+
+      const pos = cursor.head;
+      if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
+
+      const deco = Decoration.widget({
+        widget: new CursorWidget(user),
+        side: -1
+      }).range(pos);
+      builder.push(deco);
+    }
+
+    return Decoration.set(builder);
+  }
+
+  destroy() {}
+
+}, {
+  decorations: v => v.decorations
+});
+
+class CursorWidget {
+  constructor(user) {
+    this.user = user;
+  }
+
+  toDOM() {
+    const cursor = document.createElement("span");
+    cursor.className = "remote-cursor";
+    cursor.style.borderLeft = `2px solid ${this.user.color}`;
+    cursor.style.marginLeft = "-1px";
+    cursor.style.height = "1em";
+    cursor.style.position = "relative";
+
+    const label = document.createElement("div");
+    label.textContent = this.user.name;
+    label.style.position = "absolute";
+    label.style.top = "-1.2em";
+    label.style.left = "0";
+    label.style.background = this.user.color;
+    label.style.color = "#fff";
+    label.style.fontSize = "0.75em";
+    label.style.padding = "0 4px";
+    label.style.borderRadius = "4px";
+
+    cursor.appendChild(label);
+    return cursor;
+  }
+
+  ignoreEvent() { return true; }
+}
