@@ -12,7 +12,7 @@
 ## 📌 Yjs Tutorial Progress – Remaining Tasks
 
 ### 🔜 Awareness & Presence (Partial)
-- [ ] **Cursor Sharing:** Add cursor position sharing across users using `provider.awareness` with `cursor` field.
+- [x] **Cursor Sharing:** Add cursor position sharing across users using `provider.awareness` with `cursor` field.
 - [ ] **Live Typing Indicators:** Show which users are currently typing (based on awareness change).
 - [ ] **User Update Handling:** Reflect changes when users update their name or color live (already stored but not shown in real-time UI changes).
 - [ ] **User Disconnects:** Indicate when a user disconnects (e.g. fade or remove from UI when their awareness state clears).
@@ -20,9 +20,9 @@
 ---
 
 ### 🔜 Offline Support
-- [ ] **Add y-indexeddb:** Use `y-indexeddb` to persist the Yjs document locally in the browser.
-- [ ] **Sync on Reconnect:** Ensure it merges with server changes once the client reconnects.
-- [ ] **Test Offline Behavior:** Simulate offline editing and re-syncing to verify behavior.
+- [x] **Add y-indexeddb:** Use `y-indexeddb` to persist the Yjs document locally in the browser.
+- [x] **Sync on Reconnect:** Ensure it merges with server changes once the client reconnects.
+- [x] **Test Offline Behavior:** Simulate offline editing and re-syncing to verify behavior.
 
 ---
 
