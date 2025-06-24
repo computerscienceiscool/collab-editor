@@ -1,7 +1,7 @@
-
+import { Decoration, ViewPlugin, ViewUpdate } from '@codemirror/view'
 import * as Y from 'yjs'
 import { IndexeddbPersistence } from 'y-indexeddb';
-
+import { yCollab, yCursorPlugin } from 'y-codemirror.next'
 import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
@@ -112,22 +112,109 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Auto-save set up")
 
   // Initialize CodeMirror
-  let state
-  try {
-    state = EditorState.create({
-      extensions: [
-        basicSetup,
-        yCollab(ytext, provider.awareness)
-      ]
+let state
+try {
+  state = EditorState.create({
+    extensions: [
+      basicSetup,
+      yCollab(ytext, provider.awareness, {
+        awareness: provider.awareness,
+        clientID: ydoc.clientID
+      })
+        cursorPlugin    //  Custom cursor plugin
+    ]
+  })
+  console.log("EditorState created", state)
+} catch (err) {
+  console.error("Failed to create EditorState:", err)
+}
+
+const cursorPlugin = ViewPlugin.fromClass(class {
+  constructor(view) {
+    this.decorations = this.buildDecorations(view)
+    provider.awareness.on('change', () => {
+      this.decorations = this.buildDecorations(view)
+      view.update([])
     })
-    console.log("EditorState created", state)
-  } catch (err) {
-    console.error("Failed to create EditorState:", err)
   }
 
-  new EditorView({
-    state,
-    parent: document.getElementById('editor')
-  })
-  console.log("EditorView initialized")
+  update(update) {
+    // Called on every document update
+    this.decorations = this.buildDecorations(update.view)
+  }
+
+  buildDecorations(view) {
+    const decos = []
+    const states = provider.awareness.getStates()
+    for (const [clientID, state] of states.entries()) {
+      if (clientID === ydoc.clientID) continue
+      const cursor = state.cursor
+      const user = state.user
+      if (cursor && user) {
+        const deco = Decoration.widget({
+          widget: new CursorWidget(user.name, user.color),
+          side: -1
+        }).range(cursor.head)
+        decos.push(deco)
+      }
+    }
+    return Decoration.set(decos)
+  }
+
+  destroy() {
+    provider.awareness.off('change', this)
+  }
+}, {
+  decorations: v => v.decorations
 })
+
+
+class CursorWidget {
+  constructor(name, color) {
+    this.name = name
+    this.color = color
+  }
+
+  toDOM() {
+    const cursorEl = document.createElement('span')
+    cursorEl.style.borderLeft = `2px solid ${this.color}`
+    cursorEl.style.marginLeft = '-1px'
+    cursorEl.style.height = '1em'
+    cursorEl.style.position = 'relative'
+    cursorEl.style.zIndex = 10
+
+    const label = document.createElement('div')
+    label.textContent = this.name
+    label.style.position = 'absolute'
+    label.style.top = '-1.2em'
+    label.style.left = '0'
+    label.style.backgroundColor = this.color
+    label.style.color = '#fff'
+    label.style.padding = '0 4px'
+    label.style.fontSize = '10px'
+    label.style.borderRadius = '4px'
+
+    cursorEl.appendChild(label)
+    return cursorEl
+  }
+
+  ignoreEvent() { return true }
+}
+
+
+const view = new EditorView({
+  state,
+  parent: document.getElementById('editor')
+})
+console.log("EditorView initialized")
+
+view.dispatch({
+  effects: EditorView.updateListener.of(update => {
+    if (update.selectionSet) {
+      const anchor = update.state.selection.main.anchor
+      const head = update.state.selection.main.head
+      provider.awareness.setLocalStateField('cursor', { anchor, head })
+    }
+  })
+})
+
