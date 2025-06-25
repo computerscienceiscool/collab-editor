@@ -8,9 +8,13 @@ import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
 
 console.log("editor.js loaded")
+const storedName = localStorage.getItem('username') || 'anonymous'
+const username = storedName;
+const storedColor = localStorage.getItem('userColor') || '#' + Math.floor(Math.random() * 16777215).toString(16)
 
-// Prompt for username
-const username = prompt("Enter your name:", "anonymous") || "anonymous"
+localStorage.setItem('username', storedName)
+localStorage.setItem('userColor', storedColor)
+
 
 // Assign a persistent color per user
 let userColor = localStorage.getItem('userColor')
@@ -27,6 +31,29 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (roomNameEl) roomNameEl.textContent = room
   if (usernameEl) usernameEl.textContent = username
+  
+  const nameInput = document.getElementById('name-input');
+  const colorInput = document.getElementById('color-input');
+
+  nameInput.value = storedName;
+  colorInput.value = storedColor;
+
+  function updateUserAwareness() {
+    const name = nameInput.value;
+    const color = colorInput.value;
+
+    provider.awareness.setLocalStateField('user', { name, color });
+
+    localStorage.setItem('username', name);
+    localStorage.setItem('userColor', color);
+
+    if (usernameEl) usernameEl.textContent = name;
+    updateUserList();
+  }
+
+  nameInput.addEventListener('input', updateUserAwareness);
+  colorInput.addEventListener('input', updateUserAwareness);
+
 
   // Yjs doc and provider
   const ydoc = new Y.Doc()
@@ -40,9 +67,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
     
   const ytext = ydoc.getText('codemirror')
+
   const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc)
   console.log("Yjs + Provider initialized")
-  
+
+  provider.awareness.setLocalStateField('user', {
+    name: storedName,
+    color: storedColor
+  });
+    
+
   const offlineBanner = document.getElementById('offline-banner');
   if (offlineBanner) {
     offlineBanner.style.display = navigator.onLine ? 'none' : 'block'

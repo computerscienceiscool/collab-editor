@@ -31469,7 +31469,11 @@ ${reason}`);
 
   // frontend/editor.js
   console.log("editor.js loaded");
-  var username = prompt("Enter your name:", "anonymous") || "anonymous";
+  var storedName = localStorage.getItem("username") || "anonymous";
+  var username = storedName;
+  var storedColor = localStorage.getItem("userColor") || "#" + Math.floor(Math.random() * 16777215).toString(16);
+  localStorage.setItem("username", storedName);
+  localStorage.setItem("userColor", storedColor);
   var userColor = localStorage.getItem("userColor");
   if (!userColor) {
     userColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
@@ -31482,6 +31486,21 @@ ${reason}`);
     const usernameEl = document.getElementById("local-username");
     if (roomNameEl) roomNameEl.textContent = room;
     if (usernameEl) usernameEl.textContent = username;
+    const nameInput = document.getElementById("name-input");
+    const colorInput = document.getElementById("color-input");
+    nameInput.value = storedName;
+    colorInput.value = storedColor;
+    function updateUserAwareness() {
+      const name2 = nameInput.value;
+      const color = colorInput.value;
+      provider.awareness.setLocalStateField("user", { name: name2, color });
+      localStorage.setItem("username", name2);
+      localStorage.setItem("userColor", color);
+      if (usernameEl) usernameEl.textContent = name2;
+      updateUserList();
+    }
+    nameInput.addEventListener("input", updateUserAwareness);
+    colorInput.addEventListener("input", updateUserAwareness);
     const ydoc = new Doc();
     const persistence = new IndexeddbPersistence(room, ydoc);
     persistence.once("synced", () => {
@@ -31490,6 +31509,10 @@ ${reason}`);
     const ytext = ydoc.getText("codemirror");
     const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
     console.log("Yjs + Provider initialized");
+    provider.awareness.setLocalStateField("user", {
+      name: storedName,
+      color: storedColor
+    });
     const offlineBanner = document.getElementById("offline-banner");
     if (offlineBanner) {
       offlineBanner.style.display = navigator.onLine ? "none" : "block";
@@ -31558,7 +31581,23 @@ ${reason}`);
         }
       });
     }
-    provider.awareness.on("change", updateUserList);
+    provider.awareness.on("change", () => {
+      updateUserList();
+      const states = Array.from(provider.awareness.getStates().entries());
+      const typingUsers = states.filter(([clientID, state2]) => state2?.isTyping && state2.user?.name && clientID !== ydoc.clientID).map(([_, state2]) => state2.user.name);
+      updateTypingIndicator(typingUsers);
+    });
+    function updateTypingIndicator(usersTyping) {
+      const indicator = document.getElementById("typing-indicator");
+      if (!indicator) return;
+      if (usersTyping.length === 0) {
+        indicator.textContent = "";
+      } else if (usersTyping.length === 1) {
+        indicator.textContent = `${usersTyping[0]} is typing...`;
+      } else {
+        indicator.textContent = `${usersTyping.join(", ")} are typing...`;
+      }
+    }
     updateUserList();
     fetch("/load").then((res) => res.ok ? res.arrayBuffer() : null).then((update) => {
       if (update) applyUpdate(ydoc, new Uint8Array(update));
@@ -31635,6 +31674,14 @@ ${reason}`);
           provider.awareness.setLocalStateField("cursor", { anchor, head });
         }
       })
+    });
+    let typingTimeout;
+    view.dom.addEventListener("input", () => {
+      provider.awareness.setLocalStateField("isTyping", true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        provider.awareness.setLocalStateField("isTyping", false);
+      }, 2e3);
     });
     class CursorWidget {
       constructor(user) {
