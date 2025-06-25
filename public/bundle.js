@@ -31580,6 +31580,10 @@ ${reason}`);
           userListEl.appendChild(userEl);
         }
       });
+      const userCountEl = document.getElementById("user-count");
+      if (userCountEl) {
+        userCountEl.textContent = `Users: ${states.length}`;
+      }
     }
     provider2.awareness.on("change", () => {
       updateUserList2();

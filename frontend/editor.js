@@ -167,6 +167,10 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
         userListEl.appendChild(userEl)
       }
     })
+      const userCountEl = document.getElementById('user-count');
+        if (userCountEl) {
+        userCountEl.textContent = `Users: ${states.length}`;
+    }
   }
 
   provider.awareness.on('change', () => {

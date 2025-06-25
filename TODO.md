@@ -1,189 +1,101 @@
-# Collaborative Editor TODO List
 
-## Completed.
+# Collaborative Editor TODO
 
-* Prompt for username and assign persistent color
-* Display correct username and room in the toolbar
-* Basic collaborative editing using Yjs + CodeMirror
-* Auto-save document to `/save` endpoint
-* Load existing document from `/load`
-* Offline support
+## Completed
 
----
-## 📌 Yjs Tutorial Progress – Remaining Tasks
+### User Setup and Awareness
 
-### 🔜 Awareness & Presence: DONE
-- [x] **Cursor Sharing:** Add cursor position sharing across users using `provider.awareness` with `cursor` field.
-- [x] **Live Typing Indicators:** Show which users are currently typing (based on awareness change).
-- [x] **User Update Handling:** Reflect changes when users update their name or color live (already stored but not shown in real-time UI changes).
-- [x] **User Disconnects:** Indicate when a user disconnects (e.g. fade or remove from UI when their awareness state clears).
+- [x] Prompt for username and assign persistent color
+- [x] Display correct username and room in the toolbar
+- [x] Share cursor position using provider.awareness
+- [x] Show typing indicators live in the UI
+- [x] Reflect live updates to name and color
+- [x] Remove users from UI on disconnect
+- [x] Display user count in the toolbar
 
----
+### Core Collaboration
 
-### 🔜 Offline Support: DONE
-- [x] **Add y-indexeddb:** Use `y-indexeddb` to persist the Yjs document locally in the browser.
-- [x] **Sync on Reconnect:** Ensure it merges with server changes once the client reconnects.
-- [x] **Test Offline Behavior:** Simulate offline editing and re-syncing to verify behavior.
+- [x] Basic collaborative editing with Yjs and CodeMirror
+- [x] Auto-save document to the /save endpoint
+- [x] Load existing document from the /load endpoint
 
----
+### Offline Support
 
-### 🛠️ Shared Types (Advanced - Optional)
-- [ ] **Experiment with Y.Map/Y.Array:** Integrate additional `Y.Map` or `Y.Array` shared types for richer collaboration features.
-- [ ] **Display Structured Data:** Display structured shared state (e.g. list of todos, metadata) in a UI panel.
+- [x] Use y-indexeddb for local persistence
+- [x] Sync with server on reconnect
+- [x] Test and confirm offline editing behavior
+- [x] Add service worker to cache HTML/CSS/JS for full offline access
 
 ---
 
-### 📦 Future Exploration (Optional Tutorials)
-- [ ] **Central Database Persistence:** Store Yjs updates in a persistent backend (beyond simple `/save` endpoint).
-- [ ] **Redis + y-redis:** Investigate scalability using `y-redis` and a Redis server.
-- [ ] **Custom Provider:** Learn how to create a custom network provider using `y-protocols/awareness`.
+## In Progress and Next Steps
+
+### Editor Usability
+
+- [ ] Add basic formatting toolbar (bold, italic, etc.)
+- [ ] Add keyboard shortcuts (e.g., Ctrl+B for bold)
+- [ ] Add placeholder text when the document is empty
+
+### User Awareness Enhancements
+
+- [ ] Show list of active users with optional avatars
+- [ ] Add room join/leave notifications
+
+### Data Handling and Persistence
+
+- [ ] Confirm that the /save endpoint writes updates to disk
+- [ ] Add document versioning or revision history
+- [ ] Add export option (e.g., download as .txt or .json)
+
+### Room and Session Management
+
+- [ ] Make room name dynamic (via prompt or URL)
+- [ ] Allow user to switch or select different rooms
 
 ---
 
-##  Offline Support — Step-by-Step
+## Optional Advanced Features
 
-- [x] **Install y-indexeddb**  
-  Run the following in your project root:  
-  ```bash
-  npm install y-indexeddb
-  ```
+### Shared Yjs Types
 
-- [x] **Import and Initialize Persistence**  
-  In `editor.js`, add:  
-  ```js
-  import { IndexeddbPersistence } from 'y-indexeddb';
+- [ ] Use Y.Array or Y.Map for shared structured data
+- [ ] Observe changes using .observe and .observeDeep
+- [ ] Handle nested types like Y.Array inside Y.Map
+- [ ] Test encoding for JSON and binary formats
+- [ ] Use ydoc.transact for grouped mutations
+- [ ] Understand transaction lifecycle events
 
-  const persistence = new IndexeddbPersistence(room, ydoc);
-  ```
+### Managing Multiple Documents
 
-- [x] **Add Sync Confirmation**  
-  Still in `editor.js`, confirm IndexedDB content loaded with:  
-  ```js
-  persistence.once('synced', () => {
-    console.log('initial content loaded');
-  });
-  ```
+- [ ] Use Y.Map or Y.Array to hold multiple documents
+- [ ] Support adding/removing documents dynamically
+- [ ] Include metadata such as title and timestamps
+- [ ] Build a minimal multi-document interface
 
-- [x] **Ensure Dual Provider Setup**  
-  Make sure `WebsocketProvider` and `IndexeddbPersistence` both use the same `Y.Doc` (`ydoc`).  
-  This is already likely the case:
-  ```js
-  const ydoc = new Y.Doc();
-  const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc);
-  const persistence = new IndexeddbPersistence(room, ydoc);
-  ```
+### Server and Backend Scalability
 
-- [x] **Test Offline Behavior**  
-  - Stop the WebSocket server (`Ctrl+C` in its terminal tab).  
-  - Reload the browser page.  
-  - Confirm previously entered content still appears.  
-  - Restart the server and confirm it resyncs when it comes back online.
+- [ ] Store Yjs updates in a full backend database
+- [ ] Add Redis sync using y-redis
+- [ ] Learn to build a custom provider with y-protocols/awareness
 
-- [x] **(Optional) Add Service Worker**  
-  This is **not required**, but for full offline support (including HTML/CSS/JS):  
-  - Add a basic `service-worker.js` file to cache site assets.  
-  - Register it in `index.html` via:  
-    ```js
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
-    }
-    ```
+### Developer Workflow
 
+- [ ] Separate development and production builds
+- [ ] Add automated unit or DOM tests
+- [ ] Validate document integrity before saving
+
+### UI and Experience Improvements
+
+- [ ] Improve mobile responsiveness
+- [ ] Add a connection status indicator (e.g., "connected", "saving", etc.)
+- [ ] Add dark mode toggle
+- [ ] Display last saved timestamp
+
+### Code and Config Cleanup
+
+- [ ] Replace hardcoded values with config (e.g., WebSocket URL, room)
+- [ ] Modularize editor.js into separate concerns
+- [ ] Add error handling for fetch, save, and load failures
 
 ---
-
-## 📦 Yjs Tutorial: Offline Support & Shared Types
-
-### 🔌 Offline Support with `y-indexeddb`
-- [x] **Install & Import:** Add the `y-indexeddb` package and import `IndexeddbPersistence`.
-- [x] **Initialize Persistence:** Create a new `IndexeddbPersistence(roomName, ydoc)` instance.
-- [x] **Confirm Integration:** Log `"initial content loaded"` using `.once('synced')` to verify loading from local IndexedDB.
-- [x] **Dual Provider Setup:** Ensure `WebsocketProvider` and `IndexeddbPersistence` both operate on the same Y.Doc.
-- [x] **Simulate Offline Mode:** Reload the page without the WebSocket server and verify content loads from the local store.
-- [x] **Optionally Add Service Worker:** Add a service worker to cache the HTML/CSS/JS for full offline access.
-
----
-
-### 🧠 Shared Types: Y.Array, Y.Map, and Nested Structures
-- [ ] **Basic Use of Y.Array:** Add a `Y.Array` to your document and perform basic inserts.
-- [ ] **Observe Changes:** Use `.observe` and `.observeDeep` to listen to delta changes.
-- [ ] **Nested Types:** Insert nested Yjs types (e.g., Y.Array inside another Y.Array) and add observers accordingly.
-- [ ] **Test JSON Encoding:** Try inserting JSON-encodable values and `Uint8Array`s.
-- [ ] **Understand Limitations:**
-  - [ ] Avoid re-inserting integrated shared types (causes errors).
-  - [ ] Avoid modifying objects retrieved from shared types (can desync).
-- [ ] **Transactions:**
-  - [ ] Wrap multiple mutations in `ydoc.transact()` to reduce event firing and optimize syncing.
-  - [ ] Confirm event handler call order:
-    - `beforeTransaction`
-    - `beforeObserverCalls`
-    - type `.observe(...)`
-    - `.observeDeep(...)`
-    - `afterTransaction`
-    - `ydoc.on('update', ...)`
-
----
-
-### 🗂️ Managing Multiple Documents in Shared Types (Advanced)
-- [ ] **Create Multi-Doc Model:** Use a Y.Map or Y.Array to store multiple documents' metadata and content.
-- [ ] **Support Live Document List:** Allow adding/removing docs dynamically.
-- [ ] **Enhance with Metadata:** Use nested shared types for each document (e.g., name, created-at, content).
-- [ ] **Extend to Simulated File System:** Consider a minimal multi-file editor architecture.
-
----
-
-**Recommended Next Step:** Add `y-indexeddb` to enable offline document syncing and test browser reload behavior.
-
-
----
-## Other Priorities
-
-### 1. Editor Usability Improvements
-
-* [ ] Add basic formatting toolbar (bold, italic, etc.)
-* [ ] Add keyboard shortcuts (e.g., Ctrl+B for bold)
-* [ ] Add placeholder text when document is empty
-* [ ] Show typing indicators per user (currently just placeholder in HTML)
-
-### 2. User Awareness Enhancements
-
-* [ ] Add cursor awareness (e.g., show other users’ cursors with their names/colors)
-* [ ] Show list of active users dynamically, possibly with avatars
-* [ ] Display user count in toolbar
-
-### 3. Data Handling & Persistence
-
-* [ ] Confirm `/save` endpoint is writing updates to disk
-* [ ] Add versioning or revision history to saved docs
-* [ ] Add export option: Download as `.txt` or `.json`
-
-### 4. Room/Session Management
-
-* [ ] Make room name dynamic (prompt user or from URL)
-* [ ] Display room join/leave notifications
-* [ ] Allow selecting/joining different rooms
-
-### 5. UI/UX Improvements
-
-* [ ] Improve mobile responsiveness
-* [ ] Add status indicator (e.g., "connected", "saving...", "saved")
-* [ ] Add dark mode toggle
-* [ ] Display last saved timestamp
-
-### 6. Developer Workflow
-
-* [ ] Separate dev and prod builds (`frontend/index.html` vs `public/index.html`)
-* [ ] Add automated testing (even just DOM/unit smoke tests)
-* [ ] Validate document structure before saving (Yjs update integrity)
-
-### 7. Polish & Cleanup
-
-* [ ] Replace hardcoded values with config (e.g., WebSocket URL, room)
-* [ ] Modularize `editor.js` (split UI, networking, editor setup)
-* [ ] Add error handling/logging around fetch/save/load failures
- 
-
-
-
-**Next Recommended Focus:** `Offline Support` using `y-indexeddb`
 
