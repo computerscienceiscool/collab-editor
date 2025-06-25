@@ -135,7 +135,34 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
     })
   }
 
-  provider.awareness.on('change', updateUserList)
+  provider.awareness.on('change', () => {
+    updateUserList();
+
+    const states = Array.from(provider.awareness.getStates().entries());
+    const typingUsers = states
+      .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
+      .map(([_, state]) => state.user.name);
+
+    updateTypingIndicator(typingUsers);
+  });
+
+  function updateTypingIndicator(usersTyping) {
+    const indicator = document.getElementById('typing-indicator');
+    if (!indicator) return;
+
+    if (usersTyping.length === 0) {
+      indicator.textContent = '';
+    } else if (usersTyping.length === 1) {
+      indicator.textContent = `${usersTyping[0]} is typing...`;
+    } else {
+      indicator.textContent = `${usersTyping.join(', ')} are typing...`;
+    }
+  }
+
+
+
+
+
   updateUserList()
 
   // Load doc state from server
@@ -231,6 +258,16 @@ view.dispatch({
   })
 })
 
+let typingTimeout;
+
+view.dom.addEventListener('input', () => {
+  provider.awareness.setLocalStateField('isTyping', true);
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    provider.awareness.setLocalStateField('isTyping', false);
+  }, 2000);
+});
 
 
 
