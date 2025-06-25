@@ -1,12 +1,13 @@
 # Collaborative Editor TODO List
 
-## Completed
+## Completed.
 
 * Prompt for username and assign persistent color
 * Display correct username and room in the toolbar
 * Basic collaborative editing using Yjs + CodeMirror
 * Auto-save document to `/save` endpoint
 * Load existing document from `/load`
+* Offline support
 
 ---
 ## 📌 Yjs Tutorial Progress – Remaining Tasks
