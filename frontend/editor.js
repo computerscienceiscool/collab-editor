@@ -39,21 +39,7 @@ window.addEventListener("DOMContentLoaded", () => {
   nameInput.value = storedName;
   colorInput.value = storedColor;
 
-  function updateUserAwareness() {
-    const name = nameInput.value;
-    const color = colorInput.value;
 
-    provider.awareness.setLocalStateField('user', { name, color });
-
-    localStorage.setItem('username', name);
-    localStorage.setItem('userColor', color);
-
-    if (usernameEl) usernameEl.textContent = name;
-    updateUserList();
-  }
-
-  nameInput.addEventListener('input', updateUserAwareness);
-  colorInput.addEventListener('input', updateUserAwareness);
 
 
   // Yjs doc and provider
@@ -72,38 +58,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc)
   console.log("Yjs + Provider initialized")
 
-  provider.awareness.setLocalStateField('user', {
-    name: storedName,
-    color: storedColor
-  });
-    
-
-  const offlineBanner = document.getElementById('offline-banner');
-  if (offlineBanner) {
-    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
-  }
-
-
-
-  window.addEventListener('offline', () => {
-    console.warn('Browser is offline');
-    if (offlineBanner) offlineBanner.style.display = 'block';
-  });
-
-  window.addEventListener('online', () => {
-    console.info('Browser is back online');
-    if (offlineBanner) offlineBanner.style.display = 'none';
-  });
-
-  // Set local user awareness
-  provider.awareness.setLocalStateField('user', {
-    name: username,
-    color: userColor
-  })
-
-  // Show user name in DOM (optional override via toolbar selector)
-  const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
-  if (userLabel) userLabel.innerHTML = `User: ${username}`
 
 const remoteCursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
@@ -146,6 +100,55 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
   decorations: v => v.decorations
 });
 
+
+
+  function updateUserAwareness() {
+    const name = nameInput.value;
+    const color = colorInput.value;
+
+    provider.awareness.setLocalStateField('user', { name, color });
+
+    localStorage.setItem('username', name);
+    localStorage.setItem('userColor', color);
+
+    if (usernameEl) usernameEl.textContent = name;
+    updateUserList();
+  }
+
+  nameInput.addEventListener('input', updateUserAwareness);
+  colorInput.addEventListener('input', updateUserAwareness);
+  provider.awareness.setLocalStateField('user', {
+    name: storedName,
+    color: storedColor
+  });
+    
+
+  const offlineBanner = document.getElementById('offline-banner');
+  if (offlineBanner) {
+    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
+  }
+
+
+
+  window.addEventListener('offline', () => {
+    console.warn('Browser is offline');
+    if (offlineBanner) offlineBanner.style.display = 'block';
+  });
+
+  window.addEventListener('online', () => {
+    console.info('Browser is back online');
+    if (offlineBanner) offlineBanner.style.display = 'none';
+  });
+
+  // Set local user awareness
+  provider.awareness.setLocalStateField('user', {
+    name: username,
+    color: userColor
+  })
+
+  // Show user name in DOM (optional override via toolbar selector)
+  const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
+  if (userLabel) userLabel.innerHTML = `User: ${username}`
 
 
 
@@ -199,7 +202,7 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
   }
 
 
-
+{
 
 
   updateUserList()
@@ -220,9 +223,9 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
     })
   }, 5000)
   console.log("Auto-save set up")
-
+}
   // Initialize CodeMirror
-let state
+let state;
 try {
   state = EditorState.create({
     extensions: [
@@ -231,21 +234,42 @@ try {
         awareness: provider.awareness,
         clientID: ydoc.clientID
       }),
-        placeholder('Start typing here...'),
-        remoteCursorPlugin    //  Custom cursor plugin
+      placeholder('Start typing here...'),
+      remoteCursorPlugin,
+      EditorView.updateListener.of(update => {
+        if (update.selectionSet) {
+          const anchor = update.state.selection.main.anchor;
+          const head = update.state.selection.main.head;
+          provider.awareness.setLocalStateField('cursor', { anchor, head });
+        }
+      })
     ]
-  })
-  console.log("EditorState created", state)
+  });
+
+  console.log("EditorState created", state);
 } catch (err) {
-  console.error("Failed to create EditorState:", err)
+  console.error("Failed to create EditorState:", err);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const cursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.decorations = this.buildDecorations(view)
     provider.awareness.on('change', () => {
       this.decorations = this.buildDecorations(view)
-      view.update([])
+      view.dispatch ({effects:[]})
     })
   }
 
@@ -281,22 +305,12 @@ const cursorPlugin = ViewPlugin.fromClass(class {
 
 
 
-
 const view = new EditorView({
   state,
   parent: document.getElementById('editor')
 })
 console.log("EditorView initialized")
 
-view.dispatch({
-  effects: EditorView.updateListener.of(update => {
-    if (update.selectionSet) {
-      const anchor = update.state.selection.main.anchor
-      const head = update.state.selection.main.head
-      provider.awareness.setLocalStateField('cursor', { anchor, head })
-    }
-  })
-})
 
 let typingTimeout;
 
@@ -342,44 +356,33 @@ class CursorWidget {
 
   ignoreEvent() { return true; }
 }
+
+
+
+
+function exportAsText() {
+  const blob = new Blob([ytext.toString()], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  triggerDownload(url, 'document.txt');
+}
+
+function exportAsJSON() {
+  const json = JSON.stringify(ydoc.toJSON(), null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  triggerDownload(url, 'document.json');
+}
+
+function triggerDownload(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Make available globally
+window.exportAsText = exportAsText;
+window.exportAsJSON = exportAsJSON;
 });
-
-
-
-
-
-
-  provider.awareness.on('change', () => {
-    updateUserList();
-
-    const states = Array.from(provider.awareness.getStates().entries());
-    const typingUsers = states
-      .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
-      .map(([_, state]) => state.user.name);
-
-    updateTypingIndicator(typingUsers);
-  });
-
-  function updateTypingIndicator(usersTyping) {
-    const indicator = document.getElementById('typing-indicator');
-    if (!indicator) return;
-
-    if (usersTyping.length === 0) {
-      indicator.textContent = '';
-    } else if (usersTyping.length === 1) {
-      indicator.textContent = `${usersTyping[0]} is typing...`;
-    } else {
-      indicator.textContent = `${usersTyping.join(', ')} are typing...`;
-    }
-  }
-
-  let typingTimeout;
-
-  view.dom.addEventListener('input', () => {
-    provider.awareness.setLocalStateField('isTyping', true);
-
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      provider.awareness.setLocalStateField('isTyping', false);
-    }, 2000);
-  });
