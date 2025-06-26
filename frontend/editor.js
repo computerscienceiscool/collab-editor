@@ -6,6 +6,7 @@ import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
+import { placeholder } from '@codemirror/view';
 
 console.log("editor.js loaded")
 const storedName = localStorage.getItem('username') || 'anonymous'
@@ -230,6 +231,7 @@ try {
         awareness: provider.awareness,
         clientID: ydoc.clientID
       }),
+        placeholder('Start typing here...'),
         remoteCursorPlugin    //  Custom cursor plugin
     ]
   })

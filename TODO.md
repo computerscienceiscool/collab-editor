@@ -34,7 +34,7 @@
 
 - [ ] Add basic formatting toolbar (bold, italic, etc.)
 - [ ] Add keyboard shortcuts (e.g., Ctrl+B for bold)
-- [ ] Add placeholder text when the document is empty
+- [x] Add placeholder text when the document is empty
 
 ### User Awareness Enhancements
 

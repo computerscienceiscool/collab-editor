@@ -12337,6 +12337,49 @@
   }, {
     decorations: (v) => v.decorations
   });
+  var Placeholder = class extends WidgetType {
+    constructor(content2) {
+      super();
+      this.content = content2;
+    }
+    toDOM(view2) {
+      let wrap = document.createElement("span");
+      wrap.className = "cm-placeholder";
+      wrap.style.pointerEvents = "none";
+      wrap.appendChild(typeof this.content == "string" ? document.createTextNode(this.content) : typeof this.content == "function" ? this.content(view2) : this.content.cloneNode(true));
+      wrap.setAttribute("aria-hidden", "true");
+      return wrap;
+    }
+    coordsAt(dom) {
+      let rects = dom.firstChild ? clientRectsFor(dom.firstChild) : [];
+      if (!rects.length)
+        return null;
+      let style = window.getComputedStyle(dom.parentNode);
+      let rect = flattenRect(rects[0], style.direction != "rtl");
+      let lineHeight = parseInt(style.lineHeight);
+      if (rect.bottom - rect.top > lineHeight * 1.5)
+        return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.top + lineHeight };
+      return rect;
+    }
+    ignoreEvent() {
+      return false;
+    }
+  };
+  function placeholder(content2) {
+    let plugin = ViewPlugin.fromClass(class {
+      constructor(view2) {
+        this.view = view2;
+        this.placeholder = content2 ? Decoration.set([Decoration.widget({ widget: new Placeholder(content2), side: 1 }).range(0)]) : Decoration.none;
+      }
+      get decorations() {
+        return this.view.state.doc.length ? Decoration.none : this.placeholder;
+      }
+    }, { decorations: (v) => v.decorations });
+    return typeof content2 == "string" ? [
+      plugin,
+      EditorView.contentAttributes.of({ "aria-placeholder": content2 })
+    ] : plugin;
+  }
   var MaxOff = 2e3;
   function rectangleFor(state, a, b) {
     let startLine = Math.min(a.line, b.line), endLine = Math.max(a.line, b.line);
@@ -31623,6 +31666,7 @@ ${reason}`);
             awareness: provider2.awareness,
             clientID: ydoc2.clientID
           }),
+          placeholder("Start typing here..."),
           remoteCursorPlugin
           //  Custom cursor plugin
         ]
