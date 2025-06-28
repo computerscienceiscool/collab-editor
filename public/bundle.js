@@ -31538,6 +31538,18 @@ ${reason}`);
     persistence.once("synced", () => {
       console.log("IndexedDB content loaded");
     });
+    function exportAsYsnap() {
+      const snapshot = encodeStateAsUpdate(ydoc);
+      const blob = new Blob([snapshot], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "snapshot.ysnap";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
     const ytext = ydoc.getText("codemirror");
     const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
     console.log("Yjs + Provider initialized");
@@ -31767,7 +31779,7 @@ ${reason}`);
       const json = JSON.stringify(ydoc.toJSON(), null, 2);
       const blob = new Blob([json], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      triggerDownload(url, "document.json");
+      triggerDownload(url, "document.yjs.json");
     }
     function triggerDownload(url, filename) {
       const a = document.createElement("a");
@@ -31776,7 +31788,27 @@ ${reason}`);
       a.click();
       URL.revokeObjectURL(url);
     }
+    function exportSnapshotAsJSON() {
+      const update = encodeStateAsUpdate(ydoc);
+      const json = JSON.stringify({ update: Array.from(update) }, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "document.ysnap.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    function exportAsYsnap() {
+      console.log("exportAsYsnap called");
+      const snapshot = encodeStateAsUpdate(ydoc);
+      const blob = new Blob([snapshot], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      triggerDownload(url, "document.ysnap.json");
+    }
     window.exportAsText = exportAsText;
     window.exportAsJSON = exportAsJSON;
+    window.exportAsYsnap = exportAsYsnap;
+    window.exportSnapshotAsJSON = exportSnapshotAsJSON;
   });
 })();

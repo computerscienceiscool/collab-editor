@@ -51,6 +51,19 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log('IndexedDB content loaded');
   }); 
    
+// Export snapshot as .ysnap.json
+function exportAsYsnap() {
+  const snapshot = Y.encodeStateAsUpdate(ydoc)
+  const blob = new Blob([snapshot], { type: 'application/octet-stream' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'snapshot.ysnap'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
     
   const ytext = ydoc.getText('codemirror')
@@ -371,7 +384,7 @@ function exportAsJSON() {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
 
-  triggerDownload(url, 'document.json');
+  triggerDownload(url, 'document.yjs.json');
 }
 
 function triggerDownload(url, filename) {
@@ -382,7 +395,32 @@ function triggerDownload(url, filename) {
   URL.revokeObjectURL(url);
 }
 
+
+function exportSnapshotAsJSON() {
+  const update = Y.encodeStateAsUpdate(ydoc);
+  const json = JSON.stringify({ update: Array.from(update) }, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'document.ysnap.json';
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function exportAsYsnap() {
+  console.log("exportAsYsnap called");
+  const snapshot = Y.encodeStateAsUpdate(ydoc);
+  const blob = new Blob([snapshot], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  triggerDownload(url, 'document.ysnap.json');
+}
+
 // Make available globally
 window.exportAsText = exportAsText;
 window.exportAsJSON = exportAsJSON;
+window.exportAsYsnap = exportAsYsnap;
+window.exportSnapshotAsJSON = exportSnapshotAsJSON;
 });
