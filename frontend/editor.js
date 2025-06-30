@@ -6,7 +6,6 @@ import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
-import { placeholder } from '@codemirror/view';
 
 console.log("editor.js loaded")
 const storedName = localStorage.getItem('username') || 'anonymous'
@@ -39,7 +38,21 @@ window.addEventListener("DOMContentLoaded", () => {
   nameInput.value = storedName;
   colorInput.value = storedColor;
 
+  function updateUserAwareness() {
+    const name = nameInput.value;
+    const color = colorInput.value;
 
+    provider.awareness.setLocalStateField('user', { name, color });
+
+    localStorage.setItem('username', name);
+    localStorage.setItem('userColor', color);
+
+    if (usernameEl) usernameEl.textContent = name;
+    updateUserList();
+  }
+
+  nameInput.addEventListener('input', updateUserAwareness);
+  colorInput.addEventListener('input', updateUserAwareness);
 
 
   // Yjs doc and provider
@@ -51,19 +64,6 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log('IndexedDB content loaded');
   }); 
    
-// Export snapshot as .ysnap.json
-function exportAsYsnap() {
-  const snapshot = Y.encodeStateAsUpdate(ydoc)
-  const blob = new Blob([snapshot], { type: 'application/octet-stream' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'snapshot.ysnap'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
 
     
   const ytext = ydoc.getText('codemirror')
@@ -71,6 +71,38 @@ function exportAsYsnap() {
   const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc)
   console.log("Yjs + Provider initialized")
 
+  provider.awareness.setLocalStateField('user', {
+    name: storedName,
+    color: storedColor
+  });
+    
+
+  const offlineBanner = document.getElementById('offline-banner');
+  if (offlineBanner) {
+    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
+  }
+
+
+
+  window.addEventListener('offline', () => {
+    console.warn('Browser is offline');
+    if (offlineBanner) offlineBanner.style.display = 'block';
+  });
+
+  window.addEventListener('online', () => {
+    console.info('Browser is back online');
+    if (offlineBanner) offlineBanner.style.display = 'none';
+  });
+
+  // Set local user awareness
+  provider.awareness.setLocalStateField('user', {
+    name: username,
+    color: userColor
+  })
+
+  // Show user name in DOM (optional override via toolbar selector)
+  const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
+  if (userLabel) userLabel.innerHTML = `User: ${username}`
 
 const remoteCursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
@@ -114,94 +146,46 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
 });
 
 
+function updateUserList() {
+  if (!userListEl) return;
+  const states = Array.from(provider.awareness.getStates().values());
 
-  function updateUserAwareness() {
-    const name = nameInput.value;
-    const color = colorInput.value;
-
-    provider.awareness.setLocalStateField('user', { name, color });
-
-    localStorage.setItem('username', name);
-    localStorage.setItem('userColor', color);
-
-    if (usernameEl) usernameEl.textContent = name;
-    updateUserList();
+  // Update user count
+  const userCountEl = document.getElementById('user-count');
+  if (userCountEl) {
+    userCountEl.textContent = `Users: ${states.length}`;
   }
 
-  nameInput.addEventListener('input', updateUserAwareness);
-  colorInput.addEventListener('input', updateUserAwareness);
-  provider.awareness.setLocalStateField('user', {
-    name: storedName,
-    color: storedColor
-  });
-    
-
-  const offlineBanner = document.getElementById('offline-banner');
-  if (offlineBanner) {
-    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
-  }
-
-
-
-  window.addEventListener('offline', () => {
-    console.warn('Browser is offline');
-    if (offlineBanner) offlineBanner.style.display = 'block';
-  });
-
-  window.addEventListener('online', () => {
-    console.info('Browser is back online');
-    if (offlineBanner) offlineBanner.style.display = 'none';
-  });
-
-  // Set local user awareness
-  provider.awareness.setLocalStateField('user', {
-    name: username,
-    color: userColor
-  })
-
-  // Show user name in DOM (optional override via toolbar selector)
-  const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
-  if (userLabel) userLabel.innerHTML = `User: ${username}`
-
-
-
-
-  // Render list of connected users
-  function updateUserList() {
-    if (!userListEl) return
-    const states = Array.from(provider.awareness.getStates().values())
-
-    userListEl.innerHTML = 'Users in room: '
-    states.forEach(state => {
-      if (state.user) {
-        const userEl = document.createElement('span')
-        userEl.className = 'user'
-        userEl.textContent = state.user.name
-        userEl.style.backgroundColor = state.user.color || '#ccc'
-        userEl.style.marginLeft = '5px'
-        userEl.style.padding = '2px 5px'
-        userEl.style.borderRadius = '4px'
-        userListEl.appendChild(userEl)
-      }
-    })
-      const userCountEl = document.getElementById('user-count');
-        if (userCountEl) {
-        userCountEl.textContent = `Users: ${states.length}`;
+  userListEl.innerHTML = 'Users in room: ';
+  states.forEach(state => {
+    if (state.user) {
+      const userEl = document.createElement('span');
+      userEl.className = 'user';
+      userEl.textContent = state.user.name;
+      userEl.style.backgroundColor = state.user.color || '#ccc';
+      userEl.style.marginLeft = '5px';
+      userEl.style.padding = '2px 5px';
+      userEl.style.borderRadius = '4px';
+      userListEl.appendChild(userEl);
     }
-  }
-
-  provider.awareness.on('change', () => {
-    updateUserList();
-
-    const states = Array.from(provider.awareness.getStates().entries());
-    const typingUsers = states
-      .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
-      .map(([_, state]) => state.user.name);
-
-    updateTypingIndicator(typingUsers);
   });
+}
 
-  function updateTypingIndicator(usersTyping) {
+//  Correct awareness change handler
+provider.awareness.on('change', () => {
+  updateUserList();
+
+  const states = Array.from(provider.awareness.getStates().entries());
+  const typingUsers = states
+    .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
+    .map(([_, state]) => state.user.name);
+
+  updateTypingIndicator(typingUsers);
+});
+
+
+
+function updateTypingIndicator(usersTyping) {
     const indicator = document.getElementById('typing-indicator');
     if (!indicator) return;
 
@@ -212,10 +196,10 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
     } else {
       indicator.textContent = `${usersTyping.join(', ')} are typing...`;
     }
-  }
+}
 
 
-{
+
 
 
   updateUserList()
@@ -236,9 +220,9 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
     })
   }, 5000)
   console.log("Auto-save set up")
-}
+
   // Initialize CodeMirror
-let state;
+let state
 try {
   state = EditorState.create({
     extensions: [
@@ -247,42 +231,20 @@ try {
         awareness: provider.awareness,
         clientID: ydoc.clientID
       }),
-      placeholder('Start typing here...'),
-      remoteCursorPlugin,
-      EditorView.updateListener.of(update => {
-        if (update.selectionSet) {
-          const anchor = update.state.selection.main.anchor;
-          const head = update.state.selection.main.head;
-          provider.awareness.setLocalStateField('cursor', { anchor, head });
-        }
-      })
+        remoteCursorPlugin    //  Custom cursor plugin
     ]
-  });
-
-  console.log("EditorState created", state);
+  })
+  console.log("EditorState created", state)
 } catch (err) {
-  console.error("Failed to create EditorState:", err);
+  console.error("Failed to create EditorState:", err)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const cursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.decorations = this.buildDecorations(view)
     provider.awareness.on('change', () => {
       this.decorations = this.buildDecorations(view)
-      view.dispatch ({effects:[]})
+      view.update([])
     })
   }
 
@@ -318,12 +280,22 @@ const cursorPlugin = ViewPlugin.fromClass(class {
 
 
 
+
 const view = new EditorView({
   state,
   parent: document.getElementById('editor')
 })
 console.log("EditorView initialized")
 
+view.dispatch({
+  effects: EditorView.updateListener.of(update => {
+    if (update.selectionSet) {
+      const anchor = update.state.selection.main.anchor
+      const head = update.state.selection.main.head
+      provider.awareness.setLocalStateField('cursor', { anchor, head })
+    }
+  })
+})
 
 let typingTimeout;
 
@@ -369,58 +341,104 @@ class CursorWidget {
 
   ignoreEvent() { return true; }
 }
+});
 
 
 
+
+
+
+  provider.awareness.on('change', () => {
+    updateUserList();
+
+    const states = Array.from(provider.awareness.getStates().entries());
+    const typingUsers = states
+      .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
+      .map(([_, state]) => state.user.name);
+
+    updateTypingIndicator(typingUsers);
+  });
+
+  function updateTypingIndicator(usersTyping) {
+    const indicator = document.getElementById('typing-indicator');
+    if (!indicator) return;
+
+    if (usersTyping.length === 0) {
+      indicator.textContent = '';
+    } else if (usersTyping.length === 1) {
+      indicator.textContent = `${usersTyping[0]} is typing...`;
+    } else {
+      indicator.textContent = `${usersTyping.join(', ')} are typing...`;
+    }
+  }
+
+  let typingTimeout;
+
+  view.dom.addEventListener('input', () => {
+    provider.awareness.setLocalStateField('isTyping', true);
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      provider.awareness.setLocalStateField('isTyping', false);
+    }, 2000);
+  });
+
+
+
+// ==========================
+// Export Functions
+// ==========================
 
 function exportAsText() {
-  const blob = new Blob([ytext.toString()], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  triggerDownload(url, 'document.txt');
+  const text = ytext.toString();
+  const blob = new Blob([text], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'document.txt';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function exportAsJSON() {
-  const json = JSON.stringify(ydoc.toJSON(), null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  triggerDownload(url, 'document.yjs.json');
-}
-
-function triggerDownload(url, filename) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-
-function exportSnapshotAsJSON() {
-  const update = Y.encodeStateAsUpdate(ydoc);
-  const json = JSON.stringify({ update: Array.from(update) }, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'document.ysnap.json';
-  a.click();
-
-  URL.revokeObjectURL(url);
+  const state = view.state.toJSON();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'codemirror_state.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function exportAsYsnap() {
-  console.log("exportAsYsnap called");
-  const snapshot = Y.encodeStateAsUpdate(ydoc);
-  const blob = new Blob([snapshot], { type: 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
-  triggerDownload(url, 'document.ysnap.json');
+  const update = Y.encodeStateAsUpdate(ydoc);
+  const blob = new Blob([update], { type: 'application/octet-stream' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'snapshot.ysnap';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
+
+function exportSnapshotAsJSON() {
+  const update = Y.encodeStateAsUpdate(ydoc);
+  const arr = Array.from(update);
+  const blob = new Blob([JSON.stringify(arr, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'snapshot.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 
 // Make available globally
 window.exportAsText = exportAsText;
 window.exportAsJSON = exportAsJSON;
 window.exportAsYsnap = exportAsYsnap;
 window.exportSnapshotAsJSON = exportSnapshotAsJSON;
-});
+console.log("Export functions set up")
+

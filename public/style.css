@@ -31,3 +31,31 @@ html, body {
   border-radius: 4px;
   color: #000;
 }
+.remote-cursor {
+  border-left-width: 2px;
+  border-left-style: solid;
+  margin-left: -1px;
+  height: 1em;
+  position: relative;
+  display: inline-block;
+  width: 0;
+  vertical-align: bottom;
+  pointer-events: none;
+  contenteditable: false;
+}
+.remote-cursor > div {
+  position: absolute;
+  top: -1.2em;
+  left: 0;
+  background: #000; /* Will be overridden by user.color */
+  color: #fff;
+  font-size: 0.75em;
+  padding: 0 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.remote-selection {
+  background-color: rgba(0, 0, 255, 0.2); /* Default fallback */
+}
+
