@@ -8,6 +8,12 @@ import { EditorView } from '@codemirror/view'
 import { basicSetup } from 'codemirror'
 
 console.log("editor.js loaded")
+
+window.ydoc = null;
+window.ytext = null;
+window.view = null;
+
+
 const storedName = localStorage.getItem('username') || 'anonymous'
 const username = storedName;
 const storedColor = localStorage.getItem('userColor') || '#' + Math.floor(Math.random() * 16777215).toString(16)
@@ -22,6 +28,8 @@ if (!userColor) {
   userColor = '#' + Math.floor(Math.random() * 16777215).toString(16)
   localStorage.setItem('userColor', userColor)
 }
+
+
 
 window.addEventListener("DOMContentLoaded", () => {
   const room = 'my-room'
@@ -55,22 +63,66 @@ window.addEventListener("DOMContentLoaded", () => {
   colorInput.addEventListener('input', updateUserAwareness);
 
 
-  // Yjs doc and provider
-  const ydoc = new Y.Doc()
-  const persistence = new IndexeddbPersistence(room, ydoc);
 
-  // Optional: log once local content is loaded
-  persistence.once('synced', () => {
-    console.log('IndexedDB content loaded');
-  }); 
-   
+ydoc = new Y.Doc();
+ytext = ydoc.getText('codemirror');
+const persistence = new IndexeddbPersistence(room, ydoc);
 
-    
-  const ytext = ydoc.getText('codemirror')
+    persistence.once('synced', () => {
+        console.log('IndexedDB content loaded');
+        });
 
-  const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc)
-  console.log("Yjs + Provider initialized")
 
+let provider;
+
+if (!navigator.onLine) {
+  console.warn("Offline mode – disabling real provider");
+
+  provider = {
+    awareness: {
+      setLocalStateField: () => {},
+      getStates: () => new Map(),
+      on: () => {},
+      off: () => {},
+    }
+  };
+} else {
+  provider = new WebsocketProvider('ws://localhost:1234', room, ydoc);
+  console.log("Yjs + Provider initialized");
+
+  provider.awareness.setLocalStateField('user', {
+    name: storedName,
+    color: storedColor
+  });
+}
+
+
+
+/*
+let provider = null;
+
+if (navigator.onLine) {
+  provider = new WebsocketProvider('ws://localhost:1234', room, ydoc);
+  console.log("WebSocketProvider connected for online collaboration");
+} else {
+  console.warn("Offline mode: WebSocketProvider not started");
+  // Provide a mock awareness provider to avoid errors
+  provider = {
+    awareness: {
+      setLocalStateField: () => {},
+      getStates: () => new Map(),
+      on: () => {},
+      off: () => {},
+    }
+  };
+}*/
+    //
+    //
+    //
+    //
+    //
+    //
+    //
   provider.awareness.setLocalStateField('user', {
     name: storedName,
     color: storedColor
@@ -281,7 +333,7 @@ const cursorPlugin = ViewPlugin.fromClass(class {
 
 
 
-const view = new EditorView({
+view = new EditorView({
   state,
   parent: document.getElementById('editor')
 })
@@ -341,7 +393,7 @@ class CursorWidget {
 
   ignoreEvent() { return true; }
 }
-});
+//}); //Test here
 
 
 
@@ -359,7 +411,7 @@ class CursorWidget {
     updateTypingIndicator(typingUsers);
   });
 
-  function updateTypingIndicator(usersTyping) {
+function updateTypingIndicator(usersTyping) {
     const indicator = document.getElementById('typing-indicator');
     if (!indicator) return;
 
@@ -372,7 +424,7 @@ class CursorWidget {
     }
   }
 
-  let typingTimeout;
+ // let typingTimeout;
 
   view.dom.addEventListener('input', () => {
     provider.awareness.setLocalStateField('isTyping', true);
@@ -383,7 +435,7 @@ class CursorWidget {
     }, 2000);
   });
 
-
+});
 
 // ==========================
 // Export Functions
@@ -434,6 +486,7 @@ function exportSnapshotAsJSON() {
   document.body.removeChild(link);
 }
 
+//});
 
 // Make available globally
 window.exportAsText = exportAsText;
@@ -441,4 +494,5 @@ window.exportAsJSON = exportAsJSON;
 window.exportAsYsnap = exportAsYsnap;
 window.exportSnapshotAsJSON = exportSnapshotAsJSON;
 console.log("Export functions set up")
+export {};
 

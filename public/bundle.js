@@ -2542,8 +2542,8 @@
     */
     languageDataAt(name2, pos, side = -1) {
       let values = [];
-      for (let provider2 of this.facet(languageData)) {
-        for (let result of provider2(this, pos, side)) {
+      for (let provider of this.facet(languageData)) {
+        for (let result of provider(this, pos, side)) {
           if (Object.prototype.hasOwnProperty.call(result, name2))
             values.push(result[name2]);
         }
@@ -23047,143 +23047,143 @@
   var messageAwareness = 1;
   var messageAuth = 2;
   var messageHandlers = [];
-  messageHandlers[messageSync] = (encoder, decoder, provider2, emitSynced, _messageType) => {
+  messageHandlers[messageSync] = (encoder, decoder, provider, emitSynced, _messageType) => {
     writeVarUint(encoder, messageSync);
     const syncMessageType = readSyncMessage(
       decoder,
       encoder,
-      provider2.doc,
-      provider2
+      provider.doc,
+      provider
     );
-    if (emitSynced && syncMessageType === messageYjsSyncStep2 && !provider2.synced) {
-      provider2.synced = true;
+    if (emitSynced && syncMessageType === messageYjsSyncStep2 && !provider.synced) {
+      provider.synced = true;
     }
   };
-  messageHandlers[messageQueryAwareness] = (encoder, _decoder, provider2, _emitSynced, _messageType) => {
+  messageHandlers[messageQueryAwareness] = (encoder, _decoder, provider, _emitSynced, _messageType) => {
     writeVarUint(encoder, messageAwareness);
     writeVarUint8Array(
       encoder,
       encodeAwarenessUpdate(
-        provider2.awareness,
-        Array.from(provider2.awareness.getStates().keys())
+        provider.awareness,
+        Array.from(provider.awareness.getStates().keys())
       )
     );
   };
-  messageHandlers[messageAwareness] = (_encoder, decoder, provider2, _emitSynced, _messageType) => {
+  messageHandlers[messageAwareness] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
     applyAwarenessUpdate(
-      provider2.awareness,
+      provider.awareness,
       readVarUint8Array(decoder),
-      provider2
+      provider
     );
   };
-  messageHandlers[messageAuth] = (_encoder, decoder, provider2, _emitSynced, _messageType) => {
+  messageHandlers[messageAuth] = (_encoder, decoder, provider, _emitSynced, _messageType) => {
     readAuthMessage(
       decoder,
-      provider2.doc,
-      (_ydoc, reason) => permissionDeniedHandler(provider2, reason)
+      provider.doc,
+      (_ydoc, reason) => permissionDeniedHandler(provider, reason)
     );
   };
   var messageReconnectTimeout = 3e4;
-  var permissionDeniedHandler = (provider2, reason) => console.warn(`Permission denied to access ${provider2.url}.
+  var permissionDeniedHandler = (provider, reason) => console.warn(`Permission denied to access ${provider.url}.
 ${reason}`);
-  var readMessage = (provider2, buf, emitSynced) => {
+  var readMessage = (provider, buf, emitSynced) => {
     const decoder = createDecoder(buf);
     const encoder = createEncoder();
     const messageType = readVarUint(decoder);
-    const messageHandler = provider2.messageHandlers[messageType];
+    const messageHandler = provider.messageHandlers[messageType];
     if (
       /** @type {any} */
       messageHandler
     ) {
-      messageHandler(encoder, decoder, provider2, emitSynced, messageType);
+      messageHandler(encoder, decoder, provider, emitSynced, messageType);
     } else {
       console.error("Unable to compute message");
     }
     return encoder;
   };
-  var setupWS = (provider2) => {
-    if (provider2.shouldConnect && provider2.ws === null) {
-      const websocket = new provider2._WS(provider2.url);
+  var setupWS = (provider) => {
+    if (provider.shouldConnect && provider.ws === null) {
+      const websocket = new provider._WS(provider.url);
       websocket.binaryType = "arraybuffer";
-      provider2.ws = websocket;
-      provider2.wsconnecting = true;
-      provider2.wsconnected = false;
-      provider2.synced = false;
+      provider.ws = websocket;
+      provider.wsconnecting = true;
+      provider.wsconnected = false;
+      provider.synced = false;
       websocket.onmessage = (event) => {
-        provider2.wsLastMessageReceived = getUnixTime();
-        const encoder = readMessage(provider2, new Uint8Array(event.data), true);
+        provider.wsLastMessageReceived = getUnixTime();
+        const encoder = readMessage(provider, new Uint8Array(event.data), true);
         if (length(encoder) > 1) {
           websocket.send(toUint8Array(encoder));
         }
       };
       websocket.onerror = (event) => {
-        provider2.emit("connection-error", [event, provider2]);
+        provider.emit("connection-error", [event, provider]);
       };
       websocket.onclose = (event) => {
-        provider2.emit("connection-close", [event, provider2]);
-        provider2.ws = null;
-        provider2.wsconnecting = false;
-        if (provider2.wsconnected) {
-          provider2.wsconnected = false;
-          provider2.synced = false;
+        provider.emit("connection-close", [event, provider]);
+        provider.ws = null;
+        provider.wsconnecting = false;
+        if (provider.wsconnected) {
+          provider.wsconnected = false;
+          provider.synced = false;
           removeAwarenessStates(
-            provider2.awareness,
-            Array.from(provider2.awareness.getStates().keys()).filter(
-              (client) => client !== provider2.doc.clientID
+            provider.awareness,
+            Array.from(provider.awareness.getStates().keys()).filter(
+              (client) => client !== provider.doc.clientID
             ),
-            provider2
+            provider
           );
-          provider2.emit("status", [{
+          provider.emit("status", [{
             status: "disconnected"
           }]);
         } else {
-          provider2.wsUnsuccessfulReconnects++;
+          provider.wsUnsuccessfulReconnects++;
         }
         setTimeout(
           setupWS,
           min(
-            pow(2, provider2.wsUnsuccessfulReconnects) * 100,
-            provider2.maxBackoffTime
+            pow(2, provider.wsUnsuccessfulReconnects) * 100,
+            provider.maxBackoffTime
           ),
-          provider2
+          provider
         );
       };
       websocket.onopen = () => {
-        provider2.wsLastMessageReceived = getUnixTime();
-        provider2.wsconnecting = false;
-        provider2.wsconnected = true;
-        provider2.wsUnsuccessfulReconnects = 0;
-        provider2.emit("status", [{
+        provider.wsLastMessageReceived = getUnixTime();
+        provider.wsconnecting = false;
+        provider.wsconnected = true;
+        provider.wsUnsuccessfulReconnects = 0;
+        provider.emit("status", [{
           status: "connected"
         }]);
         const encoder = createEncoder();
         writeVarUint(encoder, messageSync);
-        writeSyncStep1(encoder, provider2.doc);
+        writeSyncStep1(encoder, provider.doc);
         websocket.send(toUint8Array(encoder));
-        if (provider2.awareness.getLocalState() !== null) {
+        if (provider.awareness.getLocalState() !== null) {
           const encoderAwarenessState = createEncoder();
           writeVarUint(encoderAwarenessState, messageAwareness);
           writeVarUint8Array(
             encoderAwarenessState,
-            encodeAwarenessUpdate(provider2.awareness, [
-              provider2.doc.clientID
+            encodeAwarenessUpdate(provider.awareness, [
+              provider.doc.clientID
             ])
           );
           websocket.send(toUint8Array(encoderAwarenessState));
         }
       };
-      provider2.emit("status", [{
+      provider.emit("status", [{
         status: "connecting"
       }]);
     }
   };
-  var broadcastMessage = (provider2, buf) => {
-    const ws = provider2.ws;
-    if (provider2.wsconnected && ws && ws.readyState === ws.OPEN) {
+  var broadcastMessage = (provider, buf) => {
+    const ws = provider.ws;
+    if (provider.wsconnected && ws && ws.readyState === ws.OPEN) {
       ws.send(buf);
     }
-    if (provider2.bcconnected) {
-      publish(provider2.bcChannel, buf, provider2);
+    if (provider.bcconnected) {
+      publish(provider.bcChannel, buf, provider);
     }
   };
   var WebsocketProvider = class extends Observable {
@@ -31469,6 +31469,9 @@ ${reason}`);
 
   // frontend/editor.js
   console.log("editor.js loaded");
+  window.ydoc = null;
+  window.ytext = null;
+  window.view = null;
   var storedName = localStorage.getItem("username") || "anonymous";
   var username = storedName;
   var storedColor = localStorage.getItem("userColor") || "#" + Math.floor(Math.random() * 16777215).toString(16);
@@ -31493,23 +31496,43 @@ ${reason}`);
     function updateUserAwareness() {
       const name2 = nameInput.value;
       const color = colorInput.value;
-      provider2.awareness.setLocalStateField("user", { name: name2, color });
+      provider.awareness.setLocalStateField("user", { name: name2, color });
       localStorage.setItem("username", name2);
       localStorage.setItem("userColor", color);
       if (usernameEl) usernameEl.textContent = name2;
-      updateUserList2();
+      updateUserList();
     }
     nameInput.addEventListener("input", updateUserAwareness);
     colorInput.addEventListener("input", updateUserAwareness);
-    const ydoc2 = new Doc();
-    const persistence = new IndexeddbPersistence(room, ydoc2);
+    ydoc = new Doc();
+    ytext = ydoc.getText("codemirror");
+    const persistence = new IndexeddbPersistence(room, ydoc);
     persistence.once("synced", () => {
       console.log("IndexedDB content loaded");
     });
-    const ytext2 = ydoc2.getText("codemirror");
-    const provider2 = new WebsocketProvider("ws://localhost:1234", room, ydoc2);
-    console.log("Yjs + Provider initialized");
-    provider2.awareness.setLocalStateField("user", {
+    let provider;
+    if (!navigator.onLine) {
+      console.warn("Offline mode \u2013 disabling real provider");
+      provider = {
+        awareness: {
+          setLocalStateField: () => {
+          },
+          getStates: () => /* @__PURE__ */ new Map(),
+          on: () => {
+          },
+          off: () => {
+          }
+        }
+      };
+    } else {
+      provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
+      console.log("Yjs + Provider initialized");
+      provider.awareness.setLocalStateField("user", {
+        name: storedName,
+        color: storedColor
+      });
+    }
+    provider.awareness.setLocalStateField("user", {
       name: storedName,
       color: storedColor
     });
@@ -31525,15 +31548,15 @@ ${reason}`);
       console.info("Browser is back online");
       if (offlineBanner) offlineBanner.style.display = "none";
     });
-    provider2.awareness.setLocalStateField("user", {
+    provider.awareness.setLocalStateField("user", {
       name: username,
       color: userColor
     });
     const userLabel = document.querySelector("#toolbar > div:nth-child(2)");
     if (userLabel) userLabel.innerHTML = `User: ${username}`;
     const remoteCursorPlugin = ViewPlugin.fromClass(class {
-      constructor(view3) {
-        this.view = view3;
+      constructor(view2) {
+        this.view = view2;
         this.decorations = this.buildDecorations();
       }
       update(update) {
@@ -31543,9 +31566,9 @@ ${reason}`);
       }
       buildDecorations() {
         const builder = [];
-        const states = Array.from(provider2.awareness.getStates().entries());
+        const states = Array.from(provider.awareness.getStates().entries());
         for (const [clientID, state2] of states) {
-          if (clientID === ydoc2.clientID) continue;
+          if (clientID === ydoc.clientID) continue;
           const cursor = state2.cursor;
           const user = state2.user;
           if (!cursor || !user) continue;
@@ -31564,9 +31587,9 @@ ${reason}`);
     }, {
       decorations: (v) => v.decorations
     });
-    function updateUserList2() {
+    function updateUserList() {
       if (!userListEl) return;
-      const states = Array.from(provider2.awareness.getStates().values());
+      const states = Array.from(provider.awareness.getStates().values());
       const userCountEl = document.getElementById("user-count");
       if (userCountEl) {
         userCountEl.textContent = `Users: ${states.length}`;
@@ -31585,13 +31608,13 @@ ${reason}`);
         }
       });
     }
-    provider2.awareness.on("change", () => {
-      updateUserList2();
-      const states = Array.from(provider2.awareness.getStates().entries());
-      const typingUsers = states.filter(([clientID, state2]) => state2?.isTyping && state2.user?.name && clientID !== ydoc2.clientID).map(([_, state2]) => state2.user.name);
-      updateTypingIndicator2(typingUsers);
+    provider.awareness.on("change", () => {
+      updateUserList();
+      const states = Array.from(provider.awareness.getStates().entries());
+      const typingUsers = states.filter(([clientID, state2]) => state2?.isTyping && state2.user?.name && clientID !== ydoc.clientID).map(([_, state2]) => state2.user.name);
+      updateTypingIndicator(typingUsers);
     });
-    function updateTypingIndicator2(usersTyping) {
+    function updateTypingIndicator(usersTyping) {
       const indicator = document.getElementById("typing-indicator");
       if (!indicator) return;
       if (usersTyping.length === 0) {
@@ -31602,12 +31625,12 @@ ${reason}`);
         indicator.textContent = `${usersTyping.join(", ")} are typing...`;
       }
     }
-    updateUserList2();
+    updateUserList();
     fetch("/load").then((res) => res.ok ? res.arrayBuffer() : null).then((update) => {
-      if (update) applyUpdate(ydoc2, new Uint8Array(update));
+      if (update) applyUpdate(ydoc, new Uint8Array(update));
     });
     setInterval(() => {
-      const update = encodeStateAsUpdate(ydoc2);
+      const update = encodeStateAsUpdate(ydoc);
       fetch("/save", {
         method: "POST",
         body: update
@@ -31619,9 +31642,9 @@ ${reason}`);
       state = EditorState.create({
         extensions: [
           basicSetup,
-          yCollab(ytext2, provider2.awareness, {
-            awareness: provider2.awareness,
-            clientID: ydoc2.clientID
+          yCollab(ytext, provider.awareness, {
+            awareness: provider.awareness,
+            clientID: ydoc.clientID
           }),
           remoteCursorPlugin
           //  Custom cursor plugin
@@ -31632,21 +31655,21 @@ ${reason}`);
       console.error("Failed to create EditorState:", err);
     }
     const cursorPlugin = ViewPlugin.fromClass(class {
-      constructor(view3) {
-        this.decorations = this.buildDecorations(view3);
-        provider2.awareness.on("change", () => {
-          this.decorations = this.buildDecorations(view3);
-          view3.update([]);
+      constructor(view2) {
+        this.decorations = this.buildDecorations(view2);
+        provider.awareness.on("change", () => {
+          this.decorations = this.buildDecorations(view2);
+          view2.update([]);
         });
       }
       update(update) {
         this.decorations = this.buildDecorations(update.view);
       }
-      buildDecorations(view3) {
+      buildDecorations(view2) {
         const decos = [];
-        const states = provider2.awareness.getStates();
+        const states = provider.awareness.getStates();
         for (const [clientID, state2] of states.entries()) {
-          if (clientID === ydoc2.clientID) continue;
+          if (clientID === ydoc.clientID) continue;
           const cursor = state2.cursor;
           const user = state2.user;
           if (cursor && user) {
@@ -31660,31 +31683,31 @@ ${reason}`);
         return Decoration.set(decos);
       }
       destroy() {
-        provider2.awareness.off("change", this);
+        provider.awareness.off("change", this);
       }
     }, {
       decorations: (v) => v.decorations
     });
-    const view2 = new EditorView({
+    view = new EditorView({
       state,
       parent: document.getElementById("editor")
     });
     console.log("EditorView initialized");
-    view2.dispatch({
+    view.dispatch({
       effects: EditorView.updateListener.of((update) => {
         if (update.selectionSet) {
           const anchor = update.state.selection.main.anchor;
           const head = update.state.selection.main.head;
-          provider2.awareness.setLocalStateField("cursor", { anchor, head });
+          provider.awareness.setLocalStateField("cursor", { anchor, head });
         }
       })
     });
-    let typingTimeout2;
-    view2.dom.addEventListener("input", () => {
-      provider2.awareness.setLocalStateField("isTyping", true);
-      clearTimeout(typingTimeout2);
-      typingTimeout2 = setTimeout(() => {
-        provider2.awareness.setLocalStateField("isTyping", false);
+    let typingTimeout;
+    view.dom.addEventListener("input", () => {
+      provider.awareness.setLocalStateField("isTyping", true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        provider.awareness.setLocalStateField("isTyping", false);
       }, 2e3);
     });
     class CursorWidget {
@@ -31715,31 +31738,30 @@ ${reason}`);
         return true;
       }
     }
-  });
-  provider.awareness.on("change", () => {
-    updateUserList();
-    const states = Array.from(provider.awareness.getStates().entries());
-    const typingUsers = states.filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID).map(([_, state]) => state.user.name);
-    updateTypingIndicator(typingUsers);
-  });
-  function updateTypingIndicator(usersTyping) {
-    const indicator = document.getElementById("typing-indicator");
-    if (!indicator) return;
-    if (usersTyping.length === 0) {
-      indicator.textContent = "";
-    } else if (usersTyping.length === 1) {
-      indicator.textContent = `${usersTyping[0]} is typing...`;
-    } else {
-      indicator.textContent = `${usersTyping.join(", ")} are typing...`;
+    provider.awareness.on("change", () => {
+      updateUserList();
+      const states = Array.from(provider.awareness.getStates().entries());
+      const typingUsers = states.filter(([clientID, state2]) => state2?.isTyping && state2.user?.name && clientID !== ydoc.clientID).map(([_, state2]) => state2.user.name);
+      updateTypingIndicator(typingUsers);
+    });
+    function updateTypingIndicator(usersTyping) {
+      const indicator = document.getElementById("typing-indicator");
+      if (!indicator) return;
+      if (usersTyping.length === 0) {
+        indicator.textContent = "";
+      } else if (usersTyping.length === 1) {
+        indicator.textContent = `${usersTyping[0]} is typing...`;
+      } else {
+        indicator.textContent = `${usersTyping.join(", ")} are typing...`;
+      }
     }
-  }
-  var typingTimeout;
-  view.dom.addEventListener("input", () => {
-    provider.awareness.setLocalStateField("isTyping", true);
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      provider.awareness.setLocalStateField("isTyping", false);
-    }, 2e3);
+    view.dom.addEventListener("input", () => {
+      provider.awareness.setLocalStateField("isTyping", true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        provider.awareness.setLocalStateField("isTyping", false);
+      }, 2e3);
+    });
   });
   function exportAsText() {
     const text2 = ytext.toString();
