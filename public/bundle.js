@@ -31554,15 +31554,42 @@ ${reason}`);
     });
     const userLabel = document.querySelector("#toolbar > div:nth-child(2)");
     if (userLabel) userLabel.innerHTML = `User: ${username}`;
+    class CursorWidget {
+      constructor(name2, color) {
+        this.name = name2;
+        this.color = color;
+      }
+      toDOM() {
+        const cursor = document.createElement("span");
+        cursor.className = "remote-cursor";
+        cursor.style.borderLeft = `2px solid ${this.color}`;
+        cursor.style.marginLeft = "-1px";
+        cursor.style.height = "1em";
+        cursor.style.position = "relative";
+        const label = document.createElement("div");
+        label.textContent = this.name;
+        label.style.position = "absolute";
+        label.style.top = "-1.2em";
+        label.style.left = "0";
+        label.style.background = this.color;
+        label.style.color = "#fff";
+        label.style.fontSize = "0.75em";
+        label.style.padding = "0 4px";
+        label.style.borderRadius = "4px";
+        cursor.appendChild(label);
+        return cursor;
+      }
+      ignoreEvent() {
+        return true;
+      }
+    }
     const remoteCursorPlugin = ViewPlugin.fromClass(class {
       constructor(view2) {
         this.view = view2;
         this.decorations = this.buildDecorations();
       }
       update(update) {
-        if (update.docChanged || update.transactions.some((tr) => tr.annotation("awareness"))) {
-          this.decorations = this.buildDecorations();
-        }
+        this.decorations = this.buildDecorations();
       }
       buildDecorations() {
         const builder = [];
@@ -31575,7 +31602,7 @@ ${reason}`);
           const pos = cursor.head;
           if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
           const deco = Decoration.widget({
-            widget: new CursorWidget(user),
+            widget: new CursorWidget(user.name, user.color),
             side: -1
           }).range(pos);
           builder.push(deco);
@@ -31654,40 +31681,6 @@ ${reason}`);
     } catch (err) {
       console.error("Failed to create EditorState:", err);
     }
-    const cursorPlugin = ViewPlugin.fromClass(class {
-      constructor(view2) {
-        this.decorations = this.buildDecorations(view2);
-        provider.awareness.on("change", () => {
-          this.decorations = this.buildDecorations(view2);
-          view2.update([]);
-        });
-      }
-      update(update) {
-        this.decorations = this.buildDecorations(update.view);
-      }
-      buildDecorations(view2) {
-        const decos = [];
-        const states = provider.awareness.getStates();
-        for (const [clientID, state2] of states.entries()) {
-          if (clientID === ydoc.clientID) continue;
-          const cursor = state2.cursor;
-          const user = state2.user;
-          if (cursor && user) {
-            const deco = Decoration.widget({
-              widget: new CursorWidget(user.name, user.color),
-              side: -1
-            }).range(cursor.head);
-            decos.push(deco);
-          }
-        }
-        return Decoration.set(decos);
-      }
-      destroy() {
-        provider.awareness.off("change", this);
-      }
-    }, {
-      decorations: (v) => v.decorations
-    });
     view = new EditorView({
       state,
       parent: document.getElementById("editor")
@@ -31710,34 +31703,6 @@ ${reason}`);
         provider.awareness.setLocalStateField("isTyping", false);
       }, 2e3);
     });
-    class CursorWidget {
-      constructor(user) {
-        this.user = user;
-      }
-      toDOM() {
-        const cursor = document.createElement("span");
-        cursor.className = "remote-cursor";
-        cursor.style.borderLeft = `2px solid ${this.user.color}`;
-        cursor.style.marginLeft = "-1px";
-        cursor.style.height = "1em";
-        cursor.style.position = "relative";
-        const label = document.createElement("div");
-        label.textContent = this.user.name;
-        label.style.position = "absolute";
-        label.style.top = "-1.2em";
-        label.style.left = "0";
-        label.style.background = this.user.color;
-        label.style.color = "#fff";
-        label.style.fontSize = "0.75em";
-        label.style.padding = "0 4px";
-        label.style.borderRadius = "4px";
-        cursor.appendChild(label);
-        return cursor;
-      }
-      ignoreEvent() {
-        return true;
-      }
-    }
     provider.awareness.on("change", () => {
       updateUserList();
       const states = Array.from(provider.awareness.getStates().entries());

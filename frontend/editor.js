@@ -156,19 +156,59 @@ if (navigator.onLine) {
   const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
   if (userLabel) userLabel.innerHTML = `User: ${username}`
 
+
+
+
+
+
+
+class CursorWidget {
+  constructor(name, color) {
+    this.name = name;
+    this.color = color;
+  }
+
+toDOM() {
+  const cursor = document.createElement("span");
+  cursor.className = "remote-cursor";
+  cursor.style.borderLeft = `2px solid ${this.color}`;
+  cursor.style.marginLeft = "-1px";
+  cursor.style.height = "1em";
+  cursor.style.position = "relative";
+
+  const label = document.createElement("div");
+  label.textContent = this.name;
+  label.style.position = "absolute";
+  label.style.top = "-1.2em";
+  label.style.left = "0";
+  label.style.background = this.color;
+  label.style.color = "#fff";
+  label.style.fontSize = "0.75em";
+  label.style.padding = "0 4px";
+  label.style.borderRadius = "4px";
+
+  cursor.appendChild(label);
+  return cursor;
+  }
+
+  ignoreEvent() {
+    return true;
+  }
+}
+
+
 const remoteCursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.view = view;
     this.decorations = this.buildDecorations();
   }
 
-  update(update) {
-    if (update.docChanged || update.transactions.some(tr => tr.annotation("awareness"))) {
-      this.decorations = this.buildDecorations();
-    }
-  }
+update(update) {
+  this.decorations = this.buildDecorations();
+}
 
-  buildDecorations() {
+
+buildDecorations() {
     const builder = [];
 
     const states = Array.from(provider.awareness.getStates().entries());
@@ -182,7 +222,7 @@ const remoteCursorPlugin = ViewPlugin.fromClass(class {
       if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
 
       const deco = Decoration.widget({
-        widget: new CursorWidget(user),
+        widget: new CursorWidget(user.name, user.color),
         side: -1
       }).range(pos);
       builder.push(deco);
@@ -290,7 +330,7 @@ try {
 } catch (err) {
   console.error("Failed to create EditorState:", err)
 }
-
+/*
 const cursorPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.decorations = this.buildDecorations(view)
@@ -306,7 +346,7 @@ const cursorPlugin = ViewPlugin.fromClass(class {
   }
 
   buildDecorations(view) {
-    const decos = []
+    const decos = []/
     const states = provider.awareness.getStates()
     for (const [clientID, state] of states.entries()) {
       if (clientID === ydoc.clientID) continue
@@ -329,7 +369,7 @@ const cursorPlugin = ViewPlugin.fromClass(class {
 }, {
   decorations: v => v.decorations
 })
-
+*/
 
 
 
@@ -339,6 +379,20 @@ view = new EditorView({
 })
 console.log("EditorView initialized")
 
+view.dom.addEventListener('mouseup', () => {
+  const anchor = view.state.selection.main.anchor;
+  const head = view.state.selection.main.head;
+  provider.awareness.setLocalStateField('cursor', { anchor, head });
+});
+
+view.dom.addEventListener('keyup', () => {
+  const anchor = view.state.selection.main.anchor;
+  const head = view.state.selection.main.head;
+  provider.awareness.setLocalStateField('cursor', { anchor, head });
+});
+
+
+/*
 view.dispatch({
   effects: EditorView.updateListener.of(update => {
     if (update.selectionSet) {
@@ -358,44 +412,52 @@ view.dom.addEventListener('input', () => {
   typingTimeout = setTimeout(() => {
     provider.awareness.setLocalStateField('isTyping', false);
   }, 2000);
+});*/
+
+
+
+//}); //Test here 
+/*
+let typingTimeout;
+
+const updateListener = EditorView.updateListener.of(update => {
+  if (update.selectionSet) {
+    const anchor = update.state.selection.main.anchor;
+    const head = update.state.selection.main.head;
+    provider.awareness.setLocalStateField('cursor', { anchor, head });
+  }
+});
+
+state = EditorState.create({
+  extensions: [
+    basicSetup,
+    yCollab(ytext, provider.awareness, {
+      awareness: provider.awareness,
+      clientID: ydoc.clientID
+    }),
+    remoteCursorPlugin,
+    updateListener
+  ]
+});
+console.log("EditorState created", state);
+
+view = new EditorView({
+  state,
+  parent: document.getElementById('editor')
+});
+console.log("EditorView initialized");
+
+view.dom.addEventListener('input', () => {
+  provider.awareness.setLocalStateField('isTyping', true);
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    provider.awareness.setLocalStateField('isTyping', false);
+  }, 2000);
 });
 
 
-
-
-class CursorWidget {
-  constructor(user) {
-    this.user = user;
-  }
-
-  toDOM() {
-    const cursor = document.createElement("span");
-    cursor.className = "remote-cursor";
-    cursor.style.borderLeft = `2px solid ${this.user.color}`;
-    cursor.style.marginLeft = "-1px";
-    cursor.style.height = "1em";
-    cursor.style.position = "relative";
-
-    const label = document.createElement("div");
-    label.textContent = this.user.name;
-    label.style.position = "absolute";
-    label.style.top = "-1.2em";
-    label.style.left = "0";
-    label.style.background = this.user.color;
-    label.style.color = "#fff";
-    label.style.fontSize = "0.75em";
-    label.style.padding = "0 4px";
-    label.style.borderRadius = "4px";
-
-    cursor.appendChild(label);
-    return cursor;
-  }
-
-  ignoreEvent() { return true; }
-}
-//}); //Test here
-
-
+*/
 
 
 
