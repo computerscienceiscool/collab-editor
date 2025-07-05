@@ -17,3 +17,4 @@ public/style.css
 *.swo
 .DS_Store
 EOF
+node_modules/
