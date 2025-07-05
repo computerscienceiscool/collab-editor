@@ -38,14 +38,14 @@
 
 ### User Awareness Enhancements
 
-- [ ] Show list of active users with optional avatars
-- [ ] Add room join/leave notifications
+- [x] Show list of active users with optional avatars
+- [x] Add room join/leave notifications
 
 ### Data Handling and Persistence
 
 - [ ] Confirm that the /save endpoint writes updates to disk
 - [ ] Add document versioning or revision history
-- [ ] Add export option (e.g., download as .txt or .json)
+- [x] Add export option (e.g., download as .txt or .json)
 
 ### Room and Session Management
 
@@ -82,7 +82,7 @@
 
 - [ ] Separate development and production builds
 - [ ] Add automated unit or DOM tests
-- [ ] Validate document integrity before saving
+- [x] Validate document integrity before saving
 
 ### UI and Experience Improvements
 
@@ -93,8 +93,8 @@
 
 ### Code and Config Cleanup
 
-- [ ] Replace hardcoded values with config (e.g., WebSocket URL, room)
-- [ ] Modularize editor.js into separate concerns
+- [x] Replace hardcoded values with config (e.g., WebSocket URL, room)
+- [next] Modularize editor.js into separate concerns
 - [ ] Add error handling for fetch, save, and load failures
 
 ---
