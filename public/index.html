@@ -60,8 +60,8 @@
         <option value="json">Export Codemirror State</option>
         <option value="yjs">Export Yjs Update (JSON Array)</option>
       </select>
-      <button onclick="handleSave()">💾 Save</button>
-      <button id="toggle-log">📜 Log</button>
+      <button id="save-button">Save</button>
+      <button id="toggle-log">Log</button>
     </div>
   </div>
 
@@ -93,7 +93,8 @@
   </div>
 
   <div id="editor"></div>
-  <script src="bundle.js" defer></script>
+
+  <script type="module" src="/src/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
