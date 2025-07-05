@@ -1,0 +1,19 @@
+# Node
+node_modules/
+
+# Vite & build outputs
+dist/
+.vite/
+.parcel-cache/
+*.log
+
+# Optional: if you don't want to commit these
+package-lock.json
+public/bundle.js
+public/style.css
+
+# IDE/editor temp files
+*.swp
+*.swo
+.DS_Store
+EOF

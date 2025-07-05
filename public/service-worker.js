@@ -1,6 +1,6 @@
 
 const CACHE_NAME = 'editor-cache-v1';
-const URLS_TO_CACHE = ['/', '/bundle.js', '/index.html', '/styles.css', /service-worker.js'];
+const URLS_TO_CACHE = ['/', '/bundle.js', '/index.html', '/styles.css', '/service-worker.js'];
 
 self.addEventListener('install', event => {
     self.skipWaiting(); 

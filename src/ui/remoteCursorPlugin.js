@@ -1,7 +1,7 @@
 
 // File: src/ui/remoteCursorPlugin.js
 
-import { Decoration, ViewPlugin, DecorationSet, EditorView } from '@codemirror/view';
+import { Decoration, ViewPlugin, EditorView } from '@codemirror/view';
 import { StateField } from '@codemirror/state';
 import { CursorWidget } from './cursorWidget.js';
 
@@ -14,9 +14,12 @@ import { CursorWidget } from './cursorWidget.js';
  */
 export function remoteCursorPlugin(awareness, clientID) {
   const remoteCursorField = StateField.define({
-    create: () => Decoration.none,
-    update: (decorations, tr) => decorations.map(tr.changes),
-    provide: field => EditorView.decorations.from(field),
+    create() {
+      return Decoration.none;
+    },
+    update(deco, tr) {
+      return Decoration.none;
+    }
   });
 
   const plugin = ViewPlugin.fromClass(
@@ -24,6 +27,7 @@ export function remoteCursorPlugin(awareness, clientID) {
       constructor(view) {
         this.view = view;
         this.decorations = Decoration.none;
+        this.updateDecorations = this.updateDecorations.bind(this);
         this.updateDecorations();
 
         awareness.on('change', this.updateDecorations);
@@ -35,7 +39,7 @@ export function remoteCursorPlugin(awareness, clientID) {
         }
       }
 
-      updateDecorations = () => {
+      updateDecorations() {
         const decorations = [];
 
         awareness.getStates().forEach((state, id) => {
@@ -58,7 +62,7 @@ export function remoteCursorPlugin(awareness, clientID) {
         this.view.dispatch({
           effects: remoteCursorField.init(this.decorations),
         });
-      };
+      }
 
       destroy() {
         awareness.off('change', this.updateDecorations);

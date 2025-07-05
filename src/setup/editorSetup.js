@@ -5,6 +5,7 @@ import { EditorState } from '@codemirror/state';
 import { yCollab } from 'y-codemirror.next';
 import { remoteCursorPlugin } from '../ui/remoteCursorPlugin.js';
 
+
 /**
  * Initializes the CodeMirror editor and attaches Yjs collaborative binding.
  * 
