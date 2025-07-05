@@ -18,7 +18,11 @@ html, body {
 }
 
 #editor {
-  height: calc(100% - 40px);
+  height: 400px; /* or 100vh or anything visible */
+  border: 1px solid #ccc;
+  padding: 10px;
+  background: white;
+  overflow-y: auto;
 }
 
 #user-list {
@@ -31,6 +35,7 @@ html, body {
   border-radius: 4px;
   color: #000;
 }
+
 .remote-cursor {
   border-left-width: 2px;
   border-left-style: solid;
@@ -43,11 +48,12 @@ html, body {
   pointer-events: none;
   contenteditable: false;
 }
+
 .remote-cursor > div {
   position: absolute;
   top: -1.2em;
   left: 0;
-  background: #000; /* Will be overridden by user.color */
+  background: #000;
   color: #fff;
   font-size: 0.75em;
   padding: 0 4px;
@@ -55,7 +61,49 @@ html, body {
   white-space: nowrap;
   pointer-events: none;
 }
+
 .remote-selection {
-  background-color: rgba(0, 0, 255, 0.2); /* Default fallback */
+  background-color: rgba(0, 0, 255, 0.2);
 }
 
+.log-sidebar {
+  position: fixed;
+  top: 40px;
+  right: 0;
+  width: 280px;
+  height: calc(100% - 40px);
+  background-color: #fafafa;
+  border-left: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 0.9em;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.log-sidebar.open {
+  display: block;
+}
+
+.log-entry {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.log-timestamp {
+  color: #666;
+  font-size: 0.8em;
+}
+
+body.with-sidebar #editor {
+  margin-right: 280px;
+}

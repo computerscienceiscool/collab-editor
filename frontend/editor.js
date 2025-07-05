@@ -68,9 +68,9 @@ ydoc = new Y.Doc();
 ytext = ydoc.getText('codemirror');
 const persistence = new IndexeddbPersistence(room, ydoc);
 
-    persistence.once('synced', () => {
+persistence.once('synced', () => {
         console.log('IndexedDB content loaded');
-        });
+ });
 
 
 let provider;
@@ -97,6 +97,167 @@ if (!navigator.onLine) {
 }
 
 
+let typingTimeout;
+
+const editorContainer = document.getElementById('editor');
+if (editorContainer) {
+  try {
+    
+
+
+
+const remoteCursorPlugin = ViewPlugin.fromClass(class {
+  constructor(view) {
+    this.view = view;
+    this.decorations = this.buildDecorations();
+  }
+
+update(update) {
+  this.decorations = this.buildDecorations();
+}
+
+
+buildDecorations() {
+    const builder = [];
+
+    const states = Array.from(provider.awareness.getStates().entries());
+    for (const [clientID, state] of states) {
+      if (clientID === ydoc.clientID) continue; // skip self
+      const cursor = state.cursor;
+      const user = state.user;
+      if (!cursor || !user) continue;
+
+      const pos = cursor.head;
+    //  if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
+
+    const docLength = this.view.state.doc.length;
+    if (typeof pos !== 'number' || pos < 0 || pos > docLength) {
+        console.warn(`Invalid cursor position: ${pos} in doc of length ${docLength}`);
+        continue;
+    }
+    
+      const deco = Decoration.widget({
+        widget: new CursorWidget(user.name, user.color),
+        side: -1
+      }).range(pos);
+      builder.push(deco);
+    }
+
+    return Decoration.set(builder);
+  }
+
+  destroy() {}
+
+}, {
+  decorations: v => v.decorations
+});
+
+
+
+
+    const state = EditorState.create({
+      extensions: [
+        basicSetup,
+        yCollab(ytext, provider.awareness, {
+          awareness: provider.awareness,
+          clientID: ydoc.clientID
+        }),
+        remoteCursorPlugin,
+        EditorView.updateListener.of(update => {
+          if (update.docChanged || update.selectionSet) {
+            provider.awareness.setLocalStateField('isTyping', true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+              provider.awareness.setLocalStateField('isTyping', null);
+            }, 2000);
+          }
+        })
+      ]
+    });
+
+    window.view = new EditorView({
+      state,
+      parent: editorContainer
+    });
+
+    console.log("EditorView successfully initialized");
+  } catch (err) {
+    console.error("Failed to create EditorState:", err);
+  }
+} else {
+  console.error("Cannot find #editor element in DOM");
+}
+
+
+
+
+
+
+
+
+const logArray = ydoc.getArray('user-log');
+const logEntriesEl = document.getElementById('log-entries');
+
+function addLogEntry(entry) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'log-entry';
+
+  const colorDot = document.createElement('span');
+  colorDot.className = 'log-color';
+  colorDot.style.backgroundColor = entry.user.color;
+
+  const message = document.createElement('span');
+  message.textContent = `${entry.user.name} ${entry.type} at ${formatTime(entry.timestamp)} (${relativeTime(entry.timestamp)})`;
+
+  wrapper.appendChild(colorDot);
+  wrapper.appendChild(message);
+  logEntriesEl.prepend(wrapper);
+}
+
+function formatTime(ts) {
+  const date = new Date(ts);
+  return date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+}
+
+function relativeTime(ts) {
+  const now = Date.now();
+  const diff = Math.floor((now - ts) / 60000);
+  if (diff === 0) return 'just now';
+  if (diff === 1) return '1 minute ago';
+  return `${diff} minutes ago`;
+}
+
+provider.awareness.on('change', ({ added, removed }) => {
+  const states = provider.awareness.getStates();
+  const now = Date.now();
+
+  added.forEach(id => {
+    const user = states.get(id)?.user;
+    if (user) {
+      logArray.push([{ type: 'joined', user, timestamp: now }]);
+    }
+  });
+
+  removed.forEach(id => {
+    const user = states.get(id)?.user;
+    if (user) {
+      logArray.push([{ type: 'left', user, timestamp: now }]);
+    }
+  });
+});
+
+logArray.observe(event => {
+  event.changes.added.forEach(item => {
+    item.content.getContent().forEach(addLogEntry);
+  });
+});
+
+// Toggle log sidebar
+const toggleLogBtn = document.getElementById('toggle-log');
+const sidebar = document.getElementById('user-log');
+toggleLogBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+});
 
 /*
 let provider = null;
@@ -123,28 +284,28 @@ if (navigator.onLine) {
     //
     //
     //
-  provider.awareness.setLocalStateField('user', {
-    name: storedName,
-    color: storedColor
-  });
+ // provider.awareness.setLocalStateField('user', {
+ //   name: storedName,
+ //   color: storedColor
+//  });
     
-
-  const offlineBanner = document.getElementById('offline-banner');
-  if (offlineBanner) {
-    offlineBanner.style.display = navigator.onLine ? 'none' : 'block'
-  }
-
-
+const offlineBanner = document.getElementById('offline-banner');
+if (offlineBanner) {
+  offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
 
   window.addEventListener('offline', () => {
     console.warn('Browser is offline');
-    if (offlineBanner) offlineBanner.style.display = 'block';
+    offlineBanner.style.display = 'block';
   });
 
   window.addEventListener('online', () => {
     console.info('Browser is back online');
-    if (offlineBanner) offlineBanner.style.display = 'none';
+    offlineBanner.style.display = 'none';
   });
+
+}
+  
+
 
   // Set local user awareness
   provider.awareness.setLocalStateField('user', {
@@ -155,9 +316,6 @@ if (navigator.onLine) {
   // Show user name in DOM (optional override via toolbar selector)
   const userLabel = document.querySelector('#toolbar > div:nth-child(2)')
   if (userLabel) userLabel.innerHTML = `User: ${username}`
-
-
-
 
 
 
@@ -197,45 +355,21 @@ toDOM() {
 }
 
 
-const remoteCursorPlugin = ViewPlugin.fromClass(class {
-  constructor(view) {
-    this.view = view;
-    this.decorations = this.buildDecorations();
-  }
-
-update(update) {
-  this.decorations = this.buildDecorations();
-}
 
 
-buildDecorations() {
-    const builder = [];
 
-    const states = Array.from(provider.awareness.getStates().entries());
-    for (const [clientID, state] of states) {
-      if (clientID === ydoc.clientID) continue; // skip self
-      const cursor = state.cursor;
-      const user = state.user;
-      if (!cursor || !user) continue;
 
-      const pos = cursor.head;
-      if (pos == null || pos < 0 || pos > this.view.state.doc.length) continue;
 
-      const deco = Decoration.widget({
-        widget: new CursorWidget(user.name, user.color),
-        side: -1
-      }).range(pos);
-      builder.push(deco);
-    }
 
-    return Decoration.set(builder);
-  }
 
-  destroy() {}
 
-}, {
-  decorations: v => v.decorations
-});
+
+
+
+
+
+
+
 
 
 function updateUserList() {
@@ -264,7 +398,6 @@ function updateUserList() {
 }
 
 //  Correct awareness change handler
-provider.awareness.on('change', () => {
   updateUserList();
 
   const states = Array.from(provider.awareness.getStates().entries());
@@ -278,231 +411,42 @@ provider.awareness.on('change', () => {
 
 
 function updateTypingIndicator(usersTyping) {
-    const indicator = document.getElementById('typing-indicator');
-    if (!indicator) return;
+  const indicator = document.getElementById('typing-indicator');
+  if (!indicator) return;
 
-    if (usersTyping.length === 0) {
-      indicator.textContent = '';
-    } else if (usersTyping.length === 1) {
-      indicator.textContent = `${usersTyping[0]} is typing...`;
-    } else {
-      indicator.textContent = `${usersTyping.join(', ')} are typing...`;
-    }
+  if (usersTyping.length === 0) {
+    indicator.textContent = '';
+  } else if (usersTyping.length === 1) {
+    indicator.textContent = `${usersTyping[0]} is typing...`;
+  } else {
+    indicator.textContent = `${usersTyping.join(', ')} are typing...`;
+  }
 }
 
 
 
-
-
-  updateUserList()
-
-  // Load doc state from server
-  fetch('/load')
-    .then(res => (res.ok ? res.arrayBuffer() : null))
-    .then(update => {
-      if (update) Y.applyUpdate(ydoc, new Uint8Array(update))
-    })
-
-  // Auto-save to server
-  setInterval(() => {
-    const update = Y.encodeStateAsUpdate(ydoc)
-    fetch('/save', {
-      method: 'POST',
-      body: update
-    })
-  }, 5000)
-  console.log("Auto-save set up")
-
-  // Initialize CodeMirror
-let state
-try {
-  state = EditorState.create({
-    extensions: [
-      basicSetup,
-      yCollab(ytext, provider.awareness, {
-        awareness: provider.awareness,
-        clientID: ydoc.clientID
-      }),
-        remoteCursorPlugin    //  Custom cursor plugin
-    ]
-  })
-  console.log("EditorState created", state)
-} catch (err) {
-  console.error("Failed to create EditorState:", err)
-}
-/*
-const cursorPlugin = ViewPlugin.fromClass(class {
-  constructor(view) {
-    this.decorations = this.buildDecorations(view)
-    provider.awareness.on('change', () => {
-      this.decorations = this.buildDecorations(view)
-      view.update([])
-    })
-  }
-
-  update(update) {
-    // Called on every document update
-    this.decorations = this.buildDecorations(update.view)
-  }
-
-  buildDecorations(view) {
-    const decos = []/
-    const states = provider.awareness.getStates()
-    for (const [clientID, state] of states.entries()) {
-      if (clientID === ydoc.clientID) continue
-      const cursor = state.cursor
-      const user = state.user
-      if (cursor && user) {
-        const deco = Decoration.widget({
-          widget: new CursorWidget(user.name, user.color),
-          side: -1
-        }).range(cursor.head)
-        decos.push(deco)
-      }
-    }
-    return Decoration.set(decos)
-  }
-
-  destroy() {
-    provider.awareness.off('change', this)
-  }
-}, {
-  decorations: v => v.decorations
-})
-*/
-
-
-
-view = new EditorView({
-  state,
-  parent: document.getElementById('editor')
-})
-console.log("EditorView initialized")
-
-view.dom.addEventListener('mouseup', () => {
-  const anchor = view.state.selection.main.anchor;
-  const head = view.state.selection.main.head;
-  provider.awareness.setLocalStateField('cursor', { anchor, head });
-});
-
-view.dom.addEventListener('keyup', () => {
-  const anchor = view.state.selection.main.anchor;
-  const head = view.state.selection.main.head;
-  provider.awareness.setLocalStateField('cursor', { anchor, head });
-});
-
-
-/*
-view.dispatch({
-  effects: EditorView.updateListener.of(update => {
-    if (update.selectionSet) {
-      const anchor = update.state.selection.main.anchor
-      const head = update.state.selection.main.head
-      provider.awareness.setLocalStateField('cursor', { anchor, head })
-    }
-  })
-})
-
-let typingTimeout;
-
-view.dom.addEventListener('input', () => {
-  provider.awareness.setLocalStateField('isTyping', true);
-
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    provider.awareness.setLocalStateField('isTyping', false);
-  }, 2000);
-});*/
-
-
-
-//}); //Test here 
-/*
-let typingTimeout;
-
-const updateListener = EditorView.updateListener.of(update => {
-  if (update.selectionSet) {
-    const anchor = update.state.selection.main.anchor;
-    const head = update.state.selection.main.head;
-    provider.awareness.setLocalStateField('cursor', { anchor, head });
-  }
-});
-
-state = EditorState.create({
-  extensions: [
-    basicSetup,
-    yCollab(ytext, provider.awareness, {
-      awareness: provider.awareness,
-      clientID: ydoc.clientID
-    }),
-    remoteCursorPlugin,
-    updateListener
-  ]
-});
-console.log("EditorState created", state);
-
-view = new EditorView({
-  state,
-  parent: document.getElementById('editor')
-});
-console.log("EditorView initialized");
-
-view.dom.addEventListener('input', () => {
-  provider.awareness.setLocalStateField('isTyping', true);
-
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    provider.awareness.setLocalStateField('isTyping', false);
-  }, 2000);
-});
-
-
-*/
-
-
-
-
-  provider.awareness.on('change', () => {
-    updateUserList();
-
-    const states = Array.from(provider.awareness.getStates().entries());
-    const typingUsers = states
-      .filter(([clientID, state]) => state?.isTyping && state.user?.name && clientID !== ydoc.clientID)
-      .map(([_, state]) => state.user.name);
-
-    updateTypingIndicator(typingUsers);
-  });
-
-function updateTypingIndicator(usersTyping) {
-    const indicator = document.getElementById('typing-indicator');
-    if (!indicator) return;
-
-    if (usersTyping.length === 0) {
-      indicator.textContent = '';
-    } else if (usersTyping.length === 1) {
-      indicator.textContent = `${usersTyping[0]} is typing...`;
-    } else {
-      indicator.textContent = `${usersTyping.join(', ')} are typing...`;
-    }
-  }
-
- // let typingTimeout;
-
-  view.dom.addEventListener('input', () => {
-    provider.awareness.setLocalStateField('isTyping', true);
-
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      provider.awareness.setLocalStateField('isTyping', false);
-    }, 2000);
-  });
-
-});
 
 // ==========================
 // Export Functions
 // ==========================
+//
+//
+//
+//
 
+
+
+
+function handleSave() {
+  const format = document.getElementById('save-format').value;
+  if (format === 'txt') {
+    exportAsText();
+  } else if (format === 'json') {
+    exportAsJSON();
+  } else if (format === 'yjs') {
+    exportSnapshotAsJSON();
+  }
+}
 function exportAsText() {
   const text = ytext.toString();
   const blob = new Blob([text], { type: 'text/plain' });
@@ -515,7 +459,7 @@ function exportAsText() {
 }
 
 function exportAsJSON() {
-  const state = view.state.toJSON();
+  const state = window.view.state.toJSON();  // JJ: Use the view's state directly
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -548,7 +492,6 @@ function exportSnapshotAsJSON() {
   document.body.removeChild(link);
 }
 
-//});
 
 // Make available globally
 window.exportAsText = exportAsText;
@@ -556,5 +499,6 @@ window.exportAsJSON = exportAsJSON;
 window.exportAsYsnap = exportAsYsnap;
 window.exportSnapshotAsJSON = exportSnapshotAsJSON;
 console.log("Export functions set up")
+window.handleSave = handleSave;
 export {};
 
