@@ -1,6 +1,8 @@
 
 // File: src/export/handlers.js
 
+import * as Y from 'yjs';
+
 /**
  * Sets up handlers for the export buttons in the UI.
  * 
@@ -9,13 +11,11 @@
  * @param {EditorView} view - The CodeMirror editor view
  */
 export function setupExportHandlers(ydoc, ytext, view) {
- // const saveButton = document.querySelector('button[onclick="handleSave()"]');
   const saveButton = document.querySelector('#save-button');
   const formatSelect = document.querySelector('#save-format');
 
   if (!saveButton || !formatSelect) return;
 
-  // Replace global onclick with modular logic
   saveButton.onclick = () => {
     const format = formatSelect.value;
     handleSave(format, ydoc, ytext, view);
@@ -43,13 +43,21 @@ function handleSave(format, ydoc, ytext, view) {
     case 'json':
       content = JSON.stringify(view.state.toJSON(), null, 2);
       blob = new Blob([content], { type: 'application/json' });
-      filename = 'codemirror-state.json';
+      filename = 'codemirror_state.json';
+      break;
+
+    case 'ysnap':
+      const snapshot = Y.encodeStateAsUpdate(ydoc);
+      blob = new Blob([snapshot], { type: 'application/octet-stream' });
+      filename = 'snapshot.ysnap';
       break;
 
     case 'yjs':
       const update = Y.encodeStateAsUpdate(ydoc);
-      blob = new Blob([update], { type: 'application/octet-stream' });
-      filename = 'document.yjs';
+      const array = Array.from(update);
+      content = JSON.stringify(array, null, 2);
+      blob = new Blob([content], { type: 'application/json' });
+      filename = 'snapshot.json';
       break;
 
     default:

@@ -2,7 +2,7 @@
 // File: src/ui/remoteCursorPlugin.js
 
 import { Decoration, ViewPlugin, EditorView } from '@codemirror/view';
-import { StateField } from '@codemirror/state';
+import { StateField, StateEffect } from '@codemirror/state';
 import { CursorWidget } from './cursorWidget.js';
 
 /**
@@ -13,15 +13,26 @@ import { CursorWidget } from './cursorWidget.js';
  * @returns {Extension} - CodeMirror extension
  */
 export function remoteCursorPlugin(awareness, clientID) {
+  // Define a StateEffect for setting remote cursor decorations
+  const setRemoteCursors = StateEffect.define();
+
+  // Define a StateField to hold remote cursor decorations
   const remoteCursorField = StateField.define({
     create() {
       return Decoration.none;
     },
     update(deco, tr) {
-      return Decoration.none;
-    }
+      for (let e of tr.effects) {
+        if (e.is(setRemoteCursors)) {
+          return e.value;
+        }
+      }
+      return deco.map(tr.changes);
+    },
+    provide: f => EditorView.decorations.from(f)
   });
 
+  // Define the plugin class for handling awareness updates
   const plugin = ViewPlugin.fromClass(
     class {
       constructor(view) {
@@ -59,17 +70,18 @@ export function remoteCursorPlugin(awareness, clientID) {
         });
 
         this.decorations = Decoration.set(decorations);
-        this.view.dispatch({
-          effects: remoteCursorField.init(this.decorations),
-        });
+
+        // Safely dispatch decoration update
+        setTimeout(() => {
+          this.view.dispatch({
+            effects: setRemoteCursors.of(this.decorations)
+          });
+        }, 0);
       }
 
       destroy() {
         awareness.off('change', this.updateDecorations);
       }
-    },
-    {
-      decorations: v => v.decorations,
     }
   );
 

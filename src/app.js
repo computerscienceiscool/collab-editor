@@ -1,3 +1,4 @@
+
 // File: src/app.js
 
 // 1. Import all setup functions from your other modules
@@ -15,7 +16,9 @@ let typingTimeout = null;
 // 3. Wait for the page (DOM) to load before touching any HTML elements
 window.addEventListener('DOMContentLoaded', () => {
   // 3a. Set up Yjs state: shared document, awareness, etc.
-  const { ydoc, provider, ytext, awareness } = setupYjs();
+  const { ydoc, provider, ytext, awareness, room } = setupYjs();
+  
+  document.querySelector('#room-name').textContent = room;
 
   // 3b. Set up the CodeMirror editor
   const view = setupEditor(ydoc, provider, ytext, awareness);
@@ -44,4 +47,15 @@ window.addEventListener('DOMContentLoaded', () => {
       awareness.setLocalStateField('typing', false);
     }, 1500);
   });
+
+  //  3i. Hook up the Log toggle button *after* DOM is ready
+  const toggleLogBtn = document.getElementById('toggle-log');
+  const logPanel = document.getElementById('user-log');
+
+  if (toggleLogBtn && logPanel) {
+    toggleLogBtn.addEventListener('click', () => {
+      const visible = logPanel.style.display !== 'none';
+      logPanel.style.display = visible ? 'none' : 'block';
+    });
+  }
 });

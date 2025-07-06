@@ -30,14 +30,14 @@
 
 ## In Progress and Next Steps
 
-### Editor Usability
+### Editor Usability"
 
 - [ ] Add basic formatting toolbar (bold, italic, etc.)
 - [ ] Add keyboard shortcuts (e.g., Ctrl+B for bold)
 - [x] Add placeholder text when the document is empty
 
 ### User Awareness Enhancements
-
+:wq
 - [x] Show list of active users with optional avatars
 - [x] Add room join/leave notifications
 
@@ -49,8 +49,19 @@
 
 ### Room and Session Management
 
-- [ ] Make room name dynamic (via prompt or URL)
+- [x] Make room name dynamic (via prompt or URL)
 - [ ] Allow user to switch or select different rooms
+
+### UI and Design Improvements
+- [x] Improve overall UI design and layout
+- [x] User Logging 
+- [x] Show awareness metadata on cursor hover (e.g., name, color)
+
+### Documentation
+
+- [x] Create user guide at docs/user-guide.md
+- [x] Create project README with install and usage instructions
+
 
 ---
 
@@ -94,7 +105,7 @@
 ### Code and Config Cleanup
 
 - [x] Replace hardcoded values with config (e.g., WebSocket URL, room)
-- [next] Modularize editor.js into separate concerns
+- [x] Modularize editor.js into separate concerns
 - [ ] Add error handling for fetch, save, and load failures
 
 ---

@@ -17,6 +17,9 @@ export function setupYjs() {
   const urlParams = new URLSearchParams(window.location.search);
   const room = urlParams.get('room') || 'default-room';
 
+    
+
+
   // Persist state locally
   const persistence = new IndexeddbPersistence(room, ydoc);
   persistence.once('synced', () => {
@@ -24,7 +27,8 @@ export function setupYjs() {
   });
 
   // WebSocket provider
-  const provider = new WebsocketProvider('wss://demos.yjs.dev', room, ydoc);
+  const provider = new WebsocketProvider('ws://localhost:1234', room, ydoc);
+  
 
   // Shared text type
   const ytext = ydoc.getText('codemirror');
@@ -32,5 +36,5 @@ export function setupYjs() {
   // Awareness for user cursors, etc.
   const awareness = provider.awareness;
 
-  return { ydoc, provider, ytext, awareness };
+  return { ydoc, provider, ytext, awareness, room  };
 }

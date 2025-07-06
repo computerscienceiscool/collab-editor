@@ -58,7 +58,8 @@
       <select id="save-format">
         <option value="txt">Export as .txt</option>
         <option value="json">Export Codemirror State</option>
-        <option value="yjs">Export Yjs Update (JSON Array)</option>
+        <option value="ysnap">Export Yjs Snapshot (.ysnap binary)</option>
+        <option value="yjs">Export Yjs Update (.json array)</option>
       </select>
       <button id="save-button">Save</button>
       <button id="toggle-log">Log</button>
@@ -87,7 +88,7 @@
     OFFLINE MODE – Changes will be saved when reconnected.
   </div>
 
-  <div id="user-log" class="log-sidebar">
+  <div id="user-log" class="log-sidebar" style="display: none;">
     <h3>User Activity</h3>
     <div id="log-entries"></div>
   </div>
