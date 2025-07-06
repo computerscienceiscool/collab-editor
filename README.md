@@ -30,7 +30,7 @@ This demo has been extended with additional features that are useful to teams, i
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-org/collab-editor.git
+   git clone [https://github.com/your-org](https://github.com/computerscienceiscool/collab-editor/refactor-editor/collab-editor.git)
    cd collab-editor
    ```
 
