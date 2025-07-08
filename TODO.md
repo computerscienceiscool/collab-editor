@@ -37,7 +37,8 @@
 - [x] Add placeholder text when the document is empty
 
 ### User Awareness Enhancements
-:wq
+
+- [x] Show user cursors with unique colors
 - [x] Show list of active users with optional avatars
 - [x] Add room join/leave notifications
 
@@ -62,10 +63,27 @@
 - [x] Create user guide at docs/user-guide.md
 - [x] Create project README with install and usage instructions
 
+## Rust Backend Integration
+
+- [x] Move backend logic from Go to Rust
+- [x] Support `/load` and `/save` endpoints in Rust
+- [x] Implement file-based persistence for Yjs documents
+- [ ] Validate file writes and error handling
+- [ ] Add `/export` endpoint to serve Markdown (from `.yjs`)
+- [ ] Support document versioning via filename or embedded metadata
+- [ ] Confirm cross-origin and CORS headers work for frontend integration
+- [ ] Test offline edits syncing with Rust backend
+- [ ] Add basic logging to the Rust server
+- [ ] Add command-line config for port and storage path (optional)
 
 ---
 
 ## Optional Advanced Features
+
+
+
+
+
 
 ### Shared Yjs Types
 

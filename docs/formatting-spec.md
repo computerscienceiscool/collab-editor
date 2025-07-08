@@ -1,4 +1,3 @@
-
 # Formatting Spec for Collaborative Editor
 
 ## Purpose
@@ -11,7 +10,7 @@ This document outlines current and future formatting plans for the collaborative
 
 - Uses **Yjs** CRDT for collaborative editing.
 - Supports **rich text formatting** within the editor (e.g., bold, italics, cursors).
-- Stores state in `IndexedDB` and synchronizes via `y-websocket` (temporary; may change).
+- State is synchronized using y-websocket and optionally served or exported through the new Rust backend.
 
 ---
 
@@ -30,7 +29,7 @@ This document outlines current and future formatting plans for the collaborative
   - `.json`: serialized Codemirror state
   - `.yjs`: Yjs binary snapshot
   - `.snapshot.json`: JSON snapshot of Yjs document
-  - **(Future)** `.md`: Git-compatible Markdown
+  - `.md`: Git-compatible Markdown (WIP — implemented in Rust backend)
 
 ---
 
@@ -55,6 +54,18 @@ This document outlines current and future formatting plans for the collaborative
 
 ---
 
+## File Naming and GUIDs (Planned)
+
+Each document instance may eventually include a PromiseGrid GUID as part of its filename or metadata, especially during export or persistent storage. This will enable tracking across distributed instances and support PromiseGrid’s identity and versioning architecture.
+
+---
+
+## Alignment with PromiseGrid
+
+This formatting approach is being developed with the long-term goal of seamless integration into PromiseGrid’s document layer. Markdown will act as the canonical human-readable format for versioning, collaboration, and long-term storage.
+
+---
+
 ## Questions
 
 - Should custom Markdown extensions be used for user mentions or signatures?
@@ -65,4 +76,5 @@ This document outlines current and future formatting plans for the collaborative
 
 ## Status
 
-✅ This spec is a living document and will evolve as PromiseGrid integration progresses.
+This spec is a living document and will evolve as PromiseGrid integration progresses.
+
