@@ -14,14 +14,18 @@ This demo has been extended with additional features that are useful to teams, i
 - Custom usernames and color indicators
 - Room-based collaboration via URL (e.g., `?room=my-team`)
 - GUID-based room creation (see `docs/guid-rooms.md`)
-- Offline support with automatic syncing
+- Typing indicators and presence tracking
+- Toggleable user activity log
+- Offline support with automatic syncing (via IndexedDB)
+- Optional Go or Rust backend support:
+  - Go backend: Simple in-memory collaboration for legacy support
+  - Rust backend: Fast document persistence, GUID-based room support, Markdown export
 - Export options:
   - Plain text
   - CodeMirror state (JSON)
   - Yjs snapshot (binary `.ysnap`)
   - Yjs update (JSON array)
-- Typing indicators and presence tracking
-- Toggleable user activity log
+
 
 ---
 
@@ -69,6 +73,12 @@ This demo has been extended with additional features that are useful to teams, i
 
 ---
 
+## Makefile Usage
+
+For advanced use and automation, see [docs/makefile-usage.md](docs/makefile-usage.md) for how to run the Go and Rust servers using `make`.
+
+---
+
 ## User Guide
 
 Please see the [User Guide](docs/user-guide.md) for detailed usage instructions, UI explanations, and feature descriptions.
@@ -84,7 +94,8 @@ For information about GUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - y-indexeddb
 - CodeMirror 6
 - Vanilla JS / HTML / CSS
-- Rust (backend)
+- Go (optional backend for legacy and service compatibility)
+- Rust (new backend for high-performance persistence and exports)
 
 ---
 
@@ -94,7 +105,7 @@ For information about GUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - `src/setup/`: Initialization modules (Yjs, editor, user)
 - `src/ui/`: UI utilities (logging, presence, typing)
 - `rust-server/`: Rust backend server code
-- `docs/`: Markdown documentation (includes user guide and guid-rooms)
+- `docs/`: Markdown documentation (includes user guide and other files)
 
 ---
 
@@ -104,6 +115,7 @@ For information about GUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - [GUID-Based Rooms](docs/guid-rooms.md) — How room names are generated using GUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
+- [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
 
 ---
 
