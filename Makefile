@@ -37,8 +37,13 @@ ws:
 	npx y-websocket --port $(WS_PORT)
 
 run:
-	@echo "Starting Go backend at http://localhost:$(PORT)"
-	go run main.go
+	@if [ "$(BACKEND)" = "go" ]; then \
+		echo "Starting Go backend at http://localhost:$(PORT)"; \
+		go run main.go; \
+	else \
+		echo "Starting Rust backend at http://localhost:$(PORT)"; \
+		cd rust-server && cargo run; \
+	fi
 
 restart:
 	@echo "Killing anything on ports $(PORT) and $(WS_PORT)..."
@@ -51,14 +56,24 @@ clean:
 
 rebuild: clean install build
 
+
+run-go:
+	@echo "Running Go backend..."
+	go run main.go
+
+run-rust:
+	@echo "Running Rust backend..."
+	cd rust-server && cargo run
+
+
 all: install build restart
 	@echo "Starting services..."
 	@make -j2 ws run
 
 stop:
-	@echo "Killing anything on ports 8080 and 1234..."
-	@-fuser -k 8080/tcp 2>/dev/null || true
-	@-fuser -k 1234/tcp 2>/dev/null || true
+	@echo "Killing anything on ports $(PORT) and $(WS_PORT)..."
+	@-fuser -k $(PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
 
 start:
 	@echo "Restarting ports and running all services..."
