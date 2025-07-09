@@ -1,11 +1,19 @@
-// File: vite.config.mjs
 
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
-  root: '.', // adjust if needed
-  publicDir: 'public',
+  root: '.',               
+  publicDir: 'public',      
+  build: {
+    rollupOptions: {
+      input: resolve(__dirname, 'index.html'),  
+    },
+    outDir: 'dist',       
+    emptyOutDir: false,    
+  },
   server: {
     port: 8080,
-  }
+    open: true,
+  },
 });

@@ -8,31 +8,30 @@ use axum::{
     Router,
 };
 use std::{fs, net::SocketAddr};
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 #[tokio::main]
 async fn main() {
-    // Serve static files from ../public
-    let static_files = ServeDir::new("../public");
+    // Serve static files from ./public with fallback to index.html
+    let static_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
 
     // Set up the router
     let app = Router::new()
-        .nest_service("/", static_files)
-        .route("/load", get(load_handler))
-        .route("/save", post(save_handler))
-        .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // 10 MB limit
+        .nest_service("/", static_dir) // Serve index.html and static assets
+        .route("/load", get(load_handler)) // API route
+        .route("/save", post(save_handler)) // API route
+        .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // Set max upload size to 10MB
 
-    // Bind to 127.0.0.1:8080
+    // Bind and start the server
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("Rust server running at http://{}", addr);
 
-    // Start the server using axum's built-in serve method
     axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app)
         .await
         .unwrap();
 }
 
-// Handle GET /load -> return doc.yjs if it exists
+// Handle GET /load -> Return the Yjs document if it exists
 async fn load_handler() -> impl IntoResponse {
     match fs::read("doc.yjs") {
         Ok(contents) => Response::builder()
@@ -43,7 +42,7 @@ async fn load_handler() -> impl IntoResponse {
     }
 }
 
-// Handle POST /save -> save request body to doc.yjs
+// Handle POST /save -> Save the document
 async fn save_handler(body: Bytes) -> impl IntoResponse {
     match fs::write("doc.yjs", &body) {
         Ok(_) => StatusCode::OK.into_response(),

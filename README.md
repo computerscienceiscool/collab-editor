@@ -112,7 +112,7 @@ For information about GUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 ## Documentation
 
 - [User Guide](docs/user-guide.md) — How to use the editor
-- [GUID-Based Rooms](docs/guid-rooms.md) — How room names are generated using GUIDs
+- [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
