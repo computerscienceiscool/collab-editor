@@ -12,9 +12,20 @@ package-lock.json
 public/bundle.js
 public/style.css
 
-# IDE/editor temp files
+# Rust
+target/
+
+# Vite dev server & IndexedDB docs
+doc.yjs
+
+# Editor/IDE temp files
 *.swp
 *.swo
+*.tmp
+*.bak
+copilot.log
 .DS_Store
-EOF
-node_modules/
+
+# IDEs
+.vscode/
+.idea/
