@@ -13,7 +13,7 @@ public/bundle.js
 public/style.css
 
 # Rust
-target/
+/rust-server/target/
 
 # Vite dev server & IndexedDB docs
 doc.yjs
