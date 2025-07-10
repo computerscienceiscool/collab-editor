@@ -7,11 +7,21 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use std::{fs, net::SocketAddr};
+use std::{env, fs};
+use std::net::SocketAddr;
 use tower_http::services::{ServeDir, ServeFile};
 
 #[tokio::main]
 async fn main() {
+    
+    // Read port from environment variable or default to 8080
+    let port = env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse::<u16>().ok())
+        .unwrap_or(8080);
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    println!("Rust server running at http://{}", addr);
     // Serve static files from ./public with fallback to index.html
     let static_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
 
@@ -22,9 +32,6 @@ async fn main() {
         .route("/save", post(save_handler)) // API route
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // Set max upload size to 10MB
 
-    // Bind and start the server
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    println!("Rust server running at http://{}", addr);
 
     axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app)
         .await

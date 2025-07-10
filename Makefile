@@ -55,7 +55,7 @@ run-go:
 	go run main.go
 
 restart:
-	@echo "Killing anything on ports $(PORT) and $(WS_PORT)..."
+	@echo "Killing anything on ports $(PORT),$(BACKEND_PORT)and $(WS_PORT)..."
 	@-fuser -k $(PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
@@ -71,9 +71,10 @@ all: install build restart
 	@make -j2 ws run
 
 stop:
-	@echo "Killing anything on ports $(PORT) and $(WS_PORT)..."
+	@echo "Killing anything on ports $(PORT),$(WS_PORT)and $(BACKEND_PORT)..."
 	@-fuser -k $(PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
 
 start:
 	@echo "Restarting ports and running websocket + frontend..."
