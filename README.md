@@ -13,13 +13,13 @@ This demo has been extended with additional features that are useful to teams, i
 - Shared cursors and user awareness
 - Custom usernames and color indicators
 - Room-based collaboration via URL (e.g., `?room=my-team`)
-- GUID-based room creation (see `docs/guid-rooms.md`)
+- UUID-based room creation (see `docs/guid-rooms.md`)
 - Typing indicators and presence tracking
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
 - Optional Go or Rust backend support:
   - Go backend: Simple in-memory collaboration for legacy support
-  - Rust backend: Fast document persistence, GUID-based room support, Markdown export
+  - Rust backend: Fast document persistence, UUID-based room support, Markdown export
 - Export options:
   - Plain text
   - CodeMirror state (JSON)
@@ -69,7 +69,7 @@ This demo has been extended with additional features that are useful to teams, i
    http://localhost:8080/?room=my-room
    ```
 
-   Replace `my-room` with any custom room name. If none is provided, a GUID will be generated.
+   Replace `my-room` with any custom room name. If none is provided, a UUID will be generated.
 
 ---
 
@@ -83,7 +83,7 @@ For advanced use and automation, see [docs/makefile-usage.md](docs/makefile-usag
 
 Please see the [User Guide](docs/user-guide.md) for detailed usage instructions, UI explanations, and feature descriptions.
 
-For information about GUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms.md).
+For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms.md).
 
 ---
 

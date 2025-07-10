@@ -34,10 +34,7 @@ The Rust server replaces the original Go backend. It is responsible for:
 rust-server/
 ├── Cargo.toml           # Dependencies and metadata
 └── src/
-    ├── main.rs          # Server entry point
-    ├── handlers.rs      # HTTP route logic
-    ├── models.rs        # Data types (e.g. Document)
-    └── storage.rs       # File I/O (load/save documents)
+    └── main.rs          # Server entry point
 ```
 
 ---
@@ -72,7 +69,7 @@ When the browser sends a `POST` to `/save`:
 ## Next Steps (Rust Backend)
 
 - [ ] Add Markdown export to `/export`
-- [ ] Support GUID-based filenames on save/load
+- [ ] Support UUID-based filenames on save/load
 - [ ] Add `/health` endpoint
 - [ ] Return revision metadata in responses
 
