@@ -1,5 +1,6 @@
 
 // File: src/app.js
+import { initWasm } from './wasm/initWasm.js';
 
 // 1. Import all setup functions from your other modules
 import { setupYjs } from './setup/yjsSetup.js';
@@ -59,3 +60,5 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+initWasm();
+
