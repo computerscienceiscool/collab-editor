@@ -1,3 +1,7 @@
+# Rust WASM build output
+/rust-wasm/pkg/
+/rust-wasm/target/
+
 # Node
 node_modules/
 
