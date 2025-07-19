@@ -10,7 +10,11 @@ help:
 	@echo ""
 	@echo "Available commands:"
 	@echo "  make install     - Install all npm dependencies"
-	@echo "  make build       - Build frontend using Vite"
+	@echo "  make wasm        - Build Rust WASM module"
+	@echo "  make wasm-clean  - Clean WASM build artifacts"
+	@echo "  make wasm-rebuild - Clean, rebuild WASM module"
+	@echo "  make dev-all     - Run full dev stack (ws, rust, vite, and room)"
+	@echo "  make build       - Build frontend using Vite(including WASM)"
 	@echo "  make serve       - Start Vite dev server at http://localhost:$(PORT)"
 	@echo "  make ws          - Start Yjs websocket server at ws://localhost:$(WS_PORT)"
 	@echo "  make run         - Start Rust backend server (default)"
@@ -87,9 +91,31 @@ open-room:
 	echo "Opening: http://localhost:$(PORT)/?room=$$uuid"; \
 	xdg-open "http://localhost:$(PORT)/?room=$$uuid" >/dev/null 2>&1 || open "http://localhost:$(PORT)/?room=$$uuid"
 
+wasm:
+	@echo "Building WASM module..."
+	cd rust-wasm && wasm-pack build --target web --out-dir pkg
+
+wasm-clean:
+	@echo "Cleaning WASM build artifacts..."
+	rm -rf rust-wasm/pkg
+
+wasm-rebuild: wasm-clean wasm
+	@echo "WASM module rebuilt successfully"
+
+# Update your existing commands to include WASM
+build: wasm
+	@echo "Building with Vite..."
+	npx vite build
+
+rebuild: clean wasm install build
+
+all: install wasm build restart
+	@echo "Starting services..."
+	@make -j2 ws run
+
 dev-all:
 	@echo "Running full dev stack (ws, rust, vite, and room)..."
-	@make restart
+	@make stop 
 	@sleep 2
 	@make -j2 ws run &
 	@sleep 2
