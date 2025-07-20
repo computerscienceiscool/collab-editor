@@ -27,6 +27,17 @@ This document outlines the WASM-powered features in the collaborative editor, bu
   - `"**hello**"` → `"hello"` (remove formatting)
 - **Standard Markdown**: Creates portable markdown syntax
 
+### Document Statistics
+- **Function**: `calculate_document_stats()`
+- **Technology**: Rust string processing compiled to WASM
+- **Features**:
+  - Real-time word count
+  - Character count (with and without spaces)
+  - Line count
+  - Reading time estimation (based on 200 words/minute)
+- **Usage**: Live updates in toolbar as you type
+- **Performance**: Near-instantaneous calculation for large documents
+
 ### Markdown Export
 - **Function**: `export_to_markdown()`
 - **Status**: Basic implementation (returns input as-is)

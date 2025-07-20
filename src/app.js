@@ -1,8 +1,8 @@
 
 // File: src/app.js
+//
 import { initWasm } from './wasm/initWasm.js';
-
-// 1. Import all setup functions from your other modules
+import { setupDocumentStats } from './ui/documentStats.js';
 import { setupYjs } from './setup/yjsSetup.js';
 import { setupEditor } from './setup/editorSetup.js';
 import { setupExportHandlers } from './export/handlers.js';
@@ -14,8 +14,19 @@ import { setupUserList } from './ui/userList.js';
 // 2. Declare a typingTimeout variable — it’s needed across functions
 let typingTimeout = null;
 
+
+
+
 // 3. Wait for the page (DOM) to load before touching any HTML elements
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async() => {
+
+  // Initialize WASM FIRST
+  console.log("Initializing WASM...");
+  await initWasm();
+  console.log("WASM ready!");
+
+
+    
   // 3a. Set up Yjs state: shared document, awareness, etc.
   const { ydoc, provider, ytext, awareness, room } = setupYjs();
   
@@ -38,6 +49,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 3g. Update user list in the toolbar
   setupUserList(awareness);
+  setupDocumentStats(ytext, view);
+
 
   // 3h. Detect when *this* user types and tell the others
   view.dom.addEventListener('keydown', () => {
@@ -60,5 +73,5 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-initWasm();
+// initWasm();
 

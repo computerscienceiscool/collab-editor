@@ -8,7 +8,7 @@ This demo has been extended with additional features that are useful to teams, i
 ---
 
 ## Features
-
+### Core Collaboration
 - Real-time collaborative editing
 - Shared cursors and user awareness
 - Custom usernames and color indicators
@@ -17,15 +17,24 @@ This demo has been extended with additional features that are useful to teams, i
 - Typing indicators and presence tracking
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
+
+### WASM-Powered Text Processing
+- **Document compression**: 98% compression ratio using Rust WASM
+- **Smart text formatting**: Auto-clean whitespace, headers, and code blocks
+- **Markdown formatting buttons**: Bold, italic, underline with smart toggle
+- **Live document statistics**: Real-time word count, character count, reading time
+- **Client-side processing**: All text operations run in browser with near-native speed
+
+### Backend Support
 - Optional Go or Rust backend support:
   - Go backend: Simple in-memory collaboration for legacy support
   - Rust backend: Fast document persistence, UUID-based room support, Markdown export
-- Export options:
-  - Plain text
-  - CodeMirror state (JSON)
-  - Yjs snapshot (binary `.ysnap`)
-  - Yjs update (JSON array)
 
+### Export Options
+- Plain text
+- CodeMirror state (JSON)
+- Yjs snapshot (binary `.ysnap`)
+- Yjs update (JSON array)
 
 ---
 
@@ -94,6 +103,7 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - y-indexeddb
 - CodeMirror 6
 - Vanilla JS / HTML / CSS
+- **Rust WebAssembly (WASM)** - Client-side text processing
 - Go (optional backend for legacy and service compatibility)
 - Rust (new backend for high-performance persistence and exports)
 
@@ -104,6 +114,8 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - `src/`: All core JavaScript logic
 - `src/setup/`: Initialization modules (Yjs, editor, user)
 - `src/ui/`: UI utilities (logging, presence, typing)
+- `src/wasm/`: WebAssembly integration and initialization
+- `rust-wasm/`: Rust code compiled to WebAssembly
 - `rust-server/`: Rust backend server code
 - `docs/`: Markdown documentation (includes user guide and other files)
 
@@ -117,7 +129,7 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
 - [docs/project.md](docs/project.md) — Latest project overview and architecture 
-- [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly (7/18/25)
+- [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly (7/19/25)
 
 ---
 

@@ -145,4 +145,37 @@ pub fn toggle_underline(text: &str) -> String {
     }
 }
 
+#[wasm_bindgen]
+pub fn calculate_document_stats(text: &str) -> String {
+    let words = count_words(text);
+    let chars_with_spaces = text.len();
+    let chars_without_spaces = text.chars().filter(|c| !c.is_whitespace()).count();
+    let lines = count_lines(text);
+    let reading_time = estimate_reading_time(words);
+    
+    // Return as JSON string for easy parsing in JS
+    format!(
+        "{{\"words\":{},\"chars_with_spaces\":{},\"chars_without_spaces\":{},\"lines\":{},\"reading_time\":{}}}",
+        words, chars_with_spaces, chars_without_spaces, lines, reading_time
+    )
+}
+
+fn count_words(text: &str) -> usize {
+    text.split_whitespace().count()
+}
+
+fn count_lines(text: &str) -> usize {
+    if text.is_empty() {
+        0
+    } else {
+        text.lines().count()
+    }
+}
+
+fn estimate_reading_time(words: usize) -> usize {
+    // Average reading speed: 200 words per minute
+    let minutes = (words as f64 / 200.0).ceil() as usize;
+    if minutes == 0 { 1 } else { minutes }
+}
+
 
