@@ -103,7 +103,7 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - y-indexeddb
 - CodeMirror 6
 - Vanilla JS / HTML / CSS
-- **Rust WebAssembly (WASM)** - Client-side text processing
+- Rust WebAssembly (WASM) - Client-side text processing
 - Go (optional backend for legacy and service compatibility)
 - Rust (new backend for high-performance persistence and exports)
 
