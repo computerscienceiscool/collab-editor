@@ -12,8 +12,9 @@ dist/
 *.log
 
 # grokker files
-	.grok
-	.grok.lock
+.grok
+.grok.lock
+*.lock
 	
 # Optional: if you don't want to commit these
 package-lock.json
