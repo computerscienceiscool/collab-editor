@@ -351,12 +351,11 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 ## Documentation
 
 - [User Guide](docs/user-guide.md) — How to use the editor and its features (7/26/25)
-- [Project Overview](docs/format.md) — Overview of the project structure and architecture (7/26/25)
 - [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
-- [docs/project.md](docs/project.md) — Latest project overview and architecture 
+- [docs/project.md](docs/project.md) — Latest project overview and architecture (7/26/25)
 - [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly (7/26/25)
 
 ---
