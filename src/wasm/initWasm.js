@@ -6,7 +6,8 @@ import init, {
   toggle_bold,
   toggle_italic,
   toggle_underline, 
-  calculate_document_stats 
+  calculate_document_stats, 
+  convert_url_to_markdown   
 } from '../../rust-wasm/pkg/rust_wasm.js';
 
 
@@ -33,4 +34,4 @@ export async function initWasm() {
 }
 
 // Export the format function for use in other modules
-export { format_text, toggle_bold, toggle_italic, toggle_underline, calculate_document_stats };
+export { format_text, toggle_bold, toggle_italic, toggle_underline, calculate_document_stats, convert_url_to_markdown };

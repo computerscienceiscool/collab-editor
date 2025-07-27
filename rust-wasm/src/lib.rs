@@ -65,6 +65,14 @@ fn clean_whitespace(text: &str) -> String {
     result.trim().to_string()
 }
 
+fn is_url(text: &str) -> bool {
+    text.starts_with("http://") || 
+    text.starts_with("https://") || 
+    text.starts_with("ftp://") ||
+    text.starts_with("www.")
+}
+
+
 fn fix_markdown_headers(text: &str) -> String {
     let re_headers = Regex::new(r"^(#{1,6}) *(.+)$").unwrap();
     
@@ -200,4 +208,24 @@ fn fix_punctuation(text: &str) -> String {
     result = result.replace("..", ".").replace(",,", ",");
     
     result
+}
+
+#[wasm_bindgen]
+pub fn convert_url_to_markdown(text: &str) -> String {
+    let trimmed = text.trim(); // This removes leading/trailing whitespace
+    
+    // Check if it's already a markdown link
+    if trimmed.starts_with("[") && trimmed.contains("](") && trimmed.ends_with(")") {
+        return text.to_string(); // Return original text to preserve spacing
+    }
+    
+    // Check if it looks like a URL
+    if is_url(trimmed) {
+        // Replace just the URL part, preserve any surrounding whitespace
+        let before_trim = &text[..text.len() - text.trim_start().len()];
+        let after_trim = &text[trimmed.len() + before_trim.len()..];
+        format!("{}[{}]({}){}", before_trim, trimmed, trimmed, after_trim)
+    } else {
+        text.to_string()
+    }
 }

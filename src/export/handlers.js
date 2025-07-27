@@ -2,7 +2,7 @@
 // File: src/export/handlers.js
 
 import * as Y from 'yjs';
-import { format_text, toggle_bold, toggle_italic, toggle_underline } from '../wasm/initWasm.js';
+import { format_text, toggle_bold, toggle_italic, toggle_underline, convert_url_to_markdown  } from '../wasm/initWasm.js';
 import { undo, redo } from '@codemirror/commands';
 /**
  * Sets up handlers for the export buttons in the UI.
@@ -17,6 +17,7 @@ export function setupExportHandlers(ydoc, ytext, view) {
   const boldButton = document.querySelector('#bold-button');
   const italicButton = document.querySelector('#italic-button');
   const underlineButton = document.querySelector('#underline-button');
+  const linkButton = document.querySelector('#link-button');
   const formatSelect = document.querySelector('#save-format');
   const undoButton = document.querySelector('#undo-button');
   const redoButton = document.querySelector('#redo-button');
@@ -72,6 +73,14 @@ export function setupExportHandlers(ydoc, ytext, view) {
       console.log("Redo applied");
     };
   }
+    // Link button handler
+    // This button converts URLs in the text to Markdown links
+    if (linkButton) {
+        linkButton.onclick = () => {
+            handleToggleFormatting(view, convert_url_to_markdown, "Link");
+        };
+    }
+            
 }
     
 
