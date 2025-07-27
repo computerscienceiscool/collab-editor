@@ -44,6 +44,10 @@ pub fn format_text(input: &str) -> String {
     
     // 4. Fix bold, italic, underline formatting
     text = fix_markdown_formatting(&text);
+
+    // 5. Fix punctuation.  This  fixes common punctuation spacing issues and cleans up double
+    //    punctuation.  //    It also ensures that punctuation is properly spaced from words.
+    text = fix_punctuation(&text);
     
     text
 }
@@ -179,3 +183,21 @@ fn estimate_reading_time(words: usize) -> usize {
 }
 
 
+
+fn fix_punctuation(text: &str) -> String {
+    let mut result = text.to_string();
+    
+    // Fix common punctuation spacing issues
+    result = result.replace(" ,", ",");
+    result = result.replace(" .", ".");
+    result = result.replace("( ", "(").replace(" )", ")");
+    result = result.replace(" :", ":");
+    result = result.replace(" ;", ";");
+    result = result.replace(" !", "!");
+    result = result.replace(" ?", "?");
+    
+    // Fix multiple punctuation
+    result = result.replace("..", ".").replace(",,", ",");
+    
+    result
+}
