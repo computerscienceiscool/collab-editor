@@ -3,7 +3,7 @@
 
 import * as Y from 'yjs';
 import { format_text, toggle_bold, toggle_italic, toggle_underline } from '../wasm/initWasm.js';
-
+import { undo, redo } from '@codemirror/commands';
 /**
  * Sets up handlers for the export buttons in the UI.
  * 
@@ -18,6 +18,8 @@ export function setupExportHandlers(ydoc, ytext, view) {
   const italicButton = document.querySelector('#italic-button');
   const underlineButton = document.querySelector('#underline-button');
   const formatSelect = document.querySelector('#save-format');
+  const undoButton = document.querySelector('#undo-button');
+  const redoButton = document.querySelector('#redo-button');
 
   if (!saveButton || !formatSelect) return;
    
@@ -53,9 +55,24 @@ export function setupExportHandlers(ydoc, ytext, view) {
       handleToggleFormatting(view, toggle_underline, "Underline");
     };
   }
+
+
+  // Undo button handler
+  if (undoButton) {
+    undoButton.onclick = () => {
+      undo(view);
+      console.log("Undo applied");
+    };
+  }
+
+  // Redo button handler  
+  if (redoButton) {
+    redoButton.onclick = () => {
+      redo(view);
+      console.log("Redo applied");
+    };
+  }
 }
-
-
     
 
 /**
