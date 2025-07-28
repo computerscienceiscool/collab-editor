@@ -26,7 +26,7 @@ No central server is required for collaboration or text processing. All operatio
 
 ### Editor Features
 - **Undo/Redo** with buttons and keyboard shortcuts (Ctrl+Z/Ctrl+Y)
-- **Export options** (txt, json, binary snapshots)
+- **Export options** (txt, json, cbor, and binary snapshots)
 - **User activity logging** and presence tracking
 - **Typing indicators** and real-time user awareness
 
