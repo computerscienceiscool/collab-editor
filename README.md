@@ -182,7 +182,7 @@ Click the **Save** button in the toolbar to export your work. Choose the format 
 | **.txt**               | Saves the plain text contents of the document. |
 | **.json**              | Saves the current CodeMirror editor state (can include styling info). |
 | **.ysnap**             | Saves a binary snapshot of the full Yjs document. Useful for restoring or syncing state later. |
-| **.cbor**             | Saves the Yjs document in CBOR format (compact binary). |
+| **.cbor**             | Saves the Yjs document in CBOR format (compact binary). **Still testing** |
 | **.json (Yjs Update)** | JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions. |
 | **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
 
