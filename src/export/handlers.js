@@ -2,6 +2,7 @@
 // File: src/export/handlers.js
 
 import * as Y from 'yjs';
+import { encode, decode } from 'cbor-x'; 
 import { format_text, toggle_bold, toggle_italic, toggle_underline, convert_url_to_markdown  } from '../wasm/initWasm.js';
 import { undo, redo } from '@codemirror/commands';
 /**
@@ -178,6 +179,20 @@ function handleSave(format, ydoc, ytext, view) {
       content = JSON.stringify(view.state.toJSON(), null, 2);
       blob = new Blob([content], { type: 'application/json' });
       filename = 'codemirror_state.json';
+      break;
+
+    case 'cbor':  // <-- ADD THIS ENTIRE CASE
+      const cborData = {
+        content: ytext.toString(),
+        metadata: {
+          room_id: window.location.search.replace('?room=', '') || 'default',
+          timestamp: Date.now(),
+          format: 'cbor'
+        }
+      };
+      const encodedCbor = encode(cborData);
+      blob = new Blob([encodedCbor], { type: 'application/cbor' });
+      filename = 'document.cbor';
       break;
 
     case 'ysnap':

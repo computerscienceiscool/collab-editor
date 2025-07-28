@@ -27,7 +27,8 @@ This document outlines current and future formatting plans for the collaborative
 - Export document to:
   - `.txt`: plain text
   - `.json`: serialized Codemirror state
-  - `.yjs`: Yjs binary snapshot
+  - `.ysnap`: Yjs binary snapshot
+  - `.cbor`: CBOR-encoded Yjs document
   - `.snapshot.json`: JSON snapshot of Yjs document
   - `.md`: Git-compatible Markdown (WIP — implemented in Rust backend)
 
