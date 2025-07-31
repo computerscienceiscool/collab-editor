@@ -119,7 +119,10 @@ dev-all:
 	@sleep 2
 	@make -j2 ws run &
 	@sleep 2
-	@make serve &
+	@make serve &`
 	@sleep 3
 	@make open-room
 
+
+#  grok commit | git commit -F -
+#
