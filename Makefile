@@ -65,10 +65,9 @@ restart:
 	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
 
 clean:
-	@echo "Cleaning up..."`
+	@echo "Cleaning up..."
 	rm -rf node_modules package-lock.json dist
 
-rebuild: clean install build
 
 all: install build restart
 	@echo "Starting services..."
@@ -102,16 +101,9 @@ wasm-clean:
 wasm-rebuild: wasm-clean wasm
 	@echo "WASM module rebuilt successfully"
 
-# Update your existing commands to include WASM
-build: wasm
-	@echo "Building with Vite..."
-	npx vite build
 
 rebuild: clean wasm install build
 
-all: install wasm build restart
-	@echo "Starting services..."
-	@make -j2 ws run
 
 dev-all:
 	@echo "Running full dev stack (ws, rust, vite, and room)..."
@@ -119,7 +111,7 @@ dev-all:
 	@sleep 2
 	@make -j2 ws run &
 	@sleep 2
-	@make serve &`
+	@make serve &
 	@sleep 3
 	@make open-room
 

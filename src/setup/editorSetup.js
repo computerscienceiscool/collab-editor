@@ -5,7 +5,7 @@ import { yCollab } from 'y-codemirror.next';
 import { remoteCursorPlugin } from '../ui/remoteCursorPlugin.js';
 import { history, undo, redo } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
-
+import { markdown } from '@codemirror/lang-markdown';
 /**
  * Initializes the CodeMirror editor and attaches Yjs collaborative binding.
  * 
@@ -15,6 +15,7 @@ import { keymap } from '@codemirror/view';
  * @param {awareness} awareness - Awareness instance for cursors, users
  * @returns {EditorView} - The initialized CodeMirror editor view
  */
+
 export function setupEditor(ydoc, provider, ytext, awareness) {
   const editorElement = document.querySelector('#editor');
 
@@ -22,6 +23,7 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
     doc: '',
     extensions: [
       basicSetup, // Already includes basic history
+      markdown(),
       history(), // Add explicit history support
       keymap.of([
         { key: "Ctrl-z", run: undo },

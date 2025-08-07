@@ -157,6 +157,70 @@ pub fn toggle_underline(text: &str) -> String {
     }
 }
 
+/// Toggle strikethrough formatting using `~~text~~`
+#[wasm_bindgen]
+pub fn toggle_strikethrough(text: &str) -> String {
+    let trimmed = text.trim();
+    if trimmed.starts_with("~~") && trimmed.ends_with("~~") && trimmed.len() > 4 {
+        trimmed[2..trimmed.len()-2].to_string()
+    } else {
+        format!("~~{}~~", trimmed)
+    }
+}
+
+
+
+/// Toggle markdown heading level (e.g. "# Heading" -> "## Heading")
+#[wasm_bindgen]
+pub fn toggle_heading(text: &str, level: u8) -> String {
+    let trimmed = text.trim();
+
+    // Compile regex safely
+    let re = Regex::new(r"^(#{1,6})\\s+(.*)$");
+    if re.is_err() {
+        return format!("<!-- regex compile failed -->\n{}", text);
+    }
+    let re = re.unwrap();
+
+    if let Some(caps) = re.captures(trimmed) {
+        let content = caps.get(2).map_or("", |m| m.as_str()).trim();
+        format!("{} {}", "#".repeat(level as usize), content)
+    } else {
+        // fallback: no match, just prepend heading
+        format!("{} {}", "#".repeat(level as usize), trimmed)
+    }
+}
+
+/// Toggle markdown bullet list (add/remove `- ` at the start of each line)
+#[wasm_bindgen]
+pub fn toggle_list(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let is_list = lines.iter().all(|line| line.trim_start().starts_with("- "));
+
+    if is_list {
+        // Remove `- ` from each line
+        lines.iter()
+            .map(|line| line.trim_start().trim_start_matches("- ").to_string())
+            .collect::<Vec<String>>()
+            .join("\n")
+    } else {
+        // Add `- ` to each line
+        lines.iter()
+            .map(|line| format!("- {}", line.trim()))
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+}
+
+
+
+
+
+
+
+
+
+
 #[wasm_bindgen]
 pub fn calculate_document_stats(text: &str) -> String {
     let words = count_words(text);

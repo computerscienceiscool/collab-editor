@@ -5,7 +5,10 @@ import init, {
   format_text,
   toggle_bold,
   toggle_italic,
-  toggle_underline, 
+  toggle_underline,
+  toggle_strikethrough,
+  toggle_heading,
+  toggle_list,
   calculate_document_stats, 
   convert_url_to_markdown   
 } from '../../rust-wasm/pkg/rust_wasm.js';
@@ -31,7 +34,31 @@ export async function initWasm() {
   console.log(" WASM decompression successful:", decompressed === testData);
  
   
-}
+
 
 // Export the format function for use in other modules
-export { format_text, toggle_bold, toggle_italic, toggle_underline, calculate_document_stats, convert_url_to_markdown };
+
+// TEMP: expose for console testing
+window.toggle_heading = toggle_heading;
+window.toggle_list = toggle_list;
+window.toggle_bold = toggle_bold;
+window.toggle_italic = toggle_italic;
+window.toggle_underline = toggle_underline;
+window.toggle_strikethrough = toggle_strikethrough;
+window.convert_url_to_markdown = convert_url_to_markdown;
+}
+
+export {
+  format_text,
+  toggle_bold,
+  toggle_italic,
+  toggle_underline,
+  toggle_strikethrough,
+  toggle_heading,
+  toggle_list,
+  calculate_document_stats,
+  convert_url_to_markdown
+
+
+
+};

@@ -3,7 +3,17 @@
 
 import * as Y from 'yjs';
 import { encode, decode } from 'cbor-x'; 
-import { format_text, toggle_bold, toggle_italic, toggle_underline, convert_url_to_markdown  } from '../wasm/initWasm.js';
+import {
+  format_text,
+  toggle_bold,
+  toggle_italic,
+  toggle_underline,
+  toggle_strikethrough,
+  toggle_heading,
+  toggle_list,
+  convert_url_to_markdown
+} from '../wasm/initWasm.js';
+
 import { undo, redo } from '@codemirror/commands';
 /**
  * Sets up handlers for the export buttons in the UI.
@@ -22,6 +32,10 @@ export function setupExportHandlers(ydoc, ytext, view) {
   const formatSelect = document.querySelector('#save-format');
   const undoButton = document.querySelector('#undo-button');
   const redoButton = document.querySelector('#redo-button');
+  const strikeButton = document.querySelector('#strike-button');
+  const headingButton = document.querySelector('#heading-button');
+  const listButton = document.querySelector('#list-button');
+  
 
   if (!saveButton || !formatSelect) return;
    
@@ -74,6 +88,49 @@ export function setupExportHandlers(ydoc, ytext, view) {
       console.log("Redo applied");
     };
   }
+  
+  // Strikethrough handler
+  if (strikeButton) {
+    strikeButton.onclick = () => {
+      handleToggleFormatting(view, toggle_strikethrough, "Strikethrough");
+    };
+  }
+
+  // Heading handler (e.g., toggles between #, ##, ###)
+  // H1 button handler
+  const heading1Button = document.querySelector('#heading1-button');
+  if (heading1Button) {
+    heading1Button.onclick = () => {
+      handleToggleFormatting(view, (text) => toggle_heading(text, 1), "Heading 1");
+    };
+  }
+
+  // H2 button handler
+  const heading2Button = document.querySelector('#heading2-button');
+  if (heading2Button) {
+    heading2Button.onclick = () => {
+      handleToggleFormatting(view, (text) => toggle_heading(text, 2), "Heading 2");
+    };
+  }
+
+  // H3 button handler
+  const heading3Button = document.querySelector('#heading3-button');
+  if (heading3Button) {
+    heading3Button.onclick = () => {
+      handleToggleFormatting(view, (text) => toggle_heading(text, 3), "Heading 3");
+    };
+  }
+
+  // List formatting (e.g., toggles bullet points)
+  if (listButton) {
+    listButton.onclick = () => {
+      handleToggleFormatting(view, (text) => toggle_list(text, "bullet"), "List");
+    };
+  }
+    
+
+
+
     // Link button handler
     // This button converts URLs in the text to Markdown links
     if (linkButton) {
