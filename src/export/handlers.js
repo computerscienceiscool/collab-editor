@@ -1,4 +1,3 @@
-
 // File: src/export/handlers.js
 
 import * as Y from 'yjs';
@@ -11,10 +10,14 @@ import {
   toggle_strikethrough,
   toggle_heading,
   toggle_list,
-  convert_url_to_markdown
+  convert_url_to_markdown,
+  // NEW: Import PromiseGrid functions
+  promiseGrid,
+  getCurrentSessionInfo
 } from '../wasm/initWasm.js';
 
 import { undo, redo } from '@codemirror/commands';
+
 /**
  * Sets up handlers for the export buttons in the UI.
  * 
@@ -72,7 +75,6 @@ export function setupExportHandlers(ydoc, ytext, view) {
     };
   }
 
-
   // Undo button handler
   if (undoButton) {
     undoButton.onclick = () => {
@@ -127,20 +129,15 @@ export function setupExportHandlers(ydoc, ytext, view) {
       handleToggleFormatting(view, (text) => toggle_list(text, "bullet"), "List");
     };
   }
-    
 
-
-
-    // Link button handler
-    // This button converts URLs in the text to Markdown links
-    if (linkButton) {
-        linkButton.onclick = () => {
-            handleToggleFormatting(view, convert_url_to_markdown, "Link");
-        };
-    }
-            
+  // Link button handler
+  // This button converts URLs in the text to Markdown links
+  if (linkButton) {
+    linkButton.onclick = () => {
+      handleToggleFormatting(view, convert_url_to_markdown, "Link");
+    };
+  }
 }
-    
 
 /**
  * Handles formatting toggle for selected text
@@ -179,13 +176,14 @@ async function handleToggleFormatting(view, toggleFunction, formatName) {
     });
     
     console.log(`WASM ${formatName} formatting applied successfully`);
+
+    // NEW: Send edit as PromiseGrid message
+    sendEditAsPromiseGridMessage(formatName.toLowerCase(), selection.from, formattedText, view);
+    
   } catch (error) {
     console.error(`WASM ${formatName} formatting failed:`, error);
   }
 }
-
-
-
 
 /**
  * Formats the current document text using WASM.
@@ -193,7 +191,6 @@ async function handleToggleFormatting(view, toggleFunction, formatName) {
  * @param {Y.Text} ytext - The Yjs text field
  * @param {EditorView} view - The CodeMirror editor view
  */
-
 async function handleFormat(ytext, view) {
   try {
     const currentText = ytext.toString();
@@ -208,6 +205,10 @@ async function handleFormat(ytext, view) {
     ytext.insert(0, formattedText);
     
     console.log("WASM formatting applied successfully");
+
+    // NEW: Send format action as PromiseGrid message
+    sendEditAsPromiseGridMessage("format", 0, formattedText, view);
+    
   } catch (error) {
     console.error("WASM formatting failed:", error);
     alert("Failed to format text. Please try again.");
@@ -238,7 +239,7 @@ function handleSave(format, ydoc, ytext, view) {
       filename = 'codemirror_state.json';
       break;
 
-    case 'cbor':  // <-- ADD THIS ENTIRE CASE
+    case 'cbor':
       const cborData = {
         content: ytext.toString(),
         metadata: {
@@ -251,6 +252,11 @@ function handleSave(format, ydoc, ytext, view) {
       blob = new Blob([encodedCbor], { type: 'application/cbor' });
       filename = 'document.cbor';
       break;
+
+    // NEW: PromiseGrid CBOR export
+    case 'promisegrid':
+      handlePromiseGridExport(ydoc, ytext, view);
+      return; // Don't continue with regular download
 
     case 'ysnap':
       const snapshot = Y.encodeStateAsUpdate(ydoc);
@@ -272,6 +278,58 @@ function handleSave(format, ydoc, ytext, view) {
   }
 
   downloadBlob(blob, filename);
+}
+
+// NEW: PromiseGrid export handler
+function handlePromiseGridExport(ydoc, ytext, view) {
+  try {
+    const content = ytext.toString();
+    const { documentId, userId } = getCurrentSessionInfo();
+    
+    // Create PromiseGrid CBOR message
+    const cborBytes = promiseGrid.exportDocument(content, documentId, userId);
+    
+    // Log to console so you can see it working!
+    promiseGrid.logMessage(cborBytes);
+    
+    // Create download
+    const blob = new Blob([cborBytes], { type: 'application/cbor' });
+    const filename = `${documentId}_promisegrid.cbor`;
+    downloadBlob(blob, filename);
+    
+    console.log(' PromiseGrid CBOR export completed!');
+    
+  } catch (error) {
+    console.error(' PromiseGrid export failed:', error);
+    alert('PromiseGrid export failed: ' + error.message);
+  }
+}
+
+// NEW: Send edit as PromiseGrid message
+function sendEditAsPromiseGridMessage(editType, position, content, view) {
+  try {
+    const { documentId, userId } = getCurrentSessionInfo();
+    
+    // Create PromiseGrid message for this edit
+    const cborBytes = promiseGrid.createEditMessage(
+      documentId,
+      editType, 
+      position,
+      content,
+      userId
+    );
+    
+    // Log it so you can see the messages being created
+    promiseGrid.logMessage(cborBytes);
+    
+    // Here you would normally send cborBytes over the network
+    // For now, we're just logging to see it working
+    console.log(`📡 Created PromiseGrid message for ${editType} edit`);
+    
+    return cborBytes;
+  } catch (error) {
+    console.error(' Failed to create PromiseGrid edit message:', error);
+  }
 }
 
 /**

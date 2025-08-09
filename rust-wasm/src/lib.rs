@@ -293,3 +293,178 @@ pub fn convert_url_to_markdown(text: &str) -> String {
         text.to_string()
     }
 }
+
+
+
+
+// PromiseGrid integration placeholder
+// ADD THESE IMPORTS to the top of your existing lib.rs
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+// ADD THESE STRUCTS after your existing imports but before your functions
+
+/// PromiseGrid message structure following the spec
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PromiseGridMessage {
+    pub protocol_hash: String,  // CID identifying the protocol spec
+    pub payload: MessagePayload,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MessagePayload {
+    pub message_type: String,
+    pub data: HashMap<String, serde_cbor::Value>,
+}
+
+/// Document edit message for collab-editor integration
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DocumentEdit {
+    pub document_id: String,
+    pub edit_type: String,  // "insert", "delete", "replace", "format"
+    pub position: u32,
+    pub content: String,
+    pub timestamp: f64,
+    pub user_id: String,
+}
+
+// ADD THESE FUNCTIONS to your existing lib.rs (alongside your other #[wasm_bindgen] functions)
+
+/// Create a PromiseGrid CBOR message for a document edit
+#[wasm_bindgen]
+pub fn create_promisegrid_edit_message(
+    document_id: &str,
+    edit_type: &str,
+    position: u32,
+    content: &str,
+    user_id: &str
+) -> Vec<u8> {
+    let timestamp = js_sys::Date::now();
+    
+    // Create edit data map
+    let mut data = HashMap::new();
+    data.insert("document_id".to_string(), serde_cbor::Value::Text(document_id.to_string()));
+    data.insert("edit_type".to_string(), serde_cbor::Value::Text(edit_type.to_string()));
+    data.insert("position".to_string(), serde_cbor::Value::Integer(position as i128));
+    data.insert("content".to_string(), serde_cbor::Value::Text(content.to_string()));
+    data.insert("timestamp".to_string(), serde_cbor::Value::Float(timestamp));
+    data.insert("user_id".to_string(), serde_cbor::Value::Text(user_id.to_string()));
+
+    let payload = MessagePayload {
+        message_type: "document_edit".to_string(),
+        data,
+    };
+
+    let message = PromiseGridMessage {
+        // Placeholder protocol hash - in real implementation this would be actual CID
+        protocol_hash: "QmPromiseGridProtocolV1".to_string(),
+        payload,
+    };
+
+    // Create CBOR with PromiseGrid tag (0x67726964 = 'grid')
+    encode_with_grid_tag(&message).unwrap_or_else(|_| Vec::new())
+}
+
+/// Create a PromiseGrid message for document statistics
+#[wasm_bindgen]
+pub fn create_promisegrid_stats_message(
+    document_id: &str,
+    word_count: u32,
+    char_count: u32,
+    line_count: u32,
+    user_id: &str
+) -> Vec<u8> {
+    let timestamp = js_sys::Date::now();
+    
+    let mut data = HashMap::new();
+    data.insert("document_id".to_string(), serde_cbor::Value::Text(document_id.to_string()));
+    data.insert("word_count".to_string(), serde_cbor::Value::Integer(word_count as i128));
+    data.insert("char_count".to_string(), serde_cbor::Value::Integer(char_count as i128));
+    data.insert("line_count".to_string(), serde_cbor::Value::Integer(line_count as i128));
+    data.insert("timestamp".to_string(), serde_cbor::Value::Float(timestamp));
+    data.insert("user_id".to_string(), serde_cbor::Value::Text(user_id.to_string()));
+
+    let payload = MessagePayload {
+        message_type: "document_stats".to_string(),
+        data,
+    };
+
+    let message = PromiseGridMessage {
+        protocol_hash: "QmPromiseGridProtocolV1".to_string(),
+        payload,
+    };
+
+    encode_with_grid_tag(&message).unwrap_or_else(|_| Vec::new())
+}
+
+/// Parse a PromiseGrid CBOR message and return JSON string
+#[wasm_bindgen]
+pub fn parse_promisegrid_message(cbor_bytes: &[u8]) -> String {
+    match decode_with_grid_tag(cbor_bytes) {
+        Ok(message) => {
+            match serde_json::to_string_pretty(&message) {
+                Ok(json) => json,
+                Err(_) => "Error: Could not serialize to JSON".to_string()
+            }
+        }
+        Err(_) => "Error: Invalid PromiseGrid CBOR message".to_string()
+    }
+}
+
+/// Log PromiseGrid message to browser console (for debugging)
+#[wasm_bindgen]
+pub fn log_promisegrid_message(cbor_bytes: &[u8]) {
+    let json = parse_promisegrid_message(cbor_bytes);
+    web_sys::console::log_1(&format!("📡 PromiseGrid Message: {}", json).into());
+}
+
+/// Export current document content as PromiseGrid CBOR message
+#[wasm_bindgen]
+pub fn export_document_as_promisegrid(
+    document_content: &str,
+    document_id: &str,
+    user_id: &str
+) -> Vec<u8> {
+    create_promisegrid_edit_message(
+        document_id,
+        "export",
+        0,
+        document_content,
+        user_id
+    )
+}
+
+// ADD THESE HELPER FUNCTIONS (internal, not exported to WASM)
+
+/// Encode PromiseGrid message with the official 'grid' CBOR tag
+fn encode_with_grid_tag(message: &PromiseGridMessage) -> Result<Vec<u8>, serde_cbor::Error> {
+    // First encode the message
+    let message_cbor = serde_cbor::to_vec(message)?;
+    
+    // Wrap with PromiseGrid tag (0x67726964 = ASCII 'grid')
+    let grid_tag = 0x67726964u32;
+    let tagged_value = serde_cbor::Value::Tag(
+        grid_tag as u64, 
+        Box::new(serde_cbor::from_slice::<serde_cbor::Value>(&message_cbor)?)
+    );
+    
+    serde_cbor::to_vec(&tagged_value)
+}
+
+/// Decode PromiseGrid message with tag validation
+fn decode_with_grid_tag(cbor_bytes: &[u8]) -> Result<PromiseGridMessage, Box<dyn std::error::Error>> {
+    let tagged_value: serde_cbor::Value = serde_cbor::from_slice(cbor_bytes)?;
+    
+    match tagged_value {
+        serde_cbor::Value::Tag(tag, boxed_value) => {
+            if tag == 0x67726964 {  // Verify 'grid' tag
+                let message_cbor = serde_cbor::to_vec(&*boxed_value)?;
+                let message: PromiseGridMessage = serde_cbor::from_slice(&message_cbor)?;
+                Ok(message)
+            } else {
+                Err(format!("Invalid PromiseGrid tag: expected 0x67726964, got 0x{:x}", tag).into())
+            }
+        }
+        _ => Err("Message is not tagged with PromiseGrid tag".into())
+    }
+}

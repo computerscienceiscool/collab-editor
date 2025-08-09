@@ -14,7 +14,7 @@ http://localhost:8080/?room=your-room-name
 
 This creates or joins a shared editing space named `your-room-name`.
 
-If no room is specified, a globally unique room name (GUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
+If no room is specified, a globally unique room name (UUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
 
 Example:
 ```
@@ -29,7 +29,7 @@ At the top of the screen, you'll see a toolbar with the following information:
 
 | UI Element              | Description |
 |-------------------------|-------------|
-| **Room**                | The name of the shared editing room (from the URL or generated as a GUID). |
+| **Room**                | The name of the shared editing room (from the URL or generated as a UUID). |
 | **User**                | Your display name in the session. |
 | **Users**               | Count of users currently in the session. |
 | **User List**           | Colored name tags of all participants. |
@@ -119,7 +119,7 @@ Rooms allow you to isolate workspaces. The room name is taken from the `room` qu
 **Examples:**
 - `/?room=math-101`
 - `/?room=demo-room`
-- `/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4` (GUID)
+- `/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4` (UUID)
 - If no room is specified, one will be generated for you.
 
 You can share your room URL with others so they can join and collaborate in the same document.
@@ -147,9 +147,51 @@ Click the **Save** button in the toolbar to export your work. Choose the format 
 | **.txt**               | Saves the plain text contents of the document. |
 | **.json**              | Saves the current CodeMirror editor state (can include styling info). |
 | **.cbor**             | Saves the document state in CBOR format. Useful for syncing or restoring later. |
+| **PromiseGrid CBOR**   | **NEW**: Saves document as authentic PromiseGrid protocol message with official 'grid' tag. |
 | **.ysnap**             | Binary format snapshot of the full Yjs document. Useful for restoring or syncing state later. |
 | **.json (Yjs Update)** | JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions. |
 | **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
+
+---
+
+## PromiseGrid Protocol Features
+
+This editor includes **real PromiseGrid protocol integration** for decentralized computing demonstration:
+
+### Live Message Generation
+Every formatting action automatically creates PromiseGrid CBOR messages:
+- **Bold/Italic/Underline** formatting generates protocol messages
+- **Document formatting** operations create PromiseGrid messages
+- **URL conversion** actions trigger message creation
+- All messages follow official PromiseGrid specification
+
+### Console Monitoring
+To see PromiseGrid messages in action:
+1. **Open browser developer console** (F12)
+2. **Perform any formatting action** (Bold, Format, etc.)
+3. **Watch console output** showing message creation:
+   ```
+   PromiseGrid CBOR message created: 193 bytes
+   PromiseGrid Message: { "protocol_hash": "QmPromiseGridProtocolV1", ... }
+   Created PromiseGrid message for bold edit
+   ```
+
+### PromiseGrid Export
+The **PromiseGrid CBOR** export option creates protocol-compliant files:
+- **Official 'grid' tag** (0x67726964) for authentic PromiseGrid messages
+- **Complete document content** packaged as PromiseGrid message
+- **User and session metadata** included in message structure
+- **CBOR encoding** for efficient storage and transmission
+
+### Protocol Testing
+Advanced users can test PromiseGrid functions directly in the browser console:
+```javascript
+// Create a test message
+window.createPromiseGridMessage("test-doc", "insert", 0, "Hello PromiseGrid!", "user");
+
+// Parse and display messages
+window.logPromiseGridMessage(messageBytes);
+```
 
 ---
 
@@ -183,12 +225,14 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 2. **Format entire documents**: Click Format button to clean up spacing and punctuation
 3. **Quick URL conversion**: Double-click URLs to select cleanly, then click Link button
 4. **Monitor your progress**: Watch live word count and reading time in toolbar
+5. **Check console output**: See PromiseGrid messages being generated in real-time
 
 ### Best Practices
 - **Select text precisely** for formatting - avoid selecting extra spaces or newlines
 - **Use Format button** before sharing documents for professional appearance  
 - **Share room URLs** with teammates for instant collaboration
 - **Check document stats** to track writing progress
+- **Export as PromiseGrid CBOR** to demonstrate decentralized computing capabilities
 
 ---
 
@@ -199,6 +243,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - To reset your name/color, just refresh and retype in the User Settings section.
 - **If formatting buttons don't work**: Check console for WASM errors, try refreshing the page.
 - **If stats don't update**: Make sure you're typing in the editor area.
+- **If PromiseGrid messages don't appear**: Ensure WASM module loaded successfully (check console on page load).
 
 ---
 
@@ -208,9 +253,11 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **CodeMirror 6** powers the rich text editing with undo/redo support.
 - **IndexedDB** is used for offline persistence.
 - **Rust WebAssembly (WASM)** powers all text processing features for near-native performance.
+- **PromiseGrid CBOR encoding** provides authentic decentralized computing protocol messaging.
 - The editor supports **live cursor awareness**, **room-based isolation**, and **multi-user document interaction** out of the box.
 - The backend may be powered by a **Rust** server instead of the default y-websocket server.
 - **All text processing happens client-side** - no server required for formatting operations.
+- **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
 
 ---
 
@@ -220,7 +267,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 http://localhost:8080/?room=demo-room
 ```
 
-or with auto-generated GUID:
+or with auto-generated UUID:
 
 ```text
 http://localhost:8080

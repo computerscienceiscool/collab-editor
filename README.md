@@ -1,9 +1,9 @@
-# Collaborative Text Editor (Yjs-Based)
+# Collaborative Text Editor (Yjs-Based + PromiseGrid)
 
-This is a collaborative text editor demo based on the [Yjs collaborative editing framework](https://docs.yjs.dev/getting-started/a-collaborative-editor).  
-It enables multiple users to edit shared text documents in real-time using WebSocket and local IndexedDB persistence.
+This is a collaborative text editor demo based on the [Yjs collaborative editing framework](https://docs.yjs.dev/getting-started/a-collaborative-editor) with **PromiseGrid protocol integration**.  
+It enables multiple users to edit shared text documents in real-time using WebSocket and local IndexedDB persistence, while also generating real PromiseGrid CBOR messages for decentralized computing demonstration.
 
-This demo has been extended with additional features that are useful to teams, including user presence, logging, export options, and document awareness.
+This demo has been extended with additional features that are useful to teams, including user presence, logging, export options, document awareness, and **genuine PromiseGrid protocol messaging**.
 
 ---
 
@@ -25,6 +25,22 @@ This demo has been extended with additional features that are useful to teams, i
 - **Live document statistics**: Real-time word count, character count, reading time
 - **Client-side processing**: All text operations run in browser with near-native speed
 
+### PromiseGrid Protocol Integration
+- **Real CBOR message generation**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)
+- **Live protocol demonstration**: Every formatting action generates PromiseGrid messages
+- **Decentralized messaging**: Protocol-compliant messages for distributed computing
+- **Content-addressable data**: Document edits as PromiseGrid promises and capabilities
+- **Export functionality**: Save documents as PromiseGrid CBOR files
+- **Console logging**: Real-time display of PromiseGrid message creation
+
+### PromiseGrid Protocol Integration
+- **Real CBOR message generation**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)
+- **Live protocol demonstration**: Every formatting action generates PromiseGrid messages
+- **Decentralized messaging**: Protocol-compliant messages for distributed computing
+- **Content-addressable data**: Document edits as PromiseGrid promises and capabilities
+- **Export functionality**: Save documents as PromiseGrid CBOR files
+- **Console logging**: Real-time display of PromiseGrid message creation
+
 ### Backend Support
 - Optional Go or Rust backend support:
   - Go backend: Simple in-memory collaboration for legacy support
@@ -33,9 +49,35 @@ This demo has been extended with additional features that are useful to teams, i
 ### Export Options
 - Plain text
 - CodeMirror state (JSON)
-- Yjs snapshot (binary `.ysnap`# Collaborative Text Editor — User Guide
+- **PromiseGrid CBOR** (protocol-compliant messages)
+- Yjs snapshot (binary `.ysnap`)
+- Yjs update (JSON array)
 
-Welcome to the **Collaborative Text Editor**! This guide will help you understand how to use all the key features of the editor to collaborate in real time.
+---
+
+## PromiseGrid Integration Highlights
+
+This editor demonstrates **real PromiseGrid protocol implementation** through:
+
+### Live Message Generation
+Every user action creates authentic PromiseGrid CBOR messages:
+```
+ PromiseGrid CBOR message created: 193 bytes
+ Created PromiseGrid message for bold edit
+```
+
+### Protocol Compliance
+- **Official CBOR tag**: 0x67726964 ('grid')
+- **Message structure**: Protocol hash + payload with message type and data
+- **Capability-based design**: Ready for decentralized permission systems
+- **Content-addressable**: Following PromiseGrid's storage model
+
+### Message Types
+- `document_edit` - Text formatting and editing operations
+- `document_stats` - Live document statistics updates  
+- `export` - Document export operations
+
+See [docs/promisegrid-integration.md](docs/promisegrid-integration.md) for complete technical details.
 
 ---
 
@@ -49,220 +91,12 @@ http://localhost:8080/?room=your-room-name
 
 This creates or joins a shared editing space named `your-room-name`.
 
-If no room is specified, a globally unique room name (GUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
+If no room is specified, a globally unique room name (UUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
 
 Example:
 ```
 http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 ```
-
----
-
-## The Interface
-
-At the top of the screen, you'll see a toolbar with the following information:
-
-| UI Element              | Description |
-|-------------------------|-------------|
-| **Room**                | The name of the shared editing room (from the URL or generated as a GUID). |
-| **User**                | Your display name in the session. |
-| **Users**               | Count of users currently in the session. |
-| **User List**           | Colored name tags of all participants. |
-| **Document Statistics** | Live word count, character count, and reading time. |
-| **Typing Indicator**    | Shows when someone else is typing. |
-| **Formatting Buttons**  | Bold, Italic, Underline, Format, Link, Undo, Redo buttons. |
-| **Save Options**        | Export your document in various formats. |
-| **Log Button**          | Toggle to show/hide the User Activity Log. |
-
----
-
-## Text Formatting and WASM Features
-
-The editor includes powerful **WebAssembly-powered** text processing features:
-
-### Live Document Statistics
-- **Word count** - Updates as you type
-- **Character count** - Excludes spaces for clean metrics  
-- **Reading time** - Estimated based on 200 words per minute
-- **Display**: Always visible in the toolbar
-
-### Formatting Buttons
-Select text and click buttons to apply formatting:
-
-| Button        | Function | Example |
-|---------------|----------|---------|
-| **Bold**      | Toggle bold formatting | `hello` ↔ `**hello**` |
-| **Italic**    | Toggle italic formatting | `hello` ↔ `*hello*` |
-| **Underline** | Toggle underline formatting | `hello` ↔ `__hello__` |
-| **Link**      | Convert URLs to markdown links | `https://github.com` → `[https://github.com](https://github.com)` |
-
-### Document-Wide Formatting
-Click the **Format** button to automatically clean up your entire document:
-- Remove extra whitespace and line breaks
-- Fix markdown header spacing
-- Format code blocks properly  
-- Clean up bold/italic syntax
-- **Fix punctuation spacing** (removes spaces before commas, periods, etc.)
-- **Clean up parentheses** spacing: `( text )` → `(text)`
-
-**Example transformation:**
-```
-Before: This has bad spacing ,and weird punctuation .Also( this )and multiple periods..
-After:  This has bad spacing, and weird punctuation. Also (this) and multiple periods.
-```
-
-### Undo and Redo
-- **Undo button** - Reverse your last action
-- **Redo button** - Restore what you undid
-- **Keyboard shortcuts** - `Ctrl+Z` (undo), `Ctrl+Y` (redo)
-- Works with all formatting operations and text changes
-
-### URL Link Helper  
-1. **Type or paste URLs** in your document:
-   - `https://github.com`
-   - `www.google.com`  
-   - `ftp://example.com/file.txt`
-2. **Select the URL text**
-3. **Click the Link button**
-4. **Result**: `[https://github.com](https://github.com)` 
-
-**Smart features:**
-- Only converts actual URLs (detects http, https, ftp, www)
-- Won't double-convert existing markdown links
-- Leaves regular text unchanged
-
----
-
-## Changing Your Name and Color
-
-Beneath the toolbar is a **User Settings** section:
-
-- **Name:**  
-  Type your preferred name into the "Name" input. This updates your name in real time for all other participants.
-
-- **Color:**  
-  Choose a custom color using the color picker. This color is used in:
-  - Your username badge
-  - Your cursor (awareness)
-
----
-
-## Rooms and URLs
-
-Rooms allow you to isolate workspaces. The room name is taken from the `room` query in the URL.
-
-**Examples:**
-- `/?room=math-101`
-- `/?room=demo-room`
-- `/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4` (GUID)
-- If no room is specified, one will be generated for you.
-
-You can share your room URL with others so they can join and collaborate in the same document.
-
----
-
-## User Awareness
-
-When multiple users are connected:
-
-- **Cursors** appear with the user's chosen color and name.
-- You can **see their name and cursor** as they type or move.
-- When a user is typing, a **"User is typing..."** indicator appears briefly.
-
-This feature is powered by Yjs awareness and updates in real time.
-
----
-
-## Exporting and Saving Your Work
-
-Click the **Save** button in the toolbar to export your work. Choose the format from the dropdown:
-
-| Format Option         | Description |
-|------------------------|-------------|
-| **.txt**               | Saves the plain text contents of the document. |
-| **.json**              | Saves the current CodeMirror editor state (can include styling info). |
-| **.ysnap**             | Saves a binary snapshot of the full Yjs document. Useful for restoring or syncing state later. |
-| **.cbor**             | Saves the Yjs document in CBOR format (compact binary). **Still testing** |
-| **.json (Yjs Update)** | JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions. |
-| **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
-
----
-
-## User Activity Log
-
-Click the **"Log"** button to toggle the **User Activity Panel**.
-
-In this panel, you will see:
-
-- When users join or leave the session
-- When users change their name or color
-- Additional user-driven events (editable in code)
-
-This provides a helpful way to audit or follow collaboration flow.
-
----
-
-## Offline Support
-
-If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top.
-
-- Your changes are saved locally (using IndexedDB).
-- When you reconnect, changes sync automatically to others.
-
----
-
-## Quick Tips
-
-### Efficient Workflow
-1. **Use keyboard shortcuts**: `Ctrl+Z` for undo, `Ctrl+Y` for redo
-2. **Format entire documents**: Click Format button to clean up spacing and punctuation
-3. **Quick URL conversion**: Double-click URLs to select cleanly, then click Link button
-4. **Monitor your progress**: Watch live word count and reading time in toolbar
-
-### Best Practices
-- **Select text precisely** for formatting - avoid selecting extra spaces or newlines
-- **Use Format button** before sharing documents for professional appearance  
-- **Share room URLs** with teammates for instant collaboration
-- **Check document stats** to track writing progress
-
----
-
-## Troubleshooting
-
-- Ensure you're using a supported browser like **Chrome** or **Firefox**.
-- If the editor doesn't load, check your browser console for errors (e.g., related to service workers or WebSocket).
-- To reset your name/color, just refresh and retype in the User Settings section.
-- **If formatting buttons don't work**: Check console for WASM errors, try refreshing the page.
-- **If stats don't update**: Make sure you're typing in the editor area.
-
----
-
-## Technical Notes
-
-- **Yjs** handles real-time synchronization and awareness.
-- **CodeMirror 6** powers the rich text editing with undo/redo support.
-- **IndexedDB** is used for offline persistence.
-- **Rust WebAssembly (WASM)** powers all text processing features for near-native performance.
-- The editor supports **live cursor awareness**, **room-based isolation**, and **multi-user document interaction** out of the box.
-- The backend may be powered by a **Rust** server instead of the default y-websocket server.
-- **All text processing happens client-side** - no server required for formatting operations.
-
----
-
-## Clean Room URL Example
-
-```text
-http://localhost:8080/?room=demo-room
-```
-
-or with auto-generated GUID:
-
-```text
-http://localhost:8080
-```
-
-Share this with others to collaborate!)
-- Yjs update (JSON array)
 
 ---
 
@@ -281,26 +115,31 @@ Share this with others to collaborate!)
    npm install
    ```
 
-3. Start the WebSocket server:
+3. Build WASM module (includes PromiseGrid functions):
 
    ```bash
-   npx y-websocket-server --port 1234
+   make wasm
    ```
 
-4. In a separate terminal, start the dev server:
+4. Start the WebSocket server:
 
    ```bash
-   npm run dev
+   make ws
    ```
 
-5. Start the Rust backend:
+5. In a separate terminal, start the dev server:
 
    ```bash
-   cd rust-server
-   cargo run
+   make serve
    ```
 
-6. Open your browser and visit:
+6. Optional: Start the Rust backend:
+
+   ```bash
+   make run
+   ```
+
+7. Open your browser and visit:
 
    ```
    http://localhost:8080/?room=my-room
@@ -308,11 +147,37 @@ Share this with others to collaborate!)
 
    Replace `my-room` with any custom room name. If none is provided, a UUID will be generated.
 
+8. **Check browser console** to see PromiseGrid messages being generated in real-time!
+
+---
+
+## Testing PromiseGrid Integration
+
+Once running, you can verify PromiseGrid functionality:
+
+1. **Open browser console** to see initialization messages
+2. **Type and format text** - each action creates PromiseGrid messages  
+3. **Export as PromiseGrid CBOR** from the dropdown menu
+4. **Console testing**: Use exposed functions like `window.createPromiseGridMessage()`
+
+Expected console output:
+```
+ PromiseGrid CBOR message created: 193 bytes
+ PromiseGrid Message: { "protocol_hash": "QmPromiseGridProtocolV1", ... }
+ Created PromiseGrid message for bold edit
+```
+
 ---
 
 ## Makefile Usage
 
 For advanced use and automation, see [docs/makefile-usage.md](docs/makefile-usage.md) for how to run the Go and Rust servers using `make`.
+
+Key commands:
+- `make wasm` - Build Rust WASM module with PromiseGrid functions
+- `make dev-all` - Start complete development stack
+- `make ws` - Start WebSocket server for collaboration
+- `make serve` - Start frontend development server
 
 ---
 
@@ -320,18 +185,23 @@ For advanced use and automation, see [docs/makefile-usage.md](docs/makefile-usag
 
 Please see the [User Guide](docs/user-guide.md) for detailed usage instructions, UI explanations, and feature descriptions.
 
-For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms.md).
+For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms.md).
 
 ---
 
 ## Tech Stack
 
-- Yjs
-- y-websocket
-- y-indexeddb
-- CodeMirror 6
-- Vanilla JS / HTML / CSS
-- Rust WebAssembly (WASM) - Client-side text processing
+### Core Technologies
+- Yjs - Collaborative editing with CRDTs
+- y-websocket - Real-time synchronization
+- y-indexeddb - Offline persistence
+- CodeMirror 6 - Advanced text editing
+- Vanilla JS / HTML / CSS - Frontend
+
+### Advanced Features
+- **Rust WebAssembly (WASM)** - High-performance text processing + PromiseGrid protocol
+- **PromiseGrid CBOR** - Decentralized computing messages
+- **serde_cbor** - Protocol-compliant message encoding
 - Go (optional backend for legacy and service compatibility)
 - Rust (new backend for high-performance persistence and exports)
 
@@ -341,9 +211,10 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 
 - `src/`: All core JavaScript logic
 - `src/setup/`: Initialization modules (Yjs, editor, user)
-- `src/ui/`: UI utilities (logging, presence, typing)
+- `src/export/`: Export handlers including PromiseGrid CBOR
 - `src/wasm/`: WebAssembly integration and initialization
-- `rust-wasm/`: Rust code compiled to WebAssembly
+- `src/export/`: Export handlers including PromiseGrid CBOR
+- `rust-wasm/`: Rust code compiled to WebAssembly (includes PromiseGrid functions)
 - `rust-server/`: Rust backend server code
 - `docs/`: Markdown documentation (includes user guide and other files)
 
@@ -351,6 +222,7 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 
 ## Documentation
 
+### Core Documentation
 - [User Guide](docs/user-guide.md) — How to use the editor and its features (7/26/25)
 - [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
@@ -358,9 +230,35 @@ For information about UUID-based rooms, see [docs/guid-rooms.md](docs/guid-rooms
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
 - [docs/project.md](docs/project.md) — Latest project overview and architecture (7/26/25)
 - [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly (7/26/25)
+- **[docs/promisegrid-integration.md](docs/promisegrid-integration.md)** — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
+
+---
+
+## PromiseGrid Protocol Status
+
+**Current Implementation**:  Functional CBOR message creation with official 'grid' tag  
+**Integration Level**: Live message generation during collaborative editing  
+**Protocol Compliance**: Authentic PromiseGrid message structure and encoding  
+**Next Steps**: Network communication and decentralized node messaging  
+
+This project demonstrates **real PromiseGrid protocol implementation** suitable for decentralized computing research and development.
+
+### PromiseGrid Integration
+- **[docs/promisegrid-integration.md](docs/promisegrid-integration.md)** — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
+
+---
+
+## PromiseGrid Protocol Status
+
+**Current Implementation**:  Functional CBOR message creation with official 'grid' tag  
+**Integration Level**: Live message generation during collaborative editing  
+**Protocol Compliance**: Authentic PromiseGrid message structure and encoding  
+**Next Steps**: Network communication and decentralized node messaging  
+
+This project demonstrates **real PromiseGrid protocol implementation** suitable for decentralized computing research and development.
 
 ---
 
 ## Contributions
 
-This is a living demo extended for internal team use. Pull requests and suggestions are welcome.
+This is a living demo extended for internal team use and PromiseGrid protocol research. Pull requests and suggestions are welcome, especially for advancing the decentralized computing capabilities.

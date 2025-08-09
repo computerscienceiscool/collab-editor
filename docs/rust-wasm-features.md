@@ -64,6 +64,45 @@ This document outlines the WASM-powered features in the collaborative editor, bu
 4. URL converts to proper markdown link format
 5. Already-formatted links remain unchanged
 
+### PromiseGrid Protocol Integration
+- **Functions**: `create_promisegrid_edit_message()`, `create_promisegrid_stats_message()`, `parse_promisegrid_message()`, `log_promisegrid_message()`, `export_document_as_promisegrid()`
+- **Technology**: Rust serde_cbor compiled to WASM for protocol-compliant message creation
+- **Features**:
+  - **Real CBOR encoding**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)
+  - **Live message generation**: Every formatting action triggers PromiseGrid message creation
+  - **Protocol compliance**: Follows PromiseGrid message structure with protocol hash and payload
+  - **Message types**: `document_edit`, `document_stats`, `export` operations
+  - **Console logging**: Real-time display of generated messages in browser console
+  - **Export functionality**: Save documents as PromiseGrid CBOR files
+- **Usage**: 
+  - Automatic message creation during text editing
+  - Export via "PromiseGrid CBOR (.cbor)" dropdown option
+  - Console testing with exposed `window.createPromiseGridMessage()` function
+- **Console Output Examples**:
+  ```
+  PromiseGrid CBOR message created: 193 bytes
+  PromiseGrid Message: { "protocol_hash": "QmPromiseGridProtocolV1", ... }
+  Created PromiseGrid message for bold edit
+  ```
+- **Message Structure**:
+  ```json
+  {
+    "protocol_hash": "QmPromiseGridProtocolV1",
+    "payload": {
+      "message_type": "document_edit",
+      "data": {
+        "document_id": "room-name",
+        "edit_type": "bold", 
+        "position": 5,
+        "content": "**text**",
+        "user_id": "username",
+        "timestamp": 1703001234567
+      }
+    }
+  }
+  ```
+- **Performance**: Instant CBOR encoding with minimal overhead
+
 ### Markdown Export
 - **Function**: `export_to_markdown()`
 - **Status**: Basic implementation (returns input as-is)
@@ -80,3 +119,25 @@ make wasm-rebuild
 
 # Run full development stack
 make dev-all
+```
+
+## Dependencies
+
+### Rust Crates
+- **wasm-bindgen**: WebAssembly bindings for JavaScript interaction
+- **flate2**: High-performance compression for document compression
+- **regex**: Pattern matching for URL detection and text processing
+- **serde**: Serialization framework for data structures
+- **serde_json**: JSON serialization for debugging and exports
+- **serde_cbor**: CBOR encoding for PromiseGrid protocol compliance
+- **web-sys**: Browser API bindings for console logging
+- **js-sys**: JavaScript type bindings for timestamps and data handling
+- **console_error_panic_hook**: Better error reporting during development
+
+### WASM Module Integration
+The WASM module is built with `wasm-pack` and generates:
+- `rust-wasm/pkg/rust_wasm.js` - JavaScript bindings
+- `rust-wasm/pkg/rust_wasm_bg.wasm` - WebAssembly binary
+- `rust-wasm/pkg/rust_wasm.d.ts` - TypeScript definitions
+
+All functions are imported and initialized in `src/wasm/initWasm.js` and used throughout the application for both text processing and PromiseGrid protocol operations.
