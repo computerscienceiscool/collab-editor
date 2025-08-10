@@ -1,5 +1,6 @@
 // File: src/export/handlers.js
-
+import { Decoration, ViewPlugin } from '@codemirror/view';
+import { search_document } from '../wasm/initWasm.js';
 import * as Y from 'yjs';
 import { encode, decode } from 'cbor-x'; 
 import {
@@ -11,7 +12,6 @@ import {
   toggle_heading,
   toggle_list,
   convert_url_to_markdown,
-  // NEW: Import PromiseGrid functions
   promiseGrid,
   getCurrentSessionInfo
 } from '../wasm/initWasm.js';
@@ -375,12 +375,6 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-
-
-// Import search function at the top of your file
-import { search_document } from '../wasm/initWasm.js';
-
-// Add these functions
 function handleSearch(view) {
   const searchInput = document.querySelector('#search-input');
   const query = searchInput.value.trim();
@@ -390,19 +384,29 @@ function handleSearch(view) {
     return;
   }
   
-  const content = view.state.doc.toString();
-  const results = search_document(content, query, false);
+  // Show that we're searching
+  searchInput.disabled = true;
   
-  console.log('Search results:', results);
-  
-  // Parse results and highlight matches
-  try {
-    const matches = JSON.parse(results);
-    highlightMatches(view, matches);
-  } catch (e) {
-    console.error('Error parsing search results:', e);
-  }
+  // Use setTimeout to prevent blocking the UI
+  setTimeout(() => {
+    try {
+      const content = view.state.doc.toString();
+      const results = search_document(content, query, false);
+      
+      console.log('Search results:', results);
+      
+      const matches = JSON.parse(results);
+      highlightMatches(view, matches);
+      
+    } catch (e) {
+      console.error('Error parsing search results:', e);
+      alert('Search error: ' + e.message);
+    } finally {
+      searchInput.disabled = false;
+    }
+  }, 10);
 }
+
 
 function handleClearSearch(view) {
   const searchInput = document.querySelector('#search-input');
@@ -411,13 +415,43 @@ function handleClearSearch(view) {
   console.log('Search cleared');
 }
 
+
+
+
+
+const searchHighlight = Decoration.mark({
+  class: 'search-highlight',
+  attributes: { style: 'background-color: yellow; color: black;' }
+});
+
+let currentSearchDecorations = Decoration.set([]); 
+
 function highlightMatches(view, matches) {
-  // For now, just log the matches
-  // Later we can add actual highlighting
   console.log('Found', matches.length, 'matches:', matches);
+  
+  if (matches.length === 0) {
+    alert('No matches found');
+    return;
+  }
+  
+  // Just scroll to and select the first match
+  const firstMatch = matches[0];
+  view.dispatch({
+    selection: { anchor: firstMatch.start, head: firstMatch.end },
+    scrollIntoView: true
+  });
+  
+  // Show user how many matches were found
+  alert(`Found ${matches.length} matches. First match selected.`);
 }
 
+
 function clearHighlights(view) {
-  // Clear any highlighting
-  console.log('Highlights cleared');
+  // Clear selection
+  const currentPos = view.state.selection.main.head;
+  view.dispatch({
+    selection: { anchor: currentPos, head: currentPos }
+  });
+  console.log('Search cleared');
 }
+
