@@ -3,6 +3,9 @@ SHELL := /bin/bash
 BACKEND_PORT=3000  # for Rust or Go backend
 PORT=8080 # for frontend
 WS_PORT=1234  # for Yjs websocket server
+# Define the branch too use the branch already in use by the machine
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
 
 default: help
 
@@ -115,6 +118,15 @@ dev-all:
 	@sleep 3
 	@make open-room
 
-
+# git add .
 #  grok commit | git commit -F -
+# git push
+commit: 
+	# Add any files tracked files that have been modified
+	git add -u
+	# fail if any files are untracked
+#	test "$$(git status --porcelain|grep '??' |wc -l)" -le 0
+	grok commit | git commit -F-
+	git push origin $(branch)
+
 
