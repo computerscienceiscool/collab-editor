@@ -42,6 +42,65 @@ This document outlines the WASM-powered features in the collaborative editor, bu
 - **Usage**: Live updates in toolbar as you type
 - **Performance**: Near-instantaneous calculation for large documents
 
+## Document Search
+
+The editor includes a powerful **client-side search feature** powered by Rust WebAssembly for fast text processing.
+
+### How to Search
+
+1. **Locate the search box** in the toolbar (next to document statistics)
+2. **Type your search term** in the "Search document..." input field
+3. **Press Enter** or **click the Search button**
+4. **View results**: The editor will jump to the first match and show a count of total matches
+
+### Search Features
+
+- **Fast performance**: Searches large documents instantly using WASM
+- **Case-insensitive**: Searches ignore capitalization by default
+- **Multiple matches**: Finds all occurrences in the document
+- **Jump to match**: Automatically scrolls to and selects the first result
+- **Match counting**: Shows total number of matches found
+
+### Search Controls
+
+| Control | Action |
+|---------|--------|
+| **Search box** | Type your search term here |
+| **Enter key** | Execute search (same as clicking Search button) |
+| **Search button** | Find matches and jump to first result |
+| **Clear button** | Clear search term and remove selection |
+
+### Using Search Effectively
+
+1. **Type specific terms** for better results (e.g., "constitution" vs "the")
+2. **Use the Clear button** to remove search highlighting and return to normal editing
+3. **Search works on the current document** - all collaborators can search independently
+4. **No network required** - search happens entirely in your browser
+
+### Search Results
+
+When you search, you'll see:
+- **Alert popup** showing "Found X matches. First match selected."
+- **Text selection** highlighting the first match
+- **Automatic scrolling** to bring the match into view
+- **Console logging** showing all match positions (for debugging)
+
+### Example Workflow
+
+1. Open a document with substantial text
+2. Type "equal" in the search box
+3. Press Enter
+4. See "Found 6 matches. First match selected." 
+5. The word "equal" will be highlighted and visible on screen
+6. Click Clear to return to normal editing
+
+### Performance Notes
+
+- **Large documents**: Search works efficiently on documents with 25,000+ characters
+- **Real-time results**: Instant search response with WASM performance
+- **Memory efficient**: No document indexing required
+
+
 ### URL Link Helper
 - **Function**: `convert_url_to_markdown()`
 - **Technology**: Rust string processing and pattern matching compiled to WASM

@@ -24,6 +24,7 @@ This demo has been extended with additional features that are useful to teams, i
 - **Markdown formatting buttons**: Bold, italic, underline with smart toggle
 - **Live document statistics**: Real-time word count, character count, reading time
 - **Client-side processing**: All text operations run in browser with near-native speed
+- **Search**: Search functionality that highlights matches in the document
 
 ### PromiseGrid Protocol Integration
 - **Real CBOR message generation**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)

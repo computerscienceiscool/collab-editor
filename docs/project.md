@@ -124,6 +124,21 @@ make restart           # Kill stuck processes on development ports
 
 All text processing happens client-side using Rust compiled to WebAssembly:
 
+### Document Search
+- `search_document()` - Client-side full-text search with JSON results
+- Smart case-insensitive matching with configurable sensitivity
+- Returns match positions for UI integration and highlighting
+- Optimized for large documents with instant response times
+
+## Enhanced WASM Text Processing Features
+
+### Document Search (`search_document`)
+- Real-time full-text search with pattern matching
+- JSON array output with start/end positions for each match
+- Case-sensitive and case-insensitive search modes
+- Efficient string processing for documents up to 25,000+ characters
+- Browser-native performance with no server dependencies
+
 ### Document Statistics (`calculate_document_stats`)
 - Real-time word count, character count, line count
 - Reading time estimation (200 words/minute)
@@ -140,6 +155,7 @@ All text processing happens client-side using Rust compiled to WebAssembly:
 - `toggle_bold()` - Smart **bold** formatting toggle
 - `toggle_italic()` - Smart *italic* formatting toggle  
 - `toggle_underline()` - Smart __underline__ formatting toggle
+
 
 ### URL Processing (`convert_url_to_markdown`)
 - Convert plain URLs to markdown link format
