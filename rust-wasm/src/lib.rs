@@ -400,22 +400,28 @@ pub fn create_promisegrid_stats_message(
 /// Parse a PromiseGrid CBOR message and return JSON string
 #[wasm_bindgen]
 pub fn parse_promisegrid_message(cbor_bytes: &[u8]) -> String {
+    // Add detailed error reporting
+    web_sys::console::log_1(&format!("Parsing {} bytes", cbor_bytes.len()).into());
+    
     match decode_with_grid_tag(cbor_bytes) {
         Ok(message) => {
             match serde_json::to_string_pretty(&message) {
                 Ok(json) => json,
-                Err(_) => "Error: Could not serialize to JSON".to_string()
+                Err(e) => format!("JSON serialization error: {}", e)
             }
         }
-        Err(_) => "Error: Invalid PromiseGrid CBOR message".to_string()
+        Err(e) => format!("CBOR parsing error: {}", e)
     }
 }
+
+
+
 
 /// Log PromiseGrid message to browser console (for debugging)
 #[wasm_bindgen]
 pub fn log_promisegrid_message(cbor_bytes: &[u8]) {
     let json = parse_promisegrid_message(cbor_bytes);
-    web_sys::console::log_1(&format!("📡 PromiseGrid Message: {}", json).into());
+    web_sys::console::log_1(&format!("PromiseGrid Message: {}", json).into());
 }
 
 /// Export current document content as PromiseGrid CBOR message
@@ -435,36 +441,66 @@ pub fn export_document_as_promisegrid(
 }
 
 // ADD THESE HELPER FUNCTIONS (internal, not exported to WASM)
-
 /// Encode PromiseGrid message with the official 'grid' CBOR tag
+/// (0x67726964)
 fn encode_with_grid_tag(message: &PromiseGridMessage) -> Result<Vec<u8>, serde_cbor::Error> {
-    // First encode the message
-    let message_cbor = serde_cbor::to_vec(message)?;
+    // First encode the message normally
+    let untagged_bytes = serde_cbor::to_vec(message)?;
     
-    // Wrap with PromiseGrid tag (0x67726964 = ASCII 'grid')
-    let grid_tag = 0x67726964u32;
-    let tagged_value = serde_cbor::Value::Tag(
-        grid_tag as u64, 
-        Box::new(serde_cbor::from_slice::<serde_cbor::Value>(&message_cbor)?)
-    );
+    // Manually add CBOR tag bytes at the beginning
+    // CBOR tag format: major type 6 (0xC0 + tag encoding)
+    let grid_tag = 0x67726964u64; // 'grid' in hex
     
-    serde_cbor::to_vec(&tagged_value)
+    let mut tagged_bytes = Vec::new();
+    
+    // Add CBOR tag header for large positive integer
+    // Tag 0x67726964 requires 5 bytes: 0xDA + 4 bytes for the tag value
+    tagged_bytes.push(0xDA); // Major type 6, additional info 26 (4-byte tag)
+    tagged_bytes.extend_from_slice(&grid_tag.to_be_bytes()[4..8]); // Last 4 bytes of tag
+    
+    // Add the original message bytes
+    tagged_bytes.extend_from_slice(&untagged_bytes);
+    
+    web_sys::console::log_1(&format!("Added CBOR tag manually").into());
+    
+    Ok(tagged_bytes)
 }
-
 /// Decode PromiseGrid message with tag validation
 fn decode_with_grid_tag(cbor_bytes: &[u8]) -> Result<PromiseGridMessage, Box<dyn std::error::Error>> {
+    // Check if it starts with our manual tag
+    if cbor_bytes.len() >= 5 && cbor_bytes[0] == 0xDA {
+        let tag_bytes = &cbor_bytes[1..5];
+        if tag_bytes == [103, 114, 105, 100] { // "grid"
+            web_sys::console::log_1(&"Found manual PromiseGrid tag!".into());
+            // Parse the rest as the message
+            let message: PromiseGridMessage = serde_cbor::from_slice(&cbor_bytes[5..])?;
+            return Ok(message);
+        }
+    }
+    
+    // Fallback to old parsing
     let tagged_value: serde_cbor::Value = serde_cbor::from_slice(cbor_bytes)?;
     
     match tagged_value {
         serde_cbor::Value::Tag(tag, boxed_value) => {
-            if tag == 0x67726964 {  // Verify 'grid' tag
+            web_sys::console::log_1(&format!("Found tag: {}", tag).into());
+            if tag == 0x67726964 {
                 let message_cbor = serde_cbor::to_vec(&*boxed_value)?;
                 let message: PromiseGridMessage = serde_cbor::from_slice(&message_cbor)?;
                 Ok(message)
             } else {
-                Err(format!("Invalid PromiseGrid tag: expected 0x67726964, got 0x{:x}", tag).into())
+                Err(format!("Invalid tag: expected 0x67726964, got 0x{:x}", tag).into())
             }
         }
-        _ => Err("Message is not tagged with PromiseGrid tag".into())
+        serde_cbor::Value::Map(_) => {
+            web_sys::console::log_1(&"Parsing untagged message".into());
+            let message: PromiseGridMessage = serde_cbor::from_slice(cbor_bytes)?;
+            Ok(message)
+        }
+        _ => {
+            Err("Message is not tagged with PromiseGrid tag".into())
+        }
     }
 }
+
+
