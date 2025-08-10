@@ -4,6 +4,9 @@ use flate2::Compression;
 use flate2::write::{GzEncoder, GzDecoder};
 use std::io::prelude::*;
 // use regex::Regex;
+use serde_json;
+
+
 
 #[wasm_bindgen]
 pub fn export_to_markdown(raw: &str) -> String {
@@ -439,6 +442,32 @@ pub fn export_document_as_promisegrid(
         user_id
     )
 }
+
+#[wasm_bindgen]
+pub fn search_document(content: &str, query: &str, case_sensitive: bool) -> String {
+    if query.is_empty() {
+        return "[]".to_string();
+    }
+    
+    let search_content = if case_sensitive { content.to_string() } else { content.to_lowercase() };
+    let search_query = if case_sensitive { query.to_string() } else { query.to_lowercase() };
+    
+    let mut matches = Vec::new();
+    let mut start = 0;
+    
+    while let Some(pos) = search_content[start..].find(&search_query) {
+        let absolute_pos = start + pos;
+        matches.push(format!("{{\"start\":{},\"end\":{},\"text\":\"{}\"}}", 
+            absolute_pos, 
+            absolute_pos + query.len(), 
+            &content[absolute_pos..absolute_pos + query.len()]));
+        start = absolute_pos + 1;
+    }
+    
+    format!("[{}]", matches.join(","))
+}
+
+
 
 // ADD THESE HELPER FUNCTIONS (internal, not exported to WASM)
 /// Encode PromiseGrid message with the official 'grid' CBOR tag

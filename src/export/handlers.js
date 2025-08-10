@@ -38,6 +38,31 @@ export function setupExportHandlers(ydoc, ytext, view) {
   const strikeButton = document.querySelector('#strike-button');
   const headingButton = document.querySelector('#heading-button');
   const listButton = document.querySelector('#list-button');
+  // Add these lines in your setupExportHandlers function
+  const searchButton = document.querySelector('#search-button');
+  const clearSearchButton = document.querySelector('#clear-search');
+  const searchInput = document.querySelector('#search-input');
+
+  if (searchButton && searchInput) {
+    searchButton.onclick = () => {
+      handleSearch(view);
+    };
+  }
+
+  if (clearSearchButton) {
+    clearSearchButton.onclick = () => {
+      handleClearSearch(view);
+    };
+  }
+
+  // Allow Enter key in search input
+  if (searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSearch(view);
+      }
+    });
+  }
   
 
   if (!saveButton || !formatSelect) return;
@@ -348,4 +373,51 @@ function downloadBlob(blob, filename) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+
+
+// Import search function at the top of your file
+import { search_document } from '../wasm/initWasm.js';
+
+// Add these functions
+function handleSearch(view) {
+  const searchInput = document.querySelector('#search-input');
+  const query = searchInput.value.trim();
+  
+  if (!query) {
+    console.log('No search query entered');
+    return;
+  }
+  
+  const content = view.state.doc.toString();
+  const results = search_document(content, query, false);
+  
+  console.log('Search results:', results);
+  
+  // Parse results and highlight matches
+  try {
+    const matches = JSON.parse(results);
+    highlightMatches(view, matches);
+  } catch (e) {
+    console.error('Error parsing search results:', e);
+  }
+}
+
+function handleClearSearch(view) {
+  const searchInput = document.querySelector('#search-input');
+  searchInput.value = '';
+  clearHighlights(view);
+  console.log('Search cleared');
+}
+
+function highlightMatches(view, matches) {
+  // For now, just log the matches
+  // Later we can add actual highlighting
+  console.log('Found', matches.length, 'matches:', matches);
+}
+
+function clearHighlights(view) {
+  // Clear any highlighting
+  console.log('Highlights cleared');
 }

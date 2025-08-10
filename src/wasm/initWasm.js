@@ -18,7 +18,8 @@ import init, {
   create_promisegrid_stats_message,
   parse_promisegrid_message,
   log_promisegrid_message,
-  export_document_as_promisegrid
+  export_document_as_promisegrid,
+  search_document
 } from '../../rust-wasm/pkg/rust_wasm.js';
 
 export async function initWasm() {
@@ -55,7 +56,12 @@ export async function initWasm() {
   } catch (error) {
     console.log(" PromiseGrid test failed:", error);
   }
+  console.log("WASM SEARCH TEST:");
+  const testText = "The quick brown fox jumps over the lazy dog. The fox is quick.";
+  const searchResults = search_document(testText, "fox", false);
+  console.log(" Search results for 'fox':", searchResults);
 }
+
 
 // Export the format function for use in other modules
 // TEMP: expose for console testing
@@ -71,7 +77,7 @@ window.convert_url_to_markdown = convert_url_to_markdown;
 window.createPromiseGridMessage = create_promisegrid_edit_message;
 window.parsePromiseGridMessage = parse_promisegrid_message;
 window.logPromiseGridMessage = log_promisegrid_message;
-
+window.searchDocument = search_document;
 
 export {
   format_text,
@@ -82,10 +88,11 @@ export {
   toggle_heading,
   toggle_list,
   calculate_document_stats,
-  convert_url_to_markdown
+  convert_url_to_markdown,
+  search_document
 };
 
-// NEW: Export PromiseGrid functions
+// Export PromiseGrid functions
 export const promiseGrid = {
     createEditMessage: create_promisegrid_edit_message,
     createStatsMessage: create_promisegrid_stats_message,
