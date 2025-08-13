@@ -1,139 +1,677 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/style.css" />
   <title>Collaborative Text Editor</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #toolbar {
-      background: #f0f0f0;
-      padding: 0.5em 1em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      height: 40px;
       box-sizing: border-box;
     }
 
-    #editor {
-      flex: 1;
-      background: #eee;
-      border: 1px solid red;
-      margin: 10px;
-      overflow: auto;
-      will-change: scroll-position;
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: #f8f9fa;
     }
 
-    #user-list {
+    /* Menu Bar */
+    .menu-bar {
+      background: white;
+      border-bottom: 1px solid #dadce0;
+      padding: 8px 16px;
       display: flex;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .document-title {
+      font-size: 18px;
+      font-weight: 400;
+      color: #202124;
+      margin-right: 24px;
+      padding: 6px 8px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      min-width: 200px;
+    }
+
+    .menu-items {
+      display: flex;
+      gap: 0;
+    }
+
+    .menu-item {
+      position: relative;
+    }
+
+    .menu-button {
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #3c4043;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .menu-button:hover {
+      background: #f1f3f4;
+    }
+
+    .menu-button.active {
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+
+    /* Hide dropdown menus by default */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      min-width: 240px;
+      padding: 8px 0;
+      display: none;
+      z-index: 1001;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #3c4043;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background: #f1f3f4;
+    }
+
+    .keyboard-shortcut {
+      margin-left: auto;
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: white;
+      border-bottom: 1px solid #dadce0;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
-    .search-highlight {
-      background-color: yellow !important;
-      color: black !important;
-      border-radius: 2px;
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
+    .toolbar-button {
+      background: none;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-size: 14px;
+      color: #3c4043;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toolbar-button:hover {
+      background: #f1f3f4;
+      border-color: #5f6368;
+    }
+
+    .search-box {
+      padding: 6px 8px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+      min-width: 200px;
+    }
+
+    /* User Settings */
+    .user-settings {
+      background: white;
+      padding: 8px 16px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+    }
+
+    .user-settings input[type="text"] {
+      padding: 4px 8px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .user-settings input[type="color"] {
+      width: 32px;
+      height: 24px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      background: #f8f9fa;
+      border-top: 1px solid #dadce0;
+      padding: 4px 16px;
+      font-size: 12px;
+      color: #5f6368;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Editor */
+    #editor {
+      flex: 1;
+      background: white;
+      margin: 0;
+      overflow: auto;
+      border: none;
+    }
+
+    .cm-editor {
+      height: 100%;
+    }
+
+    .cm-content {
+      padding: 24px 96px;
+      min-height: 100%;
+      max-width: 816px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Offline Banner */
+    .offline-banner {
+      background: #fdd835;
+      color: #000;
+      text-align: center;
+      padding: 8px;
+      font-weight: 500;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 2000;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* User indicators */
     .user {
       padding: 2px 6px;
       border-radius: 4px;
       color: #000;
+      margin-right: 4px;
+    }
+
+    .search-highlight {
+      background-color: #fff176 !important;
+      color: #000 !important;
+      border-radius: 2px;
     }
   </style>
 </head>
 <body>
-  <div id="toolbar">
-    <div>Room: <span id="room-name">?</span></div>
-    <div>User: <span id="local-username">?</span></div>
-    <div id="user-count">Users: 0</div>
-    <div id="user-list"></div>
-    <div id="document-stats" style="font-size: 12px; color: #666; margin-left: 15px;">
-        <span id="word-count">0 words</span> • 
-        <span id="char-count">0 chars</span> • 
-        <span id="reading-time">1 min read</span>
-    </div>
-    <input type="text" id="search-input" placeholder="Search document..." style="margin-left: 10px; padding: 4px;">
-    <button id="search-button">Search</button>
-    <button id="clear-search">Clear</button>
-    <div id="typing-indicator" style="font-style: italic; margin-top: 5px;"></div>
-    <div style="margin-top: 10px;">
-      <select id="save-format">
-        <option value="txt">Export as .txt</option>
-        <option value="json">Export Codemirror State</option>
-        <option value="cbor">Save as .cbor</option>
-        <option value="promisegrid">PromiseGrid CBOR (.cbor)</option>
-        <option value="ysnap">Export Yjs Snapshot (.ysnap binary)</option>
-        <option value="yjs">Export Yjs Update (.json array)</option>
-      </select>
-      <button id="save-button">Save</button>
-      <button id="format-button">Format</button>    
-      <button id="bold-button">Bold</button>
-      <button id="italic-button">Italic</button>
-      <button id="underline-button">Underline</button>
-      <button id="link-button">Link</button>
-      <button id="strike-button">Strike</button>
-      <button id="heading1-button">H1</button>
-      <button id="heading2-button">H2</button>
-      <button id="heading3-button">H3</button>
-      <button id="bullet-button">• List</button>
-      <button id="numbered-button">1. List</button>
-      <button id="undo-button">Undo</button>
-      <button id="redo-button">Redo</button>:
-      <button id="toggle-log">Log</button>
-    </div>
-  </div>`
-
-  <div id="user-settings" style="margin: 10px;">
-    <label for="name-input">Name:</label>
-    <input type="text" id="name-input" />
-
-    <label for="color-input" style="margin-left: 10px;">Color:</label>
-    <input type="color" id="color-input" />
-  </div>
-
-  <div id="offline-banner" style="
-    display: none;
-    background-color: yellow;
-    color: black;
-    text-align: center;
-    padding: 10px;
-    font-weight: bold;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;">
+  <!-- Offline Banner -->
+  <div id="offline-banner" class="offline-banner hidden">
     OFFLINE MODE – Changes will be saved when reconnected.
   </div>
 
-  <div id="user-log" class="log-sidebar" style="display: none;">
+  <!-- Menu Bar -->
+  <div class="menu-bar">
+    <input type="text" class="document-title" value="Untitled Document" id="document-title">
+    
+    <div class="menu-items">
+      <!-- File Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="file">File</button>
+        <div class="dropdown-menu" id="file-menu">
+          <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
+          <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
+          <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
+          <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
+          <div class="dropdown-item" data-action="save-promisegrid">Download as PromiseGrid CBOR</div>
+          <div class="dropdown-item" data-action="save-ysnap">Download as Yjs Snapshot (.ysnap)</div>
+          <div class="dropdown-item" data-action="save-yjs">Download as Yjs Update (.json)</div>
+          <div class="dropdown-item" data-action="copy-url">Copy Room URL</div>
+        </div>
+      </div>
+
+      <!-- Edit Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="edit">Edit</button>
+        <div class="dropdown-menu" id="edit-menu">
+          <div class="dropdown-item" data-action="undo">Undo <span class="keyboard-shortcut">Ctrl+Z</span></div>
+          <div class="dropdown-item" data-action="redo">Redo <span class="keyboard-shortcut">Ctrl+Y</span></div>
+          <div class="dropdown-item" data-action="find">Find <span class="keyboard-shortcut">Ctrl+F</span></div>
+        </div>
+      </div>
+
+      <!-- Format Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="format">Format</button>
+        <div class="dropdown-menu" id="format-menu">
+          <div class="dropdown-item" data-action="format-document">Format Document</div>
+          <div class="dropdown-item" data-action="bold">Bold <span class="keyboard-shortcut">Ctrl+B</span></div>
+          <div class="dropdown-item" data-action="italic">Italic <span class="keyboard-shortcut">Ctrl+I</span></div>
+          <div class="dropdown-item" data-action="underline">Underline <span class="keyboard-shortcut">Ctrl+U</span></div>
+          <div class="dropdown-item" data-action="strikethrough">Strikethrough</div>
+          <div class="dropdown-item" data-action="heading1">Heading 1</div>
+          <div class="dropdown-item" data-action="heading2">Heading 2</div>
+          <div class="dropdown-item" data-action="heading3">Heading 3</div>
+          <div class="dropdown-item" data-action="bullet-list">Bullet List</div>
+          <div class="dropdown-item" data-action="numbered-list">Numbered List</div>
+          <div class="dropdown-item" data-action="link">Insert Link</div>
+        </div>
+      </div>
+
+      <!-- Tools Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="tools">Tools</button>
+        <div class="dropdown-menu" id="tools-menu">
+          <div class="dropdown-item" data-action="document-stats">Document Statistics</div>
+          <div class="dropdown-item" data-action="promisegrid-test">Test PromiseGrid Message</div>
+        </div>
+      </div>
+
+      <!-- View Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="view">View</button>
+        <div class="dropdown-menu" id="view-menu">
+          <div class="dropdown-item" data-action="toggle-log">Toggle Activity Log</div>
+          <div class="dropdown-item" data-action="toggle-toolbar">Toggle Toolbar</div>
+        </div>
+      </div>
+
+      <!-- Help Menu -->
+      <div class="menu-item">
+        <button class="menu-button" data-menu="help">Help</button>
+        <div class="dropdown-menu" id="help-menu">
+          <div class="dropdown-item" data-action="about">About</div>
+          <div class="dropdown-item" data-action="promisegrid-info">PromiseGrid Integration</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-group">
+      <button class="toolbar-button" id="bold-button" title="Bold (Ctrl+B)"><strong>B</strong></button>
+      <button class="toolbar-button" id="italic-button" title="Italic (Ctrl+I)"><em>I</em></button>
+      <button class="toolbar-button" id="underline-button" title="Underline (Ctrl+U)"><u>U</u></button>
+      <button class="toolbar-button" id="strike-button" title="Strikethrough"><s>S</s></button>
+      
+      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
+      
+      <button class="toolbar-button" id="heading1-button" title="Heading 1">H1</button>
+      <button class="toolbar-button" id="heading2-button" title="Heading 2">H2</button>
+      <button class="toolbar-button" id="heading3-button" title="Heading 3">H3</button>
+      
+      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
+      
+      <button class="toolbar-button" id="bullet-button" title="Bullet List">•</button>
+      <button class="toolbar-button" id="numbered-button" title="Numbered List">1.</button>
+      <button class="toolbar-button" id="link-button" title="Insert Link">🔗</button>
+      
+      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
+      
+      <button class="toolbar-button" id="undo-button" title="Undo (Ctrl+Z)">↶</button>
+      <button class="toolbar-button" id="redo-button" title="Redo (Ctrl+Y)">↷</button>
+      <button class="toolbar-button" id="format-button" title="Format Document">⚡</button>
+    </div>
+
+    <div class="toolbar-group">
+      <input type="text" id="search-input" class="search-box" placeholder="Search document...">
+      <button class="toolbar-button" id="search-button">🔍</button>
+      <button class="toolbar-button" id="clear-search">✕</button>
+    </div>
+  </div>
+
+  <!-- User Settings -->
+  <div class="user-settings">
+    <label for="name-input">Name:</label>
+    <input type="text" id="name-input" placeholder="Your name" />
+
+    <label for="color-input">Color:</label>
+    <input type="color" id="color-input" />
+
+    <div style="margin-left: auto;">
+      Room: <strong id="room-name">?</strong>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-group">
+      <span id="document-stats">
+        <span id="word-count">0 words</span> • 
+        <span id="char-count">0 chars</span> • 
+        <span id="reading-time">1 min read</span>
+      </span>
+      <span id="typing-indicator"></span>
+    </div>
+    
+    <div class="status-group">
+      <span>Users: <span id="user-count">0</span></span>
+      <div id="user-list"></div>
+    </div>
+  </div>
+
+  <!-- Hidden elements for compatibility -->
+  <div style="display: none;">
+    <select id="save-format">
+      <option value="txt">Export as .txt</option>
+      <option value="json">Export Codemirror State</option>
+      <option value="cbor">Save as .cbor</option>
+      <option value="promisegrid">PromiseGrid CBOR (.cbor)</option>
+      <option value="ysnap">Export Yjs Snapshot (.ysnap binary)</option>
+      <option value="yjs">Export Yjs Update (.json array)</option>
+    </select>
+    <button id="save-button">Save</button>
+    <button id="toggle-log">Log</button>
+  </div>
+
+  <!-- Editor -->
+  <div id="editor"></div>
+
+  <!-- User Activity Log Sidebar -->
+  <div id="user-log" style="display: none;">
     <h3>User Activity</h3>
     <div id="log-entries"></div>
   </div>
 
-  <div id="editor"></div>
+  <!-- Menu System Script -->
+  <script>
+    class MenuSystem {
+      constructor() {
+        this.activeMenu = null;
+        this.init();
+      }
+
+      init() {
+        this.setupMenuToggling();
+        this.setupMenuActions();
+        this.setupKeyboardShortcuts();
+        this.setupClickOutside();
+      }
+
+      setupMenuToggling() {
+        const menuButtons = document.querySelectorAll('[data-menu]');
+        
+        menuButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menuName = button.dataset.menu;
+            this.toggleMenu(menuName, button);
+          });
+        });
+      }
+
+      toggleMenu(menuName, button) {
+        const menu = document.getElementById(`${menuName}-menu`);
+        const isCurrentlyActive = this.activeMenu === menuName;
+
+        this.closeAllMenus();
+
+        if (!isCurrentlyActive) {
+          menu.classList.add('show');
+          button.classList.add('active');
+          this.activeMenu = menuName;
+        }
+      }
+
+      closeAllMenus() {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+          menu.classList.remove('show');
+        });
+        document.querySelectorAll('.menu-button').forEach(button => {
+          button.classList.remove('active');
+        });
+        this.activeMenu = null;
+      }
+
+      setupClickOutside() {
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.menu-item')) {
+            this.closeAllMenus();
+          }
+        });
+      }
+
+      setupMenuActions() {
+        document.addEventListener('click', (e) => {
+          const action = e.target.dataset.action;
+          if (action) {
+            e.preventDefault();
+            this.closeAllMenus();
+            this.handleAction(action);
+          }
+        });
+      }
+
+      handleAction(action) {
+        switch (action) {
+          case 'new':
+            if (confirm('Create a new document? This will generate a new room URL.')) {
+              window.location.href = window.location.origin + window.location.pathname;
+            }
+            break;
+          case 'save-txt':
+          case 'save-json':
+          case 'save-cbor':
+          case 'save-promisegrid':
+          case 'save-ysnap':
+          case 'save-yjs':
+            this.triggerSave(action.replace('save-', ''));
+            break;
+          case 'copy-url':
+            navigator.clipboard.writeText(window.location.href).then(() => {
+              alert('Room URL copied to clipboard!');
+            });
+            break;
+          case 'undo':
+            document.getElementById('undo-button')?.click();
+            break;
+          case 'redo':
+            document.getElementById('redo-button')?.click();
+            break;
+          case 'find':
+            document.getElementById('search-input')?.focus();
+            break;
+          case 'format-document':
+            document.getElementById('format-button')?.click();
+            break;
+          case 'bold':
+            document.getElementById('bold-button')?.click();
+            break;
+          case 'italic':
+            document.getElementById('italic-button')?.click();
+            break;
+          case 'underline':
+            document.getElementById('underline-button')?.click();
+            break;
+          case 'strikethrough':
+            document.getElementById('strike-button')?.click();
+            break;
+          case 'heading1':
+            document.getElementById('heading1-button')?.click();
+            break;
+          case 'heading2':
+            document.getElementById('heading2-button')?.click();
+            break;
+          case 'heading3':
+            document.getElementById('heading3-button')?.click();
+            break;
+          case 'bullet-list':
+            document.getElementById('bullet-button')?.click();
+            break;
+          case 'numbered-list':
+            document.getElementById('numbered-button')?.click();
+            break;
+          case 'link':
+            document.getElementById('link-button')?.click();
+            break;
+          case 'document-stats':
+            const wordCount = document.getElementById('word-count').textContent;
+            const charCount = document.getElementById('char-count').textContent;
+            const readingTime = document.getElementById('reading-time').textContent;
+            alert(`Document Statistics:\n• ${wordCount}\n• ${charCount}\n• ${readingTime}`);
+            break;
+          case 'promisegrid-test':
+            if (window.createPromiseGridMessage) {
+              try {
+                const message = window.createPromiseGridMessage("test-doc", "menu-test", 0, "Test message from menu", "user");
+                console.log('PromiseGrid test message created:', message);
+                alert('PromiseGrid test message created! Check console for details.');
+              } catch (error) {
+                alert('PromiseGrid test failed: ' + error.message);
+              }
+            } else {
+              alert('PromiseGrid functionality not available. Make sure WASM is loaded.');
+            }
+            break;
+          case 'toggle-log':
+            document.getElementById('toggle-log')?.click();
+            break;
+          case 'toggle-toolbar':
+            const toolbar = document.getElementById('toolbar');
+            toolbar.classList.toggle('hidden');
+            break;
+          case 'about':
+            alert(`Collaborative Text Editor
+
+Features:
+• Real-time collaboration with Yjs CRDTs
+• WASM-powered text processing (Rust)
+• PromiseGrid protocol integration
+• Offline support with automatic sync
+
+Built with Rust, WebAssembly, and JavaScript`);
+            break;
+          case 'promisegrid-info':
+            alert(`PromiseGrid Integration
+
+This editor includes real PromiseGrid protocol support:
+• Live CBOR message generation
+• Protocol-compliant message structure  
+• Official 'grid' tag (0x67726964)
+
+Check the browser console to see PromiseGrid messages!`);
+            break;
+          default:
+            console.log('Unknown action:', action);
+        }
+      }
+
+      triggerSave(format) {
+        const saveFormat = document.getElementById('save-format');
+        const saveButton = document.getElementById('save-button');
+        if (saveFormat && saveButton) {
+          saveFormat.value = format;
+          saveButton.click();
+        }
+      }
+
+      setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey || e.metaKey) {
+            switch (e.key.toLowerCase()) {
+              case 'n':
+                e.preventDefault();
+                this.handleAction('new');
+                break;
+              case 'f':
+                e.preventDefault();
+                document.getElementById('search-input')?.focus();
+                break;
+              case 'b':
+                if (!e.target.matches('input, textarea, [contenteditable]')) {
+                  e.preventDefault();
+                  document.getElementById('bold-button')?.click();
+                }
+                break;
+              case 'i':
+                if (!e.target.matches('input, textarea, [contenteditable]')) {
+                  e.preventDefault();
+                  document.getElementById('italic-button')?.click();
+                }
+                break;
+              case 'u':
+                if (!e.target.matches('input, textarea, [contenteditable]')) {
+                  e.preventDefault();
+                  document.getElementById('underline-button')?.click();
+                }
+                break;
+            }
+          }
+          
+          if (e.key === 'Escape') {
+            this.closeAllMenus();
+          }
+        });
+      }
+    }
+
+    // Initialize when DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+      new MenuSystem();
+    });
+  </script>
+
+  <!-- Load your existing app.js -->
   <script type="module" src="/src/app.js"></script>
+  
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => {
-          console.log('Service worker registered:', reg.scope);
-        })
-        .catch(err => {
-          console.warn('Service worker registration failed:', err);
-        });
+        .then(reg => console.log('Service worker registered:', reg.scope))
+        .catch(err => console.warn('Service worker registration failed:', err));
     }
   </script>
 </body>

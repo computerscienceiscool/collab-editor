@@ -219,26 +219,56 @@ async function handleToggleFormatting(view, toggleFunction, formatName) {
 async function handleFormat(ytext, view) {
   try {
     const currentText = ytext.toString();
-    console.log("WASM TEXT FORMATTING:");
+    
+    console.log("JAVASCRIPT TEXT FORMATTING (WASM bypass):");
     console.log("Original length:", currentText.length, "characters");
     
-    const formattedText = await format_text(currentText);
+    // Validate input
+    if (!currentText || typeof currentText !== 'string') {
+      console.log("No valid text to format");
+      return;
+    }
+
+    // Do the formatting in JavaScript instead of WASM (temporary fix)
+    let formattedText = currentText
+      // Remove excessive blank lines (more than 2 in a row)
+      .replace(/\n{3,}/g, '\n\n')
+      // Fix spacing around punctuation
+      .replace(/\s+([,.!?;:])/g, '$1')
+      // Fix spacing in parentheses
+      .replace(/\(\s+/g, '(')
+      .replace(/\s+\)/g, ')')
+      // Fix multiple spaces
+      .replace(/[ \t]{2,}/g, ' ')
+      // Fix spacing around markdown bold/italic
+      .replace(/\*\*\s+/g, '**')
+      .replace(/\s+\*\*/g, '**')
+      .replace(/\*\s+/g, '*')
+      .replace(/\s+\*/g, '*')
+      // Trim whitespace at start/end of lines
+      .split('\n')
+      .map(line => line.trim())
+      .join('\n')
+      // Ensure single trailing newline
+      .replace(/\n*$/, '\n');
+
     console.log("Formatted length:", formattedText.length, "characters");
     
     // Replace the text in the Yjs document
     ytext.delete(0, ytext.length);
     ytext.insert(0, formattedText);
     
-    console.log("WASM formatting applied successfully");
+    console.log("JavaScript formatting applied successfully (WASM bypassed)");
 
-    // NEW: Send format action as PromiseGrid message
+    // Send format action as PromiseGrid message
     sendEditAsPromiseGridMessage("format", 0, formattedText, view);
     
   } catch (error) {
-    console.error("WASM formatting failed:", error);
-    alert("Failed to format text. Please try again.");
+    console.error("JavaScript formatting failed:", error);
+    alert("Failed to format text: " + error.message);
   }
 }
+
 
 /**
  * Exports document based on selected format.
@@ -349,7 +379,7 @@ function sendEditAsPromiseGridMessage(editType, position, content, view) {
     
     // Here you would normally send cborBytes over the network
     // For now, we're just logging to see it working
-    console.log(`📡 Created PromiseGrid message for ${editType} edit`);
+    console.log(`Created PromiseGrid message for ${editType} edit`);
     
     return cborBytes;
   } catch (error) {
