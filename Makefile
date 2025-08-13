@@ -30,6 +30,7 @@ help:
 	@echo "  make open-room   - Open a browser tab with a new UUID room"
 	@echo "  make clean       - Remove node_modules and Vite build output"
 	@echo "  make rebuild     - Clean, reinstall, and rebuild everything"
+	@echo "  make commit      - Commit changes with grok commit message and push to origin/$(BRANCH)"
 	@echo ""
 
 install:
