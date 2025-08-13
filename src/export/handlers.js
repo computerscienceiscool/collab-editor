@@ -268,6 +268,43 @@ async function handleFormat(ytext, view) {
     alert("Failed to format text: " + error.message);
   }
 }
+/**
+ * Gets the document filename based on the title input
+ * @param {string} extension - File extension without the dot
+ * @returns {string} - Filename with proper extension
+ */
+function getDocumentFilename(extension) {
+  const titleInput = document.getElementById('document-title');
+  let docName = 'document'; // default fallback
+  
+  if (titleInput && titleInput.value.trim()) {
+    docName = titleInput.value.trim()
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .toLowerCase();
+  }
+  
+  return `${docName}.${extension}`;
+}
+
+
+/**
+ * Gets the PromiseGrid filename based on the title input
+ * @returns {string} - PromiseGrid filename
+ */
+function getPromiseGridFilename() {
+  const titleInput = document.getElementById('document-title');
+  let docName = 'document'; // default fallback
+  
+  if (titleInput && titleInput.value.trim()) {
+    docName = titleInput.value.trim()
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .toLowerCase();
+  }
+  
+  return `${docName}_promisegrid.cbor`;
+}
 
 
 /**
@@ -285,13 +322,13 @@ function handleSave(format, ydoc, ytext, view) {
     case 'txt':
       content = ytext.toString();
       blob = new Blob([content], { type: 'text/plain' });
-      filename = 'document.txt';
+      filename = getDocumentFilename('txt');
       break;
 
     case 'json':
       content = JSON.stringify(view.state.toJSON(), null, 2);
       blob = new Blob([content], { type: 'application/json' });
-      filename = 'codemirror_state.json';
+      filename =  getDocumentFilename('json');
       break;
 
     case 'cbor':
@@ -305,18 +342,17 @@ function handleSave(format, ydoc, ytext, view) {
       };
       const encodedCbor = encode(cborData);
       blob = new Blob([encodedCbor], { type: 'application/cbor' });
-      filename = 'document.cbor';
+      filename =  getDocumentFilename('cbor');
       break;
 
-    // NEW: PromiseGrid CBOR export
     case 'promisegrid':
       handlePromiseGridExport(ydoc, ytext, view);
-      return; // Don't continue with regular download
+      return; 
 
     case 'ysnap':
       const snapshot = Y.encodeStateAsUpdate(ydoc);
       blob = new Blob([snapshot], { type: 'application/octet-stream' });
-      filename = 'snapshot.ysnap';
+      filename =  getDocumentFilename('ysnap');
       break;
 
     case 'yjs':
@@ -324,7 +360,7 @@ function handleSave(format, ydoc, ytext, view) {
       const array = Array.from(update);
       content = JSON.stringify(array, null, 2);
       blob = new Blob([content], { type: 'application/json' });
-      filename = 'snapshot.json';
+      filename =  getDocumentFilename('json');
       break;
 
     default:
@@ -349,7 +385,8 @@ function handlePromiseGridExport(ydoc, ytext, view) {
     
     // Create download
     const blob = new Blob([cborBytes], { type: 'application/cbor' });
-    const filename = `${documentId}_promisegrid.cbor`;
+    const filename = getPromiseGridFilename();
+   // filename = `${documentId}_promisegrid.cbor`;
     downloadBlob(blob, filename);
     
     console.log(' PromiseGrid CBOR export completed!');
@@ -360,7 +397,7 @@ function handlePromiseGridExport(ydoc, ytext, view) {
   }
 }
 
-// NEW: Send edit as PromiseGrid message
+
 function sendEditAsPromiseGridMessage(editType, position, content, view) {
   try {
     const { documentId, userId } = getCurrentSessionInfo();
