@@ -272,13 +272,22 @@
         <button class="menu-button" data-menu="file">File</button>
         <div class="dropdown-menu" id="file-menu">
           <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
+           <div class="dropdown-item" data-action="open">Open <span class="keyboard-shortcut">Ctrl+O</span></div>
+          <div class="dropdown-item" data-action="make-copy">Make a copy</div>
           <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
           <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
           <div class="dropdown-item" data-action="save-promisegrid">Download as PromiseGrid CBOR</div>
           <div class="dropdown-item" data-action="save-ysnap">Download as Yjs Snapshot (.ysnap)</div>
           <div class="dropdown-item" data-action="save-yjs">Download as Yjs Update (.json)</div>
+          <div class="dropdown-item" data-action="share">Share</div>
+          <div class="dropdown-item" data-action="email">Email</div>
           <div class="dropdown-item" data-action="copy-url">Copy Room URL</div>
+          <div class="dropdown-item" data-action="print">Print <span class="keyboard-shortcut">Ctrl+P</span></div>
+          <div class="menu-section">
+            <div class="dropdown-item" data-action="rename">Rename</div>
+            <div class="dropdown-item" data-action="version-history">Version history</div>
+          </div>
         </div>
       </div>
 
@@ -557,6 +566,30 @@
           case 'link':
             document.getElementById('link-button')?.click();
             break;
+          // Very Easy features
+          case 'print':
+            window.print();
+            break;
+  
+          case 'make-copy':
+            this.makeCopy();
+            break;
+  
+          case 'share':
+            this.shareDocument();
+            break;
+
+          case 'rename':
+            this.renameDocument();
+            break;
+  
+          case 'version-history':
+            this.showVersionHistory();
+            break;
+  
+          case 'email':
+            this.emailDocument();
+            break;
           case 'document-stats':
             const wordCount = document.getElementById('word-count').textContent;
             const charCount = document.getElementById('char-count').textContent;
@@ -642,6 +675,10 @@ Check the browser console to see PromiseGrid messages!`);
                   document.getElementById('italic-button')?.click();
                 }
                 break;
+              case 'p':
+                 e.preventDefault();
+                 window.print();
+                 break;      
               case 'u':
                 if (!e.target.matches('input, textarea, [contenteditable]')) {
                   e.preventDefault();
@@ -656,6 +693,76 @@ Check the browser console to see PromiseGrid messages!`);
           }
         });
       }
+    makeCopy() {
+      const currentContent = document.querySelector('#editor .cm-content').textContent;
+      const newUrl = window.location.origin + window.location.pathname + '?room=' + this.generateUUID();
+      const newWindow = window.open(newUrl, '_blank');
+      
+      // Copy content when new window loads
+      newWindow.addEventListener('load', () => {
+        setTimeout(() => {
+          if (newWindow.document.querySelector('#editor .cm-content')) {
+            newWindow.document.querySelector('#editor .cm-content').textContent = currentContent;
+          }
+        }, 2000);
+      });
+      
+      alert('Copy created in new tab!');
+    }
+
+    shareDocument() {
+      const url = window.location.href;
+      const title = document.getElementById('document-title').value || 'Collaborative Document';
+      
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: `Collaborate with me on "${title}"`,
+          url: url
+        });
+      } else {
+        // Fallback: copy to clipboard and show share options
+        navigator.clipboard.writeText(url).then(() => {
+          const shareText = `Share this document:\n\n${title}\n${url}\n\nLink copied to clipboard!`;
+          alert(shareText);
+        });
+      }
+    }
+
+    // Easy features
+    renameDocument() {
+      const titleInput = document.getElementById('document-title');
+      titleInput.focus();
+      titleInput.select();
+    }
+
+    showVersionHistory() {
+      const stats = document.getElementById('document-stats').textContent;
+      const roomName = document.getElementById('room-name').textContent;
+      const userCount = document.getElementById('user-count').textContent;
+      
+      alert(`Document History:\n\nRoom: ${roomName}\nCurrent stats: ${stats}\nActive users: ${userCount}\n\nNote: Full version history coming in future update!`);
+    }
+
+    emailDocument() {
+      const title = document.getElementById('document-title').value || 'Collaborative Document';
+      const url = window.location.href;
+      const content = document.querySelector('#editor .cm-content')?.textContent || '';
+      const preview = content.substring(0, 200) + (content.length > 200 ? '...' : '');
+      
+      const subject = encodeURIComponent(`Collaborative Document: ${title}`);
+      const body = encodeURIComponent(`Hi!\n\nI'd like to share this collaborative document with you:\n\n"${title}"\n\nPreview:\n${preview}\n\nClick here to view and edit: ${url}\n\nBest regards`);
+      
+      window.open(`mailto:?subject=${subject}&body=${body}`);
+    }
+
+    generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }  
     }
 
     // Initialize when DOM loads
