@@ -35,7 +35,7 @@ pub struct DocumentEdit {
     pub edit_type: String,  // "insert", "delete", "replace"
     pub position: u32,
     pub content: String,
-    pub timestamp: f64,
+    pub timestamp: f64, // each agent runs their own clock.  we can not garentee sync.  
     pub user_id: String,
 }
 
