@@ -25,25 +25,139 @@ http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 
 ## The Interface
 
-At the top of the screen, you'll see a toolbar with the following information:
+At the top of the screen, you'll see a menu with the following information:
+
+### Menu Bar
+At the very top, you'll find the main menu bar with:
+- **Document Title**: Click to rename your document (affects export filenames)
+- **File Menu**: New, copy, share, print, and export options
+- **Edit Menu**: Cut, copy, paste, undo, redo, find, and select operations
+- **Format Menu**: Text formatting (bold, italic, headers, lists, links)
+- **Tools Menu**: Word count, line numbers, document statistics, and preferences
+- **View Menu**: Toggle toolbars, activity log, and fullscreen mode
+- **Help Menu**: Keyboard shortcuts, documentation, and about informat
+
+### Toolbar
+Beneath the menu bar is the **Toolbar**, which provides quick access to key features:
+
 
 | UI Element              | Description |
 |-------------------------|-------------|
-| **Room**                | The name of the shared editing room (from the URL or generated as a UUID). |
-| **User**                | Your display name in the session. |
-| **Users**               | Count of users currently in the session. |
-| **User List**           | Colored name tags of all participants. |
-| **Document Statistics** | Live word count, character count, and reading time. |
-| **Typing Indicator**    | Shows when someone else is typing. |
-| **Formatting Buttons**  | Bold, Italic, Underline, Format, Link, Undo, Redo buttons. |
-| **Save Options**        | Export your document in various formats. |
-| **Log Button**          | Toggle to show/hide the User Activity Log. |
+| **Formatting Buttons**  | Bold, Italic, Underline, Strikethrough, Headings (H1-H3) |
+| **List Buttons**        | Bullet lists, numbered lists |
+| **Action Buttons**      | Link conversion, Undo, Redo, Format Document |
+| **Search Box**          | Real-time document search with WASM performance |
 
----
+### User Settings Panel
+| UI Element              | Description |
+|-------------------------|-------------|
+| **Name Input**          | Your display name for collaboration |
+| **Color Picker**        | Your cursor and user indicator color |
+| **Room Display**        | Current room name for sharing |
+
+### Status Bar
+At the bottom of the screen:
+| UI Element              | Description |
+|-------------------------|-------------|
+| **Document Statistics** | Live word count, character count, and reading time |
+| **Typing Indicator**    | Shows when someone else is typing |
+| **User Count**          | Number of active collaborators |
+| **User List**           | Colored name tags of all participants |
+
+## Menu System Guide
+
+The editor provides comprehensive functionality through its Google Docs-style menu system.
+
+### File Menu Features
+
+**Document Management:**
+- **New Document (Ctrl+N)**: Creates a fresh document with new room URL
+- **Make a copy**: Opens your document in a new tab for independent editing
+- **Rename**: Click the document title or use this menu item to rename
+
+**Export Options:**
+All exports automatically use your document title for the filename:
+- **Download as Text (.txt)**: Plain text version
+- **Download as CodeMirror State (.json)**: Complete editor state
+- **Download as CBOR (.cbor)**: Structured document with metadata
+- **Download as PromiseGrid CBOR**: Protocol-compliant decentralized computing format
+- **Download as Yjs Snapshot (.ysnap)**: Binary collaboration snapshot
+- **Download as Yjs Update (.json)**: Collaboration state as JSON
+
+**Sharing:**
+- **Share**: Use native browser sharing or copy URL with message
+- **Email**: Opens your email client with document preview and collaboration link
+- **Copy Room URL**: Quick clipboard copy for sharing
+- **Print (Ctrl+P)**: Standard browser print dialog
+
+### Edit Menu Features
+
+**Text Operations:**
+- **Cut (Ctrl+X)**, **Copy (Ctrl+C)**, **Paste (Ctrl+V)**: Standard clipboard operations
+- **Select all (Ctrl+A)**: Select entire document
+- **Delete**: Remove selected text or character at cursor
+
+**Document Navigation:**
+- **Undo (Ctrl+Z)**, **Redo (Ctrl+Y)**: Full history support
+- **Find (Ctrl+F)**: Focuses search box for fast WASM-powered search
+
+### Format Menu Features
+
+All formatting operations are powered by Rust WebAssembly for maximum performance:
+
+**Text Formatting:**
+- **Bold (Ctrl+B)**, **Italic (Ctrl+I)**, **Underline (Ctrl+U)**: Standard formatting
+- **Strikethrough**: Cross out text
+- **Format Document**: Clean up spacing, punctuation, and markdown formatting
+
+**Document Structure:**
+- **Heading 1, 2, 3**: Convert lines to markdown headers
+- **Bullet List**, **Numbered List**: Create and toggle list formatting
+- **Insert Link**: Convert URLs to proper markdown links
+
+### Tools Menu Features
+
+**Document Analysis:**
+- **Word count (Ctrl+Shift+C)**: Detailed document statistics popup
+- **Document Statistics**: Same as status bar info
+- **Toggle line numbers**: Show/hide line numbers in editor
+
+**Settings:**
+- **Preferences**: View current editor settings and capabilities
+- **Notification settings**: Information about current notification system
+- **Accessibility**: Complete keyboard shortcut reference
+
+**Advanced:**
+- **Test PromiseGrid Message**: Generate protocol messages for testing
+
+### View Menu Features
+
+**Interface Control:**
+- **Toggle Activity Log**: Show/hide user activity sidebar
+- **Toggle Toolbar**: Show/hide formatting toolbar
+- **Full Screen Mode**: Browser fullscreen for distraction-free editing
+
+### Keyboard Shortcuts Summary
+
+**File Operations:**
+- Ctrl+N: New Document
+- Ctrl+P: Print
+
+**Editing:**
+- Ctrl+Z: Undo, Ctrl+Y: Redo
+- Ctrl+C: Copy, Ctrl+X: Cut, Ctrl+V: Paste
+- Ctrl+A: Select All, Ctrl+F: Find
+
+**Formatting:**
+- Ctrl+B: Bold, Ctrl+I: Italic, Ctrl+U: Underline
+
+**Tools:**
+- Ctrl+Shift+C: Word Count
+- Esc: Close any open menu
 
 ## Text Formatting and WASM Features
 
-The editor includes powerful **WebAssembly-powered** text processing features:
+The editor includes powerful **WebAssembly-powered** text processing features accessible through both the toolbar buttons and Format menu:
 
 ### Live Document Statistics
 - **Word count** - Updates as you type
@@ -54,12 +168,21 @@ The editor includes powerful **WebAssembly-powered** text processing features:
 ### Formatting Buttons
 Select text and click buttons to apply formatting:
 
-| Button        | Function | Example |
-|---------------|----------|---------|
-| **Bold**      | Toggle bold formatting | `hello` ↔ `**hello**` |
-| **Italic**    | Toggle italic formatting | `hello` ↔ `*hello*` |
-| **Underline** | Toggle underline formatting | `hello` ↔ `__hello__` |
-| **Link**      | Convert URLs to markdown links | `https://github.com` → `[https://github.com](https://github.com)` |
+### Formatting Operations
+Apply formatting through toolbar buttons or Format menu (all operations use WASM for performance):
+
+| Operation     | Toolbar | Menu | Keyboard | Example |
+|---------------|---------|------|----------|---------|
+| **Bold**      | B button | Format → Bold | Ctrl+B | `hello` ↔ `**hello**` |
+| **Italic**    | I button | Format → Italic | Ctrl+I | `hello` ↔ `*hello*` |
+| **Underline** | U button | Format → Underline | Ctrl+U | `hello` ↔ `__hello__` |
+| **Strikethrough** | S button | Format → Strikethrough | - | `hello` ↔ `~~hello~~` |
+| **Heading 1** | H1 button | Format → Heading 1 | - | `hello` ↔ `# hello` |
+| **Heading 2** | H2 button | Format → Heading 2 | - | `hello` ↔ `## hello` |
+| **Heading 3** | H3 button | Format → Heading 3 | - | `hello` ↔ `### hello` |
+| **Bullet List** | • button | Format → Bullet List | - | `item` ↔ `• item` |
+| **Numbered List** | 1. button | Format → Numbered List | - | `item` ↔ `1. item` |
+| **Link Conversion** | 🔗 button | Format → Insert Link | - | `https://github.com` → `[https://github.com](https://github.com)` |
 
 ### Document-Wide Formatting
 Click the **Format** button to automatically clean up your entire document:

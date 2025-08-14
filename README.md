@@ -18,6 +18,14 @@ This demo has been extended with additional features that are useful to teams, i
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
 
+### Document Style Menu System
+- **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
+- **Over 30 menu features**: Many implemented features and several planned for future releases. Much of this is a work-in-progress.
+- **Comprehensive keyboard shortcuts**: Standard shortcuts (Ctrl+C, Ctrl+V) plus editor-specific (Ctrl+B, Ctrl+I)
+- **Smart export options**: All exports use document title for filename generation
+- **Professional interface**: Clean, modern design matching Google Docs aesthetic
+- **Menu integration**: Seamlessly connects to existing WASM and collaboration features
+
 ### WASM-Powered Text Processing
 - **Document compression**: 98% compression ratio using Rust WASM
 - **Smart text formatting**: Auto-clean whitespace, headers, and code blocks
@@ -46,6 +54,8 @@ This demo has been extended with additional features that are useful to teams, i
 - Optional Go or Rust backend support:
   - Go backend: Simple in-memory collaboration for legacy support
   - Rust backend: Fast document persistence, UUID-based room support, Markdown export
+  - Menu system integration: All export formats accessible through File menu
+  - Client-side processing: Most menu operations happen in browser without backend dependency
 
 ### Export Options
 - Plain text
@@ -224,14 +234,17 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 ## Documentation
 
 ### Core Documentation
-- [User Guide](docs/user-guide.md) — How to use the editor and its features (7/26/25)
+- [User Guide](docs/user-guide.md) — How to use the editor and its features 
 - [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
-- [docs/project.md](docs/project.md) — Latest project overview and architecture (7/26/25)
-- [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly (7/26/25)
-- **[docs/promisegrid-integration.md](docs/promisegrid-integration.md)** — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
+- [docs/project.md](docs/project.md) — Latest project overview and architecture 
+- [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly 
+- [docs/promisegrid-integration.md](docs/promisegrid-integration.md) — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
+- [docs/editor-menu.md](docs/editor-menu.md) — Full list of menu features and keyboard shortcuts
+- [docs/keyboard-shortcuts.md](docs/keyboard-shortcuts.md) — Comprehensive list of keyboard shortcuts
+- [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 
 ---
 
