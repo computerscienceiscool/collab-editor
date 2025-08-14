@@ -35,6 +35,9 @@ window.addEventListener('DOMContentLoaded', async() => {
   // 3b. Set up the CodeMirror editor
   const view = setupEditor(ydoc, provider, ytext, awareness);
 
+  //3b.i. Attach the editor globally available for menu actions
+  window.editorView = view;
+
   // 3c. Hook up UI elements: name/color fields
   setupUserControls(provider);
 
