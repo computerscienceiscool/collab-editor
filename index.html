@@ -8,7 +8,7 @@
 </head>
 <body>
 <!-- User Activity Log Sidebar -->
-  <div id="user-log" style="display: none;">
+  <div id="user-log">
     <h3>User Activity</h3>
     <div id="log-entries"></div>
   </div>
@@ -946,30 +946,16 @@
 
         toggleActivityLog() {
           const logPanel = document.getElementById('user-log');
-          if (logPanel) {
-            const isVisible = logPanel.style.display === 'block';
-            if (isVisible) {
-              logPanel.style.display = 'none';
-              console.log('Activity log toggled: hidden');
-            } else {
-              logPanel.style.display = 'block';
-              logPanel.style.position = 'fixed';
-              logPanel.style.top = '120px';
-              logPanel.style.right = '20px';
-              logPanel.style.width = '280px';
-              logPanel.style.height = '400px';
-              logPanel.style.background = 'white';
-              logPanel.style.border = '1px solid #dadce0';
-              logPanel.style.borderRadius = '8px';
-              logPanel.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
-              logPanel.style.padding = '16px';
-              logPanel.style.overflowY = 'auto';
-              logPanel.style.zIndex = '9999';
-              console.log('Activity log toggled: shown');
-            }
-          }
-        }
+          if (!logPanel) return;
 
+          logPanel.classList.toggle('show');
+
+          console.log(
+            'Activity log toggled:',
+            logPanel.classList.contains('show') ? 'shown' : 'hidden'
+          );
+        }
+                
 
         // Helper methods
         getNotificationSettings() {
