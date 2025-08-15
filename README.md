@@ -24,7 +24,7 @@ This demo has been extended with additional features that are useful to teams, i
 - **Comprehensive keyboard shortcuts**: Standard shortcuts (Ctrl+C, Ctrl+V) plus editor-specific (Ctrl+B, Ctrl+I)
 - **Smart export options**: All exports use document title for filename generation
 - **Side-by-side markdown preview**: Real-time markdown rendering with Ctrl+M toggle and Ctrl+R refresh
-- **Professional interface**: Clean, modern design matching Google Docs aesthetic
+- **Professional interface**: Clean, modern design matching a traditional document editor aesthetic
 - **Menu integration**: Seamlessly connects to existing WASM and collaboration features
 
 ### WASM-Powered Text Processing
