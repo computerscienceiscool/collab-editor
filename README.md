@@ -23,6 +23,7 @@ This demo has been extended with additional features that are useful to teams, i
 - **Over 30 menu features**: Many implemented features and several planned for future releases. Much of this is a work-in-progress.
 - **Comprehensive keyboard shortcuts**: Standard shortcuts (Ctrl+C, Ctrl+V) plus editor-specific (Ctrl+B, Ctrl+I)
 - **Smart export options**: All exports use document title for filename generation
+- **Side-by-side markdown preview**: Real-time markdown rendering with Ctrl+M toggle and Ctrl+R refresh
 - **Professional interface**: Clean, modern design matching Google Docs aesthetic
 - **Menu integration**: Seamlessly connects to existing WASM and collaboration features
 

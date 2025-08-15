@@ -39,6 +39,8 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 
 | Shortcut | Action | Description |
 |----------|--------|-------------|
+| **Ctrl+M** | Toggle Markdown Preview | Show/hide side-by-side markdown preview |
+| **Ctrl+R** | Update Preview | Refresh markdown preview with current text |
 | **Esc** | Close Menus | Close any open dropdown menu |
 
 ## Quick Reference Card
@@ -57,6 +59,8 @@ Ctrl+N        New Document
 ```
 Ctrl+Shift+C  Word Count
 Ctrl+A        Select All
+Ctrl+M        Toggle Markdown Preview
+Ctrl+R        Update Preview
 Esc           Close Menus
 ```
 

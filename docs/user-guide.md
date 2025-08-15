@@ -135,6 +135,8 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 **Interface Control:**
 - **Toggle Activity Log**: Show/hide user activity sidebar
 - **Toggle Toolbar**: Show/hide formatting toolbar
+- **Toggle Markdown Preview (Ctrl+M)**: Show/hide side-by-side markdown preview pane
+- **Update Preview (Ctrl+R)**: Refresh markdown preview with current document text
 - **Full Screen Mode**: Browser fullscreen for distraction-free editing
 
 ### Keyboard Shortcuts Summary
@@ -150,6 +152,12 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 
 **Formatting:**
 - Ctrl+B: Bold, Ctrl+I: Italic, Ctrl+U: Underline
+
+
+**View:**
+- Ctrl+M: Toggle Markdown Preview
+- Ctrl+R: Update Preview
+
 
 **Tools:**
 - Ctrl+Shift+C: Word Count
@@ -375,6 +383,21 @@ window.createPromiseGridMessage("test-doc", "insert", 0, "Hello PromiseGrid!", "
 // Parse and display messages
 window.logPromiseGridMessage(messageBytes);
 ```
+
+---
+
+### Using Markdown Preview
+The markdown preview feature allows you to see a rendered version of your document alongside the text editor:
+
+1. **Enable preview**: Press **Ctrl+M** or use **View → Toggle Markdown Preview**
+2. **Side-by-side editing**: Text editor appears on left, rendered markdown on right
+3. **Update preview**: Press **Ctrl+R** or use **View → Update Preview** to refresh the rendered view
+4. **Toggle off**: Press **Ctrl+M** again to return to full-width text editing
+
+**Best Practices:**
+- Use markdown formatting (headers, lists, bold, italic) for best preview results
+- Update preview frequently to see changes: **Ctrl+R**
+- Preview shows how your document will look when exported as markdown
 
 ---
 
