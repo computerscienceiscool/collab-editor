@@ -14,7 +14,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 |---------|-------------------|--------|-------------|
 | **New Document** | Ctrl+N | Implemented | Creates a new document with fresh UUID room |
 | **Open** | Ctrl+O | Not implemented | File upload/import functionality (Medium complexity) |
-| **Make a copy** | - | Implemented | Opens new tab with copied document content |
+| **Make a copy** | Ctrl+Shift+S | Implemented | Opens new tab with copied document content |
 | **Download as Text (.txt)** | - | Implemented | Exports plain text with custom filename based on document title |
 | **Download as CodeMirror State (.json)** | - | Implemented | Exports editor state as JSON |
 | **Download as CBOR (.cbor)** | - | Implemented | Exports document with metadata in CBOR format |
@@ -22,8 +22,8 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 | **Download as Yjs Snapshot (.ysnap)** | - | Implemented | Binary Yjs document snapshot |
 | **Download as Yjs Update (.json)** | - | Implemented | JSON array of Yjs update bytes |
 | **Share** | - | Implemented | Native sharing or URL copy with custom message |
-| **Email** | - | Implemented | Opens email client with document content and collaboration link |
-| **Copy Room URL** | - | Implemented | Copies collaboration URL to clipboard |
+| **Email** | Ctrl+Shift+E | Implemented | Opens email client with document content and collaboration link |
+| **Copy Room URL** | Ctrl+Shift+U | Implemented | Copies collaboration URL to clipboard |
 | **Print** | Ctrl+P | Implemented | Browser print dialog |
 | **Rename** | - | Implemented | Focuses document title input for editing |
 | **Version history** | - | Implemented | Shows basic document info (room, stats, users) |
@@ -39,9 +39,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 | **Paste** | Ctrl+V | Implemented | Paste from clipboard at cursor position |
 | **Select all** | Ctrl+A | Implemented | Select entire document |
 | **Delete** | - | Implemented | Delete selected text or character at cursor |
-| **Find** | Ctrl+F | Implemented | Focus search input (uses WASM search) |
-| **Find and replace** | Ctrl+H | Not implemented | Replace functionality (Medium complexity) |
-| **Paste without formatting** | Ctrl+Shift+V | Not implemented | Strip formatting from pasted content (Hard complexity) |
+
 
 ### Format Menu
 
@@ -51,40 +49,32 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 | **Bold** | Ctrl+B | Implemented | WASM toggle bold formatting with PromiseGrid messaging |
 | **Italic** | Ctrl+I | Implemented | WASM toggle italic formatting with PromiseGrid messaging |
 | **Underline** | Ctrl+U | Implemented | WASM toggle underline formatting with PromiseGrid messaging |
-| **Strikethrough** | - | Implemented | WASM toggle strikethrough formatting |
-| **Heading 1** | - | Implemented | WASM toggle H1 markdown formatting |
-| **Heading 2** | - | Implemented | WASM toggle H2 markdown formatting |
-| **Heading 3** | - | Implemented | WASM toggle H3 markdown formatting |
-| **Bullet List** | - | Implemented | WASM toggle bullet point formatting |
-| **Numbered List** | - | Implemented | WASM toggle numbered list formatting |
-| **Insert Link** | - | Implemented | WASM URL to markdown link conversion |
+| **Strikethrough** | Ctrl+Shift+X | Implemented | WASM toggle strikethrough formatting |
+| **Heading 1** | Ctrl+Alt+1 | Implemented | WASM toggle H1 markdown formatting |
+| **Heading 2** | Ctrl+Alt+2 | Implemented | WASM toggle H2 markdown formatting |
+| **Heading 3** | Ctrl+Alt+3 | Implemented | WASM toggle H3 markdown formatting |
+| **Bullet List** | Ctrl+Shift+8 | Implemented | WASM toggle bullet point formatting |
+| **Numbered List** | Ctrl+Shift+7 | Implemented | WASM toggle numbered list formatting |
+| **Insert Link** | Ctrl+K | Implemented | WASM URL to markdown link conversion |
 
 ### Tools Menu
 
 | Feature | Keyboard Shortcut | Status | Description |
 |---------|-------------------|--------|-------------|
 | **Word count** | Ctrl+Shift+C | Implemented | Enhanced popup with room info and document statistics |
-| **Toggle line numbers** | - | Implemented | Show/hide line numbers in editor (basic implementation) |
+| **Toggle line numbers** | Ctrl+Shift+L | Implemented | Show/hide line numbers in editor  |
 | **Document Statistics** | - | Implemented | Shows live word/char count and reading time |
 | **Test PromiseGrid Message** | - | Implemented | Creates and logs PromiseGrid CBOR messages |
 | **Notification settings** | - | Implemented | Explains current notification system |
 | **Preferences** | - | Implemented | Shows current editor settings and capabilities |
 | **Accessibility** | - | Implemented | Complete keyboard shortcuts and accessibility information |
-| **Dictionary** | Ctrl+Shift+Y | Not implemented | Word definition lookup (Medium complexity) |
-| **Compare documents** | - | Not implemented | Document diff comparison (Medium complexity) |
-| **Citations** | - | Not implemented | Citation manager (Medium complexity) |
-| **Spelling and grammar** | - | Not implemented | Real-time spell checking (Hard complexity) |
-| **Review suggested edits** | - | Not implemented | Track changes system (Hard complexity) |
-| **Linked objects** | - | Not implemented | Embed external content (Hard complexity) |
-| **eSignature** | - | Not implemented | Digital signatures (Hard complexity) |
-| **Translate document** | - | Not implemented | Document translation (Hard complexity) |
 
 ### View Menu
 
 | Feature | Keyboard Shortcut | Status | Description |
 |---------|-------------------|--------|-------------|
-| **Show/Hide Activity Log** | - | Implemented | Toggle user activity sidebar |
-| **Show/Hide Toolbar** | - | Implemented | Toggle formatting toolbar visibility |
+| **Show/Hide Activity Log** | Ctrl+Alt+A | Implemented | Toggle user activity sidebar |
+| **Show/Hide Toolbar** | Ctrl+Shift+T | Implemented | Toggle formatting toolbar visibility |
 | **Toggle Markdown Preview** | Ctrl+M | Implemented | Toggle side-by-side markdown preview pane |
 | **Update Preview** | Ctrl+R | Implemented | Refresh markdown preview with current text content |
 | **Full Screen Mode** | - | Implemented | Browser fullscreen toggle |
@@ -100,7 +90,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 
 ## Key Features
 
-### Google Docs-Style Interface
+### Documentation Docs-Style Interface
 - Clean, modern menu bar with hover effects
 - Dropdown menus with keyboard shortcuts displayed
 - Organized menu sections with visual separators

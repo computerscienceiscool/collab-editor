@@ -133,8 +133,8 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 ### View Menu Features
 
 **Interface Control:**
-- **Toggle Activity Log**: Show/hide user activity sidebar
-- **Toggle Toolbar**: Show/hide formatting toolbar
+- **Toggle Activity Log (Ctrl+Alt+A)**: Show/hide user activity sidebar
+- **Toggle Toolbar (Ctrl+Shift+T)**: Show/hide formatting toolbar
 - **Toggle Markdown Preview (Ctrl+M)**: Show/hide side-by-side markdown preview pane
 - **Update Preview (Ctrl+R)**: Refresh markdown preview with current document text
 - **Full Screen Mode**: Browser fullscreen for distraction-free editing
@@ -144,6 +144,9 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 **File Operations:**
 - Ctrl+N: New Document
 - Ctrl+P: Print
+- Ctrl+Shift+S: Make Copy
+- Ctrl+Shift+E: Email Document  
+- Ctrl+Shift+U: Copy Room URL
 
 **Editing:**
 - Ctrl+Z: Undo, Ctrl+Y: Redo
@@ -152,15 +155,20 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 
 **Formatting:**
 - Ctrl+B: Bold, Ctrl+I: Italic, Ctrl+U: Underline
-
+- Ctrl+Shift+X: Strikethrough
+- Ctrl+K: Insert Link
+- Ctrl+Alt+1/2/3: Headings
+- Ctrl+Shift+7/8: Lists
 
 **View:**
 - Ctrl+M: Toggle Markdown Preview
 - Ctrl+R: Update Preview
-
+- Ctrl+Alt+A: Toggle Activity Log
+- Ctrl+Shift+T: Toggle Toolbar
 
 **Tools:**
 - Ctrl+Shift+C: Word Count
+- Ctrl+Shift+L: Toggle Line Numbers
 - Esc: Close any open menu
 
 ## Text Formatting and WASM Features
@@ -181,16 +189,14 @@ Apply formatting through toolbar buttons or Format menu (all operations use WASM
 
 | Operation     | Toolbar | Menu | Keyboard | Example |
 |---------------|---------|------|----------|---------|
-| **Bold**      | B button | Format → Bold | Ctrl+B | `hello` ↔ `**hello**` |
-| **Italic**    | I button | Format → Italic | Ctrl+I | `hello` ↔ `*hello*` |
-| **Underline** | U button | Format → Underline | Ctrl+U | `hello` ↔ `__hello__` |
-| **Strikethrough** | S button | Format → Strikethrough | - | `hello` ↔ `~~hello~~` |
-| **Heading 1** | H1 button | Format → Heading 1 | - | `hello` ↔ `# hello` |
-| **Heading 2** | H2 button | Format → Heading 2 | - | `hello` ↔ `## hello` |
-| **Heading 3** | H3 button | Format → Heading 3 | - | `hello` ↔ `### hello` |
-| **Bullet List** | • button | Format → Bullet List | - | `item` ↔ `• item` |
-| **Numbered List** | 1. button | Format → Numbered List | - | `item` ↔ `1. item` |
-| **Link Conversion** | 🔗 button | Format → Insert Link | - | `https://github.com` → `[https://github.com](https://github.com)` |
+| **Strikethrough** | S button | Format → Strikethrough | Ctrl+Shift+X | `hello` ↔ `~~hello~~` |
+| **Heading 1** | H1 button | Format → Heading 1 | Ctrl+Alt+1 | `hello` ↔ `# hello` |
+| **Heading 2** | H2 button | Format → Heading 2 | Ctrl+Alt+2 | `hello` ↔ `## hello` |
+| **Heading 3** | H3 button | Format → Heading 3 | Ctrl+Alt+3 | `hello` ↔ `### hello` |
+| **Bullet List** | • button | Format → Bullet List | Ctrl+Shift+8 | `item` ↔ `• item` |
+| **Numbered List** | 1. button | Format → Numbered List | Ctrl+Shift+7 | `item` ↔ `1. item` |
+| **Link Conversion** | 🔗 button | Format → Insert Link | Ctrl+K | `https://github.com` → `[https://github.com](https://github.com)` |
+
 
 ### Document-Wide Formatting
 Click the **Format** button to automatically clean up your entire document:

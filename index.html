@@ -29,7 +29,7 @@
         <div class="dropdown-menu" id="file-menu">
           <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
            <div class="dropdown-item" data-action="open">Open <span class="keyboard-shortcut">Ctrl+O</span></div>
-          <div class="dropdown-item" data-action="make-copy">Make a copy</div>
+          <div class="dropdown-item" data-action="make-copy">Make a copy<span class="keyboard-shortcut">Ctrl+Shift+S</span></div>
           <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
           <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
@@ -37,9 +37,9 @@
           <div class="dropdown-item" data-action="save-ysnap">Download as Yjs Snapshot (.ysnap)</div>
           <div class="dropdown-item" data-action="save-yjs">Download as Yjs Update (.json)</div>
           <div class="dropdown-item" data-action="share">Share</div>
-          <div class="dropdown-item" data-action="email">Email</div>
-          <div class="dropdown-item" data-action="copy-url">Copy Room URL</div>
-          <div class="dropdown-item" data-action="print">Print <span class="keyboard-shortcut">Ctrl+P</span></div>
+          <div class="dropdown-item" data-action="email">Email<span class="keyboard-shortcut">Ctrl+Shift+E</span></div>
+          <div class="dropdown-item" data-action="copy-url">Copy Room URL<span class="keyboard-shortcut">Ctrl+Shift+U</span></div>
+          <div class="dropdown-item" data-action="print">Print<span class="keyboard-shortcut">Ctrl+P</span></div>
           <div class="menu-section">
             <div class="dropdown-item" data-action="rename">Rename</div>
             <div class="dropdown-item" data-action="version-history">Version history</div>
@@ -75,23 +75,21 @@
           <div class="dropdown-item" data-action="bold">Bold <span class="keyboard-shortcut">Ctrl+B</span></div>
           <div class="dropdown-item" data-action="italic">Italic <span class="keyboard-shortcut">Ctrl+I</span></div>
           <div class="dropdown-item" data-action="underline">Underline <span class="keyboard-shortcut">Ctrl+U</span></div>
-          <div class="dropdown-item" data-action="strikethrough">Strikethrough</div>
-          <div class="dropdown-item" data-action="heading1">Heading 1</div>
-          <div class="dropdown-item" data-action="heading2">Heading 2</div>
-          <div class="dropdown-item" data-action="heading3">Heading 3</div>
-          <div class="dropdown-item" data-action="bullet-list">Bullet List</div>
-          <div class="dropdown-item" data-action="numbered-list">Numbered List</div>
-          <div class="dropdown-item" data-action="link">Insert Link</div>
+          <div class="dropdown-item" data-action="strikethrough">Strikethrough <span class="keyboard-shortcut">Ctrl+Shift+X</span></div>
+          <div class="dropdown-item" data-action="heading1">Heading 1<span class="keyboard-shortcut">Ctrl+Alt+1</span></div>
+          <div class="dropdown-item" data-action="heading2">Heading 2<span class="keyboard-shortcut">Ctrl+Alt+2</span></div>
+          <div class="dropdown-item" data-action="heading3">Heading 3<span class="keyboard-shortcut">Ctrl+Alt+3</span></div>
+          <div class="dropdown-item" data-action="bullet-list">Bullet List<span class="keyboard-shortcut">Ctrl+Shift+8</span></div>
+          <div class="dropdown-item" data-action="numbered-list">Numbered List<span class="keyboard-shortcut">Ctrl+Shift+7</span></div>
+          <div class="dropdown-item" data-action="link">Insert Link<span class="keyboard-shortcut">Ctrl+K</span></div>
         </div>
       </div>
-
-      <!-- Tools Menu -->
-      <!-- Tools Menu -->
+    <!-- Tools Menu -->
       <div class="menu-item">
         <button class="menu-button" data-menu="tools">Tools</button>
         <div class="dropdown-menu" id="tools-menu">
             <div class="dropdown-item" data-action="word-count">Word count <span class="keyboard-shortcut">Ctrl+Shift+C</span></div>
-            <div class="dropdown-item" data-action="line-numbers">Toggle line numbers</div>
+            <div class="dropdown-item" data-action="line-numbers">Toggle line numbers<span class="keyboard-shortcut">Ctrl+Shift+L</span></div>
             <div class="menu-section">
               <div class="dropdown-item" data-action="document-stats">Document Statistics</div>
               <div class="dropdown-item" data-action="promisegrid-test">Test PromiseGrid Message</div>
@@ -111,8 +109,8 @@
       <div class="menu-item">
         <button class="menu-button" data-menu="view">View</button>
         <div class="dropdown-menu" id="view-menu">
-          <div class="dropdown-item" data-action="toggle-log">Toggle Activity Log</div>
-          <div class="dropdown-item" data-action="toggle-toolbar">Toggle Toolbar</div>
+          <div class="dropdown-item" data-action="toggle-log">Toggle Activity Log<span class="keyboard-shortcut">Ctrl+Alt+A</span></div>
+          <div class="dropdown-item" data-action="toggle-toolbar">Toggle Toolbar<span class="keyboard-shortcut">Ctrl+Shift+T</span></div>
           <div class="dropdown-item" data-action="toggle-markdown-preview">Toggle Markdown Preview <span class="keyboard-shortcut">Ctrl+M</span></div>
           <div class="dropdown-item" data-action="update-markdown-preview">Update Preview <span class="keyboard-shortcut">Ctrl+R</span></div>
         </div>
@@ -155,7 +153,6 @@
       <button class="toolbar-button" id="redo-button" title="Redo (Ctrl+Y)">↷</button>
       <button class="toolbar-button" id="format-button" title="Format Document">⚡</button>
     </div>
-
     <div class="toolbar-group">
       <input type="text" id="search-input" class="search-box" placeholder="Search document...">
       <button class="toolbar-button" id="search-button">🔍</button>
@@ -428,8 +425,7 @@
             this.toggleActivityLog();
             break;
           case 'toggle-toolbar':
-            const toolbar = document.getElementById('toolbar');
-            toolbar.classList.toggle('hidden');
+            this.toggleToolbar();
             break;
           case 'toggle-markdown-preview':
             this.toggleMarkdownPreview();
@@ -475,90 +471,168 @@
         document.addEventListener('keydown', (e) => {
           if (e.ctrlKey || e.metaKey) {
             switch (e.key.toLowerCase()) {
-              case 'n':
-                e.preventDefault();
-                this.handleAction('new');
-                break;
-              case 'f':
-                e.preventDefault();
-                document.getElementById('search-input')?.focus();
-                break;
-              case 'b':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('bold-button')?.click();
-                }
-                break;
-              case 'i':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('italic-button')?.click();
-                }
-                break;
               
-              case 'p':
-                 e.preventDefault();
-                 window.print();
-                 break;      
+          case 'n':
+            e.preventDefault();
+                this.handleAction('new');
+            break;
+          case 'f':
+            e.preventDefault();
+                document.getElementById('search-input')?.focus();
+            break;
+          case 'b':
+              console.log('B key pressed, ctrlKey:', e.ctrlKey, 'target:', e.target);
+              e.preventDefault();
+              if (!e.target.matches('input, textarea')) {
+                console.log('Trying to click bold button');
+                const boldButton = document.getElementById('bold-button');
+                console.log('Bold button found:', boldButton);
+                boldButton?.click();
+              } else {
+                console.log('Target matches input/textarea, not executing bold');
+              }
+              break;          
 
-              case 'a':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                e.preventDefault();
-                this.selectAll();
-                }
-                break;
-  
-               case 'c':
-               if (e.shiftKey) {
-                 // Ctrl+Shift+C = Word count
-                 e.preventDefault();
-                 this.showWordCount();
-               } else if (!e.target.matches('input, textarea, [contenteditable]')) {
-                 // Ctrl+C = Copy (only in editor, not in input fields)
-                 e.preventDefault();
-                 this.copySelection();
-               }
-               break;  
-             case 'x':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                    e.preventDefault();
-                    this.cutSelection();
-                }
-                break;
-  
-             case 'v':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                e.preventDefault();
-                this.pasteText();
-                }
-                break;
-             
-            case 'm':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  this.toggleMarkdownPreview();
-                }
-                break;
-            case 'r':
-                if (!e.target.matches('input, textarea, [contenteditable]') && this.isPreviewActive) {
-                  e.preventDefault();
-                  this.updateMarkdownPreview();
-                }
-                break;  
-            case 'u':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('underline-button')?.click();
-                }
-                break;
+          case 'i':
+            if (!e.target.matches('input, textarea')) {
+              e.preventDefault();
+              document.getElementById('italic-button')?.click();
             }
-          }
+            break;
           
+          case 'p':
+             e.preventDefault();
+             window.print();
+             break;      
+          case 'a':
+            if (e.altKey) {
+              e.preventDefault();
+              this.toggleActivityLog();
+            } else if (!e.target.matches('input, textarea, [contenteditable]')) {
+              e.preventDefault();
+              this.selectAll();
+            }
+            break;
+          case 'c':
+            if (e.shiftKey) {
+              // Ctrl+Shift+C = Word count
+              e.preventDefault();
+              this.showWordCount();
+            } else if (!e.target.matches('input, textarea, [contenteditable]')) {
+              // Ctrl+C = Copy (only in editor, not in input fields)
+              e.preventDefault();
+              this.copySelection();
+            }
+            break;  
+          case 'x':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.toggleStrikethrough();
+            } else if (!e.target.matches('input, textarea, [contenteditable]')) {
+              e.preventDefault();
+              this.cutSelection();
+            }
+            break;
+
+          case 'v':
+            if (!e.target.matches('input, textarea, [contenteditable]')) {
+              e.preventDefault();
+              this.pasteText();
+            }
+            break;
+         
+          case 'm':
+            if (!e.target.matches('input, textarea, [contenteditable]')) {
+              e.preventDefault();
+              this.toggleMarkdownPreview();
+            }
+            break;
+          case 'r':
+            if (!e.target.matches('input, textarea, [contenteditable]') && this.isPreviewActive) {
+              e.preventDefault();
+              this.updateMarkdownPreview();
+            }
+            break;  
+          case 'u':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.copyRoomUrl();
+            } else if (!e.target.matches('input, textarea')) {
+              e.preventDefault();
+              document.getElementById('underline-button')?.click();
+            }
+            break;
+          case 's':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.makeCopy();
+            }
+            break;
+          case 'e':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.emailDocument();
+            }
+            break;
+          case '1':
+            if (e.altKey) {
+              e.preventDefault();
+              this.toggleHeading(1);
+            }
+            break;
+          case '2':
+            if (e.altKey) {
+              e.preventDefault();
+              this.toggleHeading(2);
+            }
+            break;
+          case '3':
+            if (e.altKey) {
+              e.preventDefault();
+              this.toggleHeading(3);
+            }
+            break;
+          case '7':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.toggleNumberedList();
+            }
+            break;
+          case '8':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.toggleBulletList();
+            }
+            break;
+          case 'k':
+            e.preventDefault();
+            this.insertLink();
+            break;
+          case 'l':
+            if (e.shiftKey) {
+              e.preventDefault();
+              this.toggleLineNumbers();
+            }
+            break;
+          case 't':
+            console.log('T key pressed, shiftKey:', e.shiftKey);
+            if (e.shiftKey) {
+              console.log('Ctrl+Shift+T detected, calling toggleToolbar');
+              e.preventDefault();
+              this.toggleToolbar();
+            }
+            break;
+          default:
+            break;
+            }
+        }
+
           if (e.key === 'Escape') {
             this.closeAllMenus();
           }
         });
       }
+    
         makeCopy() {
           const currentContent = document.querySelector('#editor .cm-content').textContent;
           const newUrl = window.location.origin + window.location.pathname + '?room=' + this.generateUUID();
@@ -607,6 +681,21 @@
           const userCount = document.getElementById('user-count').textContent;
           
           alert(`Document History:\n\nRoom: ${roomName}\nCurrent stats: ${stats}\nActive users: ${userCount}\n\nNote: Full version history coming in future update!`);
+        }
+
+        copyRoomUrl() {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Room URL copied to clipboard!');
+         }).catch(err => {
+            console.error('Failed to copy URL:', err);
+            alert('Failed to copy URL');
+          });
+        }
+        
+        toggleToolbar() {
+          const toolbar = document.getElementById('toolbar');
+          toolbar.classList.toggle('hidden');
+          console.log('Toolbar toggled');
         }
 
         emailDocument() {
@@ -778,7 +867,7 @@
         }
       }
      }
-      //////////////////
+                                                                 
       showWordCount() {
       const wordCount = document.getElementById('word-count').textContent;
       const charCount = document.getElementById('char-count').textContent;
@@ -917,19 +1006,39 @@
           const features = `Accessibility Features:
 
         Keyboard Shortcuts:
+        Basic:
         - Ctrl+N - New document
+        - Ctrl+F - Find text
         - Ctrl+B - Bold text
         - Ctrl+I - Italic text
         - Ctrl+U - Underline text
-        - Ctrl+F - Find text
         - Ctrl+P - Print
         - Ctrl+Z - Undo
         - Ctrl+Y - Redo
         - Ctrl+A - Select all
         - Ctrl+C - Copy
-        - Ctrl+V - Paste
         - Ctrl+X - Cut
+        - Ctrl+V - Paste
+        - Ctrl+M - Toggle markdown preview
+        - Ctrl+R - Update preview
+        - Ctrl+K - Insert link
+
+        With Shift:
         - Ctrl+Shift+C - Word count
+        - Ctrl+Shift+X - Strikethrough
+        - Ctrl+Shift+U - Copy room URL
+        - Ctrl+Shift+S - Make copy
+        - Ctrl+Shift+E - Email document
+        - Ctrl+Shift+7 - Numbered list
+        - Ctrl+Shift+8 - Bullet list
+        - Ctrl+Shift+L - Toggle line numbers
+        - Ctrl+Shift+T - Toggle toolbar
+
+        With Alt:
+        - Ctrl+Alt+1/2/3 - Headings
+        - Ctrl+Alt+A - Toggle activity log
+
+        Special:
         - Esc - Close menus
 
         Screen Reader Support:
@@ -941,23 +1050,53 @@
         Font Scaling: Use browser zoom (Ctrl + / Ctrl -)`;
 
           alert(features);
-        }
+        } 
 
-
+    
         toggleActivityLog() {
-          const logPanel = document.getElementById('user-log');
-          if (!logPanel) return;
-
-          logPanel.classList.toggle('show');
-
-          console.log(
-            'Activity log toggled:',
-            logPanel.classList.contains('show') ? 'shown' : 'hidden'
-          );
+        const logPanel = document.getElementById('user-log');
+        if (!logPanel) {
+          console.error('Activity log panel not found');
+          return;
         }
-                
 
-        // Helper methods
+         logPanel.classList.toggle('show');
+         console.log('Activity log toggled:', logPanel.classList.contains('show') ? 'shown' : 'hidden');
+        }
+
+
+                
+        toggleStrikethrough() {
+          document.getElementById('strike-button')?.click();
+        }
+
+        toggleHeading(level) {
+          document.getElementById(`heading${level}-button`)?.click();
+        }
+
+        toggleNumberedList() {
+          document.getElementById('numbered-button')?.click();
+        }
+
+        toggleBulletList() {
+          document.getElementById('bullet-button')?.click();
+        }
+
+        insertLink() {
+          document.getElementById('link-button')?.click();
+        }
+
+
+        copyRoomUrl() {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Room URL copied to clipboard!');
+            console.log('Room URL copied:', window.location.href);
+          }).catch(err => {
+            console.error('Failed to copy URL:', err);
+            alert('Failed to copy URL to clipboard');
+          });
+        }
+
         getNotificationSettings() {
           const saved = localStorage.getItem('notification-settings');
           return saved ? JSON.parse(saved) : {
@@ -967,7 +1106,6 @@
           };
         }
 
-/////////////////
     }
 
     // Initialize when DOM loads

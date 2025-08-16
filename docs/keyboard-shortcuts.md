@@ -8,6 +8,9 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 |----------|--------|-------------|
 | **Ctrl+N** | New Document | Creates a new document with fresh UUID room |
 | **Ctrl+P** | Print | Opens browser print dialog |
+| **Ctrl+Shift+S** | Make a Copy | Opens document copy in new tab |
+| **Ctrl+Shift+E** | Email Document | Opens email client with document and collaboration link |
+| **Ctrl+Shift+U** | Copy Room URL | Copies collaboration URL to clipboard |
 
 ## Text Editing
 
@@ -27,6 +30,13 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 | **Ctrl+B** | Bold | Toggle bold formatting on selected text |
 | **Ctrl+I** | Italic | Toggle italic formatting on selected text |
 | **Ctrl+U** | Underline | Toggle underline formatting on selected text |
+| **Ctrl+Shift+X** | Strikethrough | Toggle strikethrough formatting on selected text |
+| **Ctrl+K** | Insert Link | Convert URLs to markdown link format |
+| **Ctrl+Alt+1** | Heading 1 | Toggle H1 markdown formatting |
+| **Ctrl+Alt+2** | Heading 2 | Toggle H2 markdown formatting |
+| **Ctrl+Alt+3** | Heading 3 | Toggle H3 markdown formatting |
+| **Ctrl+Shift+7** | Numbered List | Toggle numbered list formatting |
+| **Ctrl+Shift+8** | Bullet List | Toggle bullet list formatting |
 
 ## Document Tools
 
@@ -34,6 +44,7 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 |----------|--------|-------------|
 | **Ctrl+F** | Find | Focus search box for document search |
 | **Ctrl+Shift+C** | Word Count | Show detailed document statistics |
+| **Ctrl+Shift+L** | Toggle Line Numbers | Show/hide line numbers in editor |
 
 ## Navigation and Interface
 
@@ -41,6 +52,8 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 |----------|--------|-------------|
 | **Ctrl+M** | Toggle Markdown Preview | Show/hide side-by-side markdown preview |
 | **Ctrl+R** | Update Preview | Refresh markdown preview with current text |
+| **Ctrl+Alt+A** | Toggle Activity Log | Show/hide user activity sidebar |
+| **Ctrl+Shift+T** | Toggle Toolbar | Show/hide formatting toolbar |
 | **Esc** | Close Menus | Close any open dropdown menu |
 
 ## Quick Reference Card
@@ -62,6 +75,17 @@ Ctrl+A        Select All
 Ctrl+M        Toggle Markdown Preview
 Ctrl+R        Update Preview
 Esc           Close Menus
+```
+
+### Advanced Shortcuts
+```
+Ctrl+Shift+S  Make Copy
+Ctrl+Shift+U  Copy Room URL
+Ctrl+Shift+E  Email Document
+Ctrl+Alt+1/2/3 Headings
+Ctrl+Shift+7/8 Lists
+Ctrl+Alt+A    Activity Log
+Ctrl+Shift+T  Toggle Toolbar
 ```
 
 ## Platform Notes
@@ -151,7 +175,6 @@ Instead of opening menus, use these direct shortcuts:
 Future versions may include:
 - **Ctrl+H** for Find and Replace
 - **Ctrl+Shift+Y** for Dictionary lookup
-- **Ctrl+K** for Insert Link dialog
 
 ### Current Limitations
 - No custom shortcut configuration yet

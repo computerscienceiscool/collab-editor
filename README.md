@@ -21,7 +21,7 @@ This demo has been extended with additional features that are useful to teams, i
 ### Document Style Menu System
 - **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
 - **Over 30 menu features**: Many implemented features and several planned for future releases. Much of this is a work-in-progress.
-- **Comprehensive keyboard shortcuts**: Standard shortcuts (Ctrl+C, Ctrl+V) plus editor-specific (Ctrl+B, Ctrl+I)
+- **Comprehensive keyboard shortcuts**: 23+ shortcuts including standard (Ctrl+C, Ctrl+V), formatting (Ctrl+B, Ctrl+I, Ctrl+U), and advanced (Ctrl+Alt+1/2/3 for headings, Ctrl+Shift+S for copy, Ctrl+M for markdown preview)
 - **Smart export options**: All exports use document title for filename generation
 - **Side-by-side markdown preview**: Real-time markdown rendering with Ctrl+M toggle and Ctrl+R refresh
 - **Professional interface**: Clean, modern design matching a traditional document editor aesthetic
