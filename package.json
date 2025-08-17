@@ -4,7 +4,29 @@
   "scripts": {
     "start": "npx esbuild frontend/editor.js --bundle --outfile=public/bundle.js --servedir=public",
     "build": "esbuild src/app.js --bundle --outfile=public/bundle.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "vite --port 8080",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "vitest run src/",
+    "test:unit:watch": "vitest src/",
+    "test:integration": "playwright test tests/integration/",
+    "test:e2e": "playwright test tests/e2e/",
+    "test:e2e:headed": "playwright test tests/e2e/ --headed",
+    "test:e2e:debug": "playwright test tests/e2e/ --debug",
+    "test:security": "playwright test tests/e2e/security/",
+    "test:performance": "playwright test tests/e2e/performance/",
+    "test:collaboration": "playwright test tests/e2e/collaboration/",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:quick": "npm run test:unit && cd rust-server && cargo test && cd .. && go test ./...",
+    "test:coverage": "vitest run --coverage src/",
+    "test:report": "playwright show-report",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --write src/ tests/",
+    "wasm:build": "cd rust-wasm && wasm-pack build --target web --out-dir pkg",
+    "wasm:test": "cd rust-wasm && cargo test",
+    "rust:test": "cd rust-server && cargo test",
+    "go:test": "go test -v ./...",
+    "setup:test": "./scripts/setup-test-env.sh"
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.3.4",
@@ -19,7 +41,14 @@
     "yjs": "^13.6.27"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "@vitest/ui": "^3.2.4",
+    "dotenv": "^16.3.0",
     "esbuild": "^0.25.5",
-    "vite": "^7.0.2"
+    "eslint": "^8.57.1",
+    "jsdom": "^23.2.0",
+    "prettier": "^3.6.2",
+    "vite": "^7.0.2",
+    "vitest": "^3.2.4"
   }
 }

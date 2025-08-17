@@ -412,34 +412,7 @@
             if (window.createPromiseGridMessage) {
               try {
                 const message = window.createPromiseGridMessage("test-doc", "menu-test", 0, "Test message from menu", "user");
-                console.log('PromiseGrid test message created:', message);
-                alert('PromiseGrid test message created! Check console for details.');
-              } catch (error) {
-                alert('PromiseGrid test failed: ' + error.message);
-              }
-            } else {
-              alert('PromiseGrid functionality not available. Make sure WASM is loaded.');
-            }
-            break;
-          case 'toggle-log':
-            this.toggleActivityLog();
-            break;
-          case 'toggle-toolbar':
-            this.toggleToolbar();
-            break;
-          case 'toggle-markdown-preview':
-            this.toggleMarkdownPreview();
-            break;
-          case 'update-markdown-preview':
-            this.updateMarkdownPreview();
-            break;
-          case 'about':
-            alert(`Collaborative Text Editor 
-            Features:
-            • Real-time collaboration with Yjs CRDTs
-            • WASM-powered text processing (Rust)
-            • PromiseGrid protocol integration
-            • Offline support with automatic sync
+'y
 
             Built with Rust, WebAssembly, and JavaScript`);
                         break;
@@ -554,13 +527,10 @@
             }
             break;  
           case 'u':
-            if (e.shiftKey) {
-              e.preventDefault();
-              this.copyRoomUrl();
-            } else if (!e.target.matches('input, textarea')) {
-              e.preventDefault();
-              document.getElementById('underline-button')?.click();
-            }
+          //    if (e.shiftKey) {
+          //      e.preventDefault();
+         //       this.copyRoomUrl();
+          //  }
             break;
           case 's':
             if (e.shiftKey) {
