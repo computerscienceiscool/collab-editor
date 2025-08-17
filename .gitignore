@@ -12,7 +12,7 @@ dist/
 *.log
 # playwright test reports
 playwright-report/
-
+test-results/
 
 # grokker files
 .grok
