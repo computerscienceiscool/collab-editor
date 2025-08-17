@@ -10,6 +10,9 @@ dist/
 .vite/
 .parcel-cache/
 *.log
+# playwright test reports
+playwright-report/
+
 
 # grokker files
 .grok
