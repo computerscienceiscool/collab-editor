@@ -130,6 +130,7 @@ commit:
 	grok commit | git commit -F-
 	git push origin $(branch)
 
+
 test:
 	npm run test:unit
 	cd rust-server && cargo test
