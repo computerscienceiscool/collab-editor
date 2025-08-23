@@ -6,6 +6,7 @@ WS_PORT=1234  # for Yjs websocket server
 # Define the branch too use the branch already in use by the machine
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
+.PHONY: help install build serve ws run run-rust run-go restart clean all stop start open-room wasm wasm-clean wasm-rebuild dev-all rebuild commit test test-all test-quick
 
 default: help
 
@@ -23,7 +24,7 @@ help:
 	@echo "  make run         - Start Rust backend server (default)"
 	@echo "  make run-go      - Start Go backend server"
 	@echo "  make run-rust    - Start Rust backend server"
-	@echo "  make restart     - Kill anything stuck on ports $(PORT) or $(WS_PORT)"
+	@echo "  make restart     - Kill anything stuck on ports $(PORT), $(WS_PORT), and $(BACKEND_PORT)" 
 	@echo "  make all         - Install, build, restart, then run all services"
 	@echo "  make start       - Restart ports and run websocket + frontend"
 	@echo "  make stop        - Kill anything on ports $(PORT) and $(WS_PORT)"
@@ -36,7 +37,7 @@ help:
 install:
 	npm install --legacy-peer-deps
 
-build:
+build: wasm
 	@echo "Building with Vite..."
 	npx vite build
 
@@ -60,13 +61,15 @@ run-rust:
 
 run-go:
 	@echo "Running Go backend..."
-	go run main.go
+	cd go-server && PORT=$(BACKEND_PORT) go run main.go
+#	go run main.go
 
 restart:
 	@echo "Killing anything on ports $(PORT),$(BACKEND_PORT)and $(WS_PORT)..."
 	@-fuser -k $(PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	sleep 2
 
 clean:
 	@echo "Cleaning up..."
@@ -128,7 +131,7 @@ commit:
 	# fail if any files are untracked
 #	test "$$(git status --porcelain|grep '??' |wc -l)" -le 0
 	grok commit | git commit -F-
-	git push origin $(branch)
+	git push origin $(BRANCH)
 
 
 test:
