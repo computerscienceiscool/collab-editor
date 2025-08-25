@@ -29,7 +29,7 @@
         <div class="dropdown-menu" id="file-menu">
           <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
            <div class="dropdown-item" data-action="open">Open <span class="keyboard-shortcut">Ctrl+O</span></div>
-          <div class="dropdown-item" data-action="make-copy">Make a copy<span class="keyboard-shortcut">Ctrl+Shift+S</span></div>
+          <div class="dropdown-item" data-action="make-copy">Make a copy <span class="keyboard-shortcut">Ctrl+Shift+S</span></div>
           <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
           <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
@@ -411,9 +411,13 @@
           case 'promisegrid-test':
             if (window.createPromiseGridMessage) {
               try {
-                const message = window.createPromiseGridMessage("test-doc", "menu-test", 0, "Test message from menu", "user");
-'y
-
+                const message = window.createPromiseGridMessage('test', { content: 'Hello, PromiseGrid!' });
+                console.log('PromiseGrid Message:', message);
+                alert('PromiseGrid test message created! Check the console for details.');
+              } catch (err) {
+                console.error('Error creating PromiseGrid message:', err);
+                alert('Failed to create PromiseGrid message. Check console for details.');
+              }
             Built with Rust, WebAssembly, and JavaScript`);
                         break;
                       case 'promisegrid-info':
@@ -526,11 +530,11 @@
               this.updateMarkdownPreview();
             }
             break;  
-          case 'u':
-          //    if (e.shiftKey) {
-          //      e.preventDefault();
-         //       this.copyRoomUrl();
-          //  }
+           case 'u':
+                if (e.altKey && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                document.getElementById('underline-button')?.click();
+                }
             break;
           case 's':
             if (e.shiftKey) {
