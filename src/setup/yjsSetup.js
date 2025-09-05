@@ -19,7 +19,9 @@ export function setupYjs() {
 
     
 
-
+  //TODO: This is where the IndexDB persistence is set up
+    // This allows custom properties to be stored in the Yjs document
+    
   // Persist state locally
   const persistence = new IndexeddbPersistence(room, ydoc);
   persistence.once('synced', () => {

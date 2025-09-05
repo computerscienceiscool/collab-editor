@@ -15,7 +15,7 @@ export function setupUserControls(provider) {
     console.warn('Name or color input not found');
     return;
   }
-
+//TODO: artifacts in localStorage that MIGHT no longer be used.  usercolor
   // Restore name/color from localStorage or use fallback
   const storedName = localStorage.getItem('username') || getRandomName();
   const storedColor = localStorage.getItem('usercolor') || getRandomColor();

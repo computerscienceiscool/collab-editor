@@ -474,6 +474,8 @@
       setupKeyboardShortcuts()  {
         document.addEventListener('keydown', (e) => {
           if (e.ctrlKey || e.metaKey) {
+            console.log('Ctrl/Meta key detected with', e);
+
             switch (e.key.toLowerCase()) {
               case 'n':
                 e.preventDefault();
