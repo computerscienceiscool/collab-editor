@@ -618,13 +618,6 @@
       }
     }
 
-
-
-
-
-
-
-
         shareDocument() {
           const url = window.location.href;
           const title = document.getElementById('document-title').value || 'Collaborative Document';
@@ -846,82 +839,62 @@
         
 
         toggleLineNumbers() {
-          const view = this.getEditorView();
-          if (!view) {
-            alert('Editor not found');
-            return;
-          }
-
-          const editor = document.querySelector('.cm-editor');
-          const gutters = editor.querySelector('.cm-gutters');
-          const isEnabled = localStorage.getItem('line-numbers-enabled') === 'true';
-          
-          if (isEnabled) {
-            // Turn OFF line numbers
-            if (gutters) {
-              gutters.style.display = 'none';
+          // Use the proper CodeMirror extension API instead of manual DOM manipulation
+          if (window.editorLineNumberCompartment && window.editorView) {
+            try {
+              // Get current state
+              const currentlyEnabled = localStorage.getItem('line-numbers-enabled') !== 'false';
+              
+              // Toggle the line numbers using CodeMirror's compartment system
+              window.editorView.dispatch({
+                effects: window.editorLineNumberCompartment.reconfigure(
+                  currentlyEnabled ? [] : window.lineNumbersExtension
+                )
+              });
+              
+              // Update state
+              localStorage.setItem('line-numbers-enabled', (!currentlyEnabled).toString());
+              
+              const statusMessage = currentlyEnabled ? 'Line numbers hidden' : 'Line numbers shown';
+              console.log(statusMessage);
+              
+              // Show brief notification
+              this.showNotification(statusMessage);
+              
+            } catch (error) {
+              console.error('Failed to toggle line numbers:', error);
+              alert('Failed to toggle line numbers. Please try again.');
             }
-            localStorage.setItem('line-numbers-enabled', 'false');
-            console.log('Line numbers disabled');
-            alert('Line numbers hidden');
           } else {
-            // Turn ON line numbers
-            if (gutters) {
-              gutters.style.display = 'block';
-            } else {
-              // If gutters do not exist, we need to add them
-              // This creates a simple line number display
-              this.addLineNumbers(editor)
-            }
-            localStorage.setItem('line-numbers-enabled', 'true');
-            console.log('Line numbers enabled');
-            alert('Line numbers shown');
+            console.warn('Line number compartment not available. Editor may not be fully initialized.');
+            alert('Editor not ready. Please wait a moment and try again.');
           }
         }
 
-    addLineNumbers(editor) {
-      // Create a simple line numbers gutter
-      const content = editor.querySelector('.cm-content');
-      if (!content) return;
-      
-      // Create gutters container
-      const gutters = document.createElement('div');
-      gutters.className = 'cm-gutters';
-      gutters.style.cssText = `
-        position: absolute;
-        left: 0;
-        top: 0;
-        min-height: 100%;
-        background: #f5f5f5;
-        border-right: 1px solid #ddd;
-        padding: 0 8px;
-        font-family: monospace;
-        font-size: 12px;
-        color: #666;
-        width: 40px;
-        z-index: 1;
-      `;
-      
-      // Add line numbers
-      const lines = content.textContent.split('\n');
-      for (let i = 1; i <= lines.length; i++) {
-        const lineNumber = document.createElement('div');
-        lineNumber.textContent = i;
-        lineNumber.style.cssText = `
-          height: 1.6em;
-          line-height: 1.6em;
-          text-align: right;
-          user-select: none;
-        `;
-        gutters.appendChild(lineNumber);
-      }
-      
-      // Insert gutters before content
-      editor.insertBefore(gutters, content);
-      
-      // Adjust content margin
-      content.style.marginLeft = '50px';
-    }
+        showNotification(message) {
+          // Create a temporary notification element
+          const notification = document.createElement('div');
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          // Remove after 2 seconds
+          setTimeout(() => {
+            notification.remove();
+          }, 2000);
+        }
 
         showNotificationSettings() {
           const settings = `Notification Settings:
