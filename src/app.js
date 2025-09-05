@@ -10,6 +10,7 @@ import { setupUserControls } from './setup/userSetup.js';
 import { setupUserLogging } from './ui/logging.js';
 import { setupTypingIndicator } from './ui/typingIndicator.js';
 import { setupUserList } from './ui/userList.js';
+import { handleDocumentCopy } from './setup/documentCopy.js';
 
 // 2. Declare a typingTimeout variable — it’s needed across functions
 let typingTimeout = null;
@@ -54,6 +55,9 @@ window.addEventListener('DOMContentLoaded', async() => {
   setupUserList(awareness);
   setupDocumentStats(ytext, view);
 
+  setTimeout(() => {
+    handleDocumentCopy(view, ytext);
+    }, 1500);
 
   // 3h. Detect when *this* user types and tell the others
   view.dom.addEventListener('keydown', () => {

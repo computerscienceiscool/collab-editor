@@ -561,29 +561,64 @@
       }
        
 
-
-  makeCopy() {
-  const currentContent = document.querySelector('#editor .cm-content').textContent;
-  const newUrl = window.location.origin + window.location.pathname + '?room=' + this.generateUUID();
-  const newWindow = window.open(newUrl, '_blank');
-
-  // Copy content when new window loads
-  newWindow.addEventListener('load', () => {
-    setTimeout(() => {
-      if (newWindow.editorView) {
-        newWindow.editorView.dispatch({
-          changes: {
-            from: 0,
-            to: newWindow.editorView.state.doc.length,
-            insert: currentContent
-          }
-        });
+    makeCopy() {
+      const view = this.getEditorView();
+      if (!view) {
+        alert('Editor not available. Please try again.');
+        return;
       }
-    }, 2000);
-  });
 
-  alert('Copy created in new tab!');
-}
+      try {
+        // Get the complete document text (preserves line breaks and formatting)
+        const currentContent = view.state.doc.toString();
+        
+        // Get document title for the new copy
+        const currentTitle = document.getElementById('document-title').value || 'Untitled Document';
+        const copyTitle = currentTitle + ' (Copy)';
+        
+        // Create copy data object
+        const copyData = {
+          content: currentContent,
+          title: copyTitle,
+          timestamp: Date.now(),
+          originalLength: currentContent.length,
+          lineCount: (currentContent.match(/\n/g) || []).length + 1
+        };
+        
+        console.log('Creating document copy:');
+        console.log('Original title:', currentTitle);
+        console.log('Content length:', copyData.originalLength, 'characters');
+        console.log('Line count:', copyData.lineCount);
+        
+        // Store in sessionStorage for transfer (will be cleaned up after use)
+        sessionStorage.setItem('documentCopyData', JSON.stringify(copyData));
+        
+        // Generate new room URL
+        const newUrl = window.location.origin + window.location.pathname + '?room=' + this.generateUUID();
+        
+        // Open new window
+        const newWindow = window.open(newUrl, '_blank');
+        
+        if (newWindow) {
+          console.log('Copy window opened successfully');
+          alert(`Copy created in new tab!\n\nTitle: ${copyTitle}\nContent: ${copyData.originalLength} characters, ${copyData.lineCount} lines`);
+        } else {
+          // Fallback if popup was blocked
+          console.log('Popup blocked');
+          alert('Popup blocked. Please allow popups and try again, or manually open: ' + newUrl);
+          // Clean up the stored data
+          sessionStorage.removeItem('documentCopyData');
+        }
+        
+      } catch (error) {
+        console.error('Failed to create copy:', error);
+        alert('Failed to create copy: ' + error.message);
+      }
+    }
+
+
+
+
 
 
 
