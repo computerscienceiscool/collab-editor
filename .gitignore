@@ -1,6 +1,6 @@
 # Rust WASM build output
-/rust-wasm/pkg/
-/rust-wasm/target/
+rust-wasm/pkg/
+rust-wasm/target/
 
 # Node
 node_modules/
@@ -25,7 +25,7 @@ public/bundle.js
 public/style.css
 
 # Rust
-/rust-server/target/
+rust-server/target/
 
 # Vite dev server & IndexedDB docs
 doc.yjs
