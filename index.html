@@ -408,25 +408,27 @@
           this.showAccessibility();
           break;
 
-          case 'promisegrid-test':
+
+
+         case 'promisegrid-test':
             if (window.createPromiseGridMessage) {
-              try {
+                try {
                 const message = window.createPromiseGridMessage("test-doc", "menu-test", 0, "Test message from menu", "user");
-'y
-
-            Built with Rust, WebAssembly, and JavaScript`);
-                        break;
-                      case 'promisegrid-info':
-                        alert(`PromiseGrid Integration
-
-            This editor includes real PromiseGrid protocol support:
-            • Live CBOR message generation
-            • Protocol-compliant message structure  
-            • Official 'grid' tag (0x67726964)
-
-            Check the browser console to see PromiseGrid messages!`);
+                console.log('PromiseGrid Message:', message);
+                alert('PromiseGrid test message created! Check the console for details.');
+                } catch (err) {
+                console.error('Error creating PromiseGrid message:', err);
+                alert('Failed to create PromiseGrid message. Check console for details.');
+                }
+            } else {
+                alert('PromiseGrid functionality not available. Make sure WASM is loaded.');
+            }
             break;
-          default:
+
+         case 'promisegrid-info':
+            alert('PromiseGrid Integration\n\nThis editor includes real PromiseGrid protocol support:\n- Live CBOR message generation\n- Protocol-compliant message structure\n- Official \'grid\' tag (0x67726964)\n\nCheck the browser console to see PromiseGrid messages!');
+            break;
+            default:
             console.log('Unknown action:', action);
         }
       }
