@@ -19,12 +19,13 @@ export function setupUserLogging(awareness) {
     for (const id of added) {
       if (id === localClientID) continue;
       const user = states.get(id)?.user;
-      if (user) logEntry(`${user.name} joined`, user.color);
+      if (user) logEntry(`${user.name} joined: `, user.color);
+      
     }
 
     for (const id of removed) {
       const user = states.get(id)?.user;
-      if (user) logEntry(`${user.name} left`, user.color);
+      if (user) logEntry(`${user.name} left: `, user.color);
     }
   });
 
