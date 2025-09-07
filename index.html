@@ -408,8 +408,8 @@
             break;
           
           case 'accessibility':
-          this.showAccessibility();
-          break;
+              showAccessibilityModal();
+              break;
 
           case 'promisegrid-test':
             if (window.createPromiseGridMessage) {
@@ -438,25 +438,14 @@
             this.updateMarkdownPreview();
             break;
           case 'about':
-            alert(`Collaborative Text Editor 
-            Features:
-            • Real-time collaboration with Yjs CRDTs
-            • WASM-powered text processing (Rust)
-            • PromiseGrid protocol integration
-            • Offline support with automatic sync
-
-            Built with Rust, WebAssembly, and JavaScript`);
-                        break;
-                      case 'promisegrid-info':
-                        alert(`PromiseGrid Integration
-
-            This editor includes real PromiseGrid protocol support:
-            • Live CBOR message generation
-            • Protocol-compliant message structure  
-            • Official 'grid' tag (0x67726964)
-
-            Check the browser console to see PromiseGrid messages!`);
+            showAboutModal();
             break;
+
+          case 'promisegrid-info':
+            showPromiseGridModal();
+            break;
+
+
           default:
             console.log('Unknown action:', action);
         }
@@ -1010,6 +999,75 @@
     document.addEventListener('DOMContentLoaded', () => {
       new MenuSystem();
     });
+    
+        // Modal System JavaScript Functions - ADD THIS SECTION
+    function showModal(title, content) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-content').innerHTML = content;
+      document.getElementById('modal-overlay').classList.add('show');
+      
+      // Prevent body scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(event) {
+      // Only close if clicking overlay or close button
+      if (event && event.target.closest('.modal-dialog') && !event.target.closest('.modal-close')) {
+        return;
+      }
+      
+      document.getElementById('modal-overlay').classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+
+    // ESC key to close modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+    function showAboutModal() {
+      const content = `
+        <h3>Collaborative Text Editor</h3>
+        <p><strong>Features:</strong></p>
+        <ul>
+          <li>Real-time collaboration with Yjs CRDTs</li>
+          <li>WASM-powered text processing (Rust)</li>
+          <li>PromiseGrid protocol integration</li>
+          <li>Offline support with automatic sync</li>
+        </ul>
+        <p>Built with Rust, WebAssembly, and JavaScript</p>
+      `;
+      showModal('About Collaborative Editor', content);
+    }
+
+    function showAccessibilityModal() {
+      const content = `
+        <h3>Keyboard Shortcuts</h3>
+        <ul>
+          <li>Ctrl+N - New document</li>
+          <li>Ctrl+B - Bold text</li>
+          <li>Ctrl+F - Find text</li>
+          <li>All buttons are keyboard accessible</li>
+        </ul>
+      `;
+      showModal('Accessibility Features', content);
+    }
+
+    function showPromiseGridModal() {
+      const content = `
+        <h3>PromiseGrid Integration</h3>
+        <p>This editor includes real PromiseGrid protocol support:</p>
+        <ul>
+          <li>Live CBOR message generation</li>
+          <li>Protocol-compliant message structure</li>
+          <li>Official 'grid' tag (0x67726964)</li>
+        </ul>
+        <p>Check the browser console to see PromiseGrid messages!</p>
+      `;
+      showModal('PromiseGrid Integration', content);
+    }
+
   </script>
   <!-- Load your existing app.js -->
   <script type="module" src="/src/app.js"></script>
@@ -1021,5 +1079,21 @@
         .catch(err => console.warn('Service worker registration failed:', err));
     }
   </script>
+    <!-- Modal HTML Structure -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+      <div class="modal-dialog" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2 id="modal-title" class="modal-title">Dialog Title</h2>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modal-content" class="modal-content">
+          <!-- Content will be inserted here -->
+        </div>
+        <div class="modal-footer">
+          <button class="modal-button" onclick="closeModal()">Close</button>
+        </div>
+  </div>
+</div>
+
 </body>
 </html>
