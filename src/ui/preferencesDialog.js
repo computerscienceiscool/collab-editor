@@ -148,10 +148,13 @@ export class PreferencesDialog {
     
     // Escape key to close or cancel editing
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
-    
+   
+
     // Click on shortcut keys to edit them
     modal.addEventListener('click', (e) => {
-      if (e.target.matches('.shortcut-key')) {
+    if (e.target.matches('.shortcut-key')) {
+        e.preventDefault();
+        e.stopPropagation();
         const action = e.target.dataset.action;
         this.startEditing(action, e.target);
       }
