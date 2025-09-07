@@ -123,7 +123,7 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 - **Toggle line numbers**: Show/hide line numbers in editor
 
 **Settings:**
-- **Preferences**: View current editor settings and capabilities
+- **Preferences (Ctrl+Comma)**: Keyboard shortcut customization dialog
 - **Notification settings**: Information about current notification system
 - **Accessibility**: Complete keyboard shortcut reference
 
@@ -169,7 +169,46 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 **Tools:**
 - Ctrl+Shift+C: Word Count
 - Ctrl+Shift+L: Toggle Line Numbers
+- **Ctrl+Comma: Preferences (Keyboard Shortcuts)**
 - Esc: Close any open menu
+
+## Keyboard Shortcut Customization
+
+**NEW FEATURE**: You can now customize any keyboard shortcut to match your preferences!
+
+### How to Customize Shortcuts
+
+1. **Open Preferences**: Press **Ctrl+Comma** or go to **Tools → Preferences**
+2. **Browse categories**: Shortcuts are organized by File, Edit, Format, Tools, View, Help, Search, and System
+3. **Click any shortcut**: Click on the key combination (like "Ctrl+B") to edit it
+4. **Press new keys**: The shortcut turns yellow - press your desired key combination
+5. **Automatic save**: Changes are saved immediately to your browser
+
+### Customization Features
+
+- **51 shortcuts available**: Every keyboard shortcut in the editor can be changed
+- **Conflict detection**: System prevents duplicate assignments and suggests alternatives
+- **Industry standards**: Defaults follow common conventions (Ctrl+C for Copy, etc.)
+- **Personal settings**: Changes are saved locally - each user can have different shortcuts
+- **Reset option**: Restore all defaults anytime with one click
+
+### Customization Tips
+
+**Choosing Shortcuts:**
+- **Use familiar patterns**: Keep Copy as Ctrl+C, Paste as Ctrl+V
+- **Group related functions**: Use Ctrl+1/2/3 for different heading levels
+- **Avoid system shortcuts**: Don't use Alt+Tab, Alt+F4, etc.
+- **Consider frequency**: Put easy shortcuts on commonly used functions
+
+**Example Custom Setups:**
+- **Writer-focused**: Ctrl+W for Word Count, Ctrl+1/2/3 for headings
+- **Developer-focused**: Ctrl+/ for Format Document, Ctrl+L for Line Numbers  
+- **Minimalist**: Remove rarely used shortcuts, keep only essentials
+
+### Accessing Customization
+- **Menu**: Tools → Preferences
+- **Keyboard**: Ctrl+Comma (can be customized too!)
+- **Documentation**: See [docs/keyboard-preferences.md](docs/keyboard-preferences.md) for complete guide
 
 ## Text Formatting and WASM Features
 
@@ -197,6 +236,7 @@ Apply formatting through toolbar buttons or Format menu (all operations use WASM
 | **Numbered List** | 1. button | Format → Numbered List | Ctrl+Shift+7 | `item` ↔ `1. item` |
 | **Link Conversion** | 🔗 button | Format → Insert Link | Ctrl+K | `https://github.com` → `[https://github.com](https://github.com)` |
 
+**Note**: All keyboard shortcuts above can be customized via **Tools → Preferences**!
 
 ### Document-Wide Formatting
 Click the **Format** button to automatically clean up your entire document:
@@ -433,18 +473,26 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 ## Quick Tips
 
 ### Efficient Workflow
-1. **Use keyboard shortcuts**: `Ctrl+Z` for undo, `Ctrl+Y` for redo
-2. **Format entire documents**: Click Format button to clean up spacing and punctuation
-3. **Quick URL conversion**: Double-click URLs to select cleanly, then click Link button
-4. **Monitor your progress**: Watch live word count and reading time in toolbar
-5. **Check console output**: See PromiseGrid messages being generated in real-time
+1. **Customize shortcuts first**: Press `Ctrl+Comma` to set up shortcuts that work for you
+2. **Use keyboard shortcuts**: Whatever keys you set for undo, redo, formatting, etc.
+3. **Format entire documents**: Click Format button to clean up spacing and punctuation
+4. **Quick URL conversion**: Double-click URLs to select cleanly, then use your Link shortcut
+5. **Monitor your progress**: Watch live word count and reading time in toolbar
+6. **Check console output**: See PromiseGrid messages being generated in real-time
 
 ### Best Practices
+- **Personalize shortcuts**: Set up shortcuts that match your workflow and habits
 - **Select text precisely** for formatting - avoid selecting extra spaces or newlines
 - **Use Format button** before sharing documents for professional appearance  
 - **Share room URLs** with teammates for instant collaboration
 - **Check document stats** to track writing progress
 - **Export as PromiseGrid CBOR** to demonstrate decentralized computing capabilities
+
+### Shortcut Recommendations
+- **Keep standards**: Leave Ctrl+C, Ctrl+V, Ctrl+Z as they are - muscle memory is important
+- **Group by function**: Use Ctrl+1/2/3 for headings, Ctrl+Shift+7/8 for lists
+- **Use what feels natural**: If Ctrl+B for Bold feels wrong to you, change it!
+- **Test your changes**: Make sure new shortcuts don't conflict with browser functions
 
 ---
 
@@ -456,6 +504,8 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **If formatting buttons don't work**: Check console for WASM errors, try refreshing the page.
 - **If stats don't update**: Make sure you're typing in the editor area.
 - **If PromiseGrid messages don't appear**: Ensure WASM module loaded successfully (check console on page load).
+- **If custom shortcuts don't work**: Check Preferences dialog to verify they saved correctly
+- **To reset shortcuts**: Use "Reset to Defaults" button in Tools → Preferences
 
 ---
 
@@ -470,6 +520,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - The backend may be powered by a **Rust** server instead of the default y-websocket server.
 - **All text processing happens client-side** - no server required for formatting operations.
 - **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
+- **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
 
 ---
 

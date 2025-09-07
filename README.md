@@ -22,6 +22,7 @@ This demo has been extended with additional features that are useful to teams, i
 - **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
 - **Over 30 menu features**: Many implemented features and several planned for future releases. Much of this is a work-in-progress.
 - **Comprehensive keyboard shortcuts**: 23+ shortcuts including standard (Ctrl+C, Ctrl+V), formatting (Ctrl+B, Ctrl+I, Ctrl+U), and advanced (Ctrl+Alt+1/2/3 for headings, Ctrl+Shift+S for copy, Ctrl+M for markdown preview)
+- **Keyboard shortcut customization**: Full preferences system allowing users to customize any of 51 keyboard shortcuts with conflict detection and localStorage persistence
 - **Smart export options**: All exports use document title for filename generation
 - **Side-by-side markdown preview**: Real-time markdown rendering with Ctrl+M toggle and Ctrl+R refresh
 - **Professional interface**: Clean, modern design matching a traditional document editor aesthetic
@@ -244,7 +245,7 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 - [docs/rust-wasm-features.md](docs/rust-wasm-features.md) — Features implemented in the Rust for WebAssembly 
 - [docs/promisegrid-integration.md](docs/promisegrid-integration.md) — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
 - [docs/editor-menu.md](docs/editor-menu.md) — Full list of menu features and keyboard shortcuts
-- [docs/keyboard-shortcuts.md](docs/keyboard-shortcuts.md) — Comprehensive list of keyboard shortcuts
+- [docs/keyboard-preferences.md](docs/keyboard-preferences.md) — Complete guide to customizing keyboard shortcuts
 - [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 
 ---

@@ -66,7 +66,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 | **Document Statistics** | - | Implemented | Shows live word/char count and reading time |
 | **Test PromiseGrid Message** | - | Implemented | Creates and logs PromiseGrid CBOR messages |
 | **Notification settings** | - | Implemented | Explains current notification system |
-| **Preferences** | - | Implemented | Shows current editor settings and capabilities |
+| **Preferences** | Ctrl+Comma | Implemented | Keyboard shortcut customization preferences |
 | **Accessibility** | - | Implemented | Complete keyboard shortcuts and accessibility information |
 
 ### View Menu
@@ -119,6 +119,7 @@ Comprehensive keyboard shortcut support for all major operations:
 - Standard shortcuts (Ctrl+C, Ctrl+V, etc.)
 - Editor-specific shortcuts (Ctrl+B for Bold, etc.)
 - Custom shortcuts (Ctrl+Shift+C for Word Count)
+- **Fully customizable shortcuts** via Tools → Preferences (Ctrl+Comma)
 - ESC to close any open menu
 
 ## Technical Implementation
@@ -161,7 +162,8 @@ Comprehensive keyboard shortcut support for all major operations:
 1. **Document Naming**: Click the document title to rename
 2. **Collaboration**: Share the room URL for real-time collaboration
 3. **Keyboard Efficiency**: Use Ctrl+Shift+C for quick word count
-4. **Export Options**: Choose appropriate format based on use case
+4. **Shortcut Customization**: Use Tools → Preferences to customize keyboard shortcuts
+5. **Export Options**: Choose appropriate format based on use case
 
 ### For Developers
 1. **Menu Extension**: Add new items by updating HTML and handleAction method
@@ -172,9 +174,9 @@ Comprehensive keyboard shortcut support for all major operations:
 ## Status Summary
 
 - **Total Menu Items**: 47
-- **Implemented**: 32 (68%)
-- **Not Implemented**: 15 (32%)
-- **Fully Functional Categories**: File (93%), Edit (80%), Format (100%), View (100%), Help (100%)
-- **Partially Implemented**: Tools (47% - missing advanced features)
+- **Implemented**: 33 (70%)
+- **Not Implemented**: 14 (30%)
+- **Fully Functional Categories**: File (93%), Edit (100%), Format (100%), View (100%), Help (100%)
+- **Partially Implemented**: Tools (86% - missing advanced features)
 
 The menu system provides comprehensive functionality for document editing, collaboration, and export while maintaining the familiar Google Docs interface that users expect.

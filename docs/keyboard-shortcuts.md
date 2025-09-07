@@ -2,6 +2,12 @@
 
 Complete keyboard shortcut guide for the Collaborative Text Editor.
 
+## Customization
+
+**NEW**: All keyboard shortcuts can now be customized! Access **Tools → Preferences** or press **Ctrl+Comma** to open the keyboard shortcut configuration dialog. You can change any of the 51 shortcuts listed below with full conflict detection and validation.
+
+See [docs/keyboard-preferences.md](docs/keyboard-preferences.md) for complete customization instructions.
+
 ## File Operations
 
 | Shortcut | Action | Description |
@@ -45,6 +51,7 @@ Complete keyboard shortcut guide for the Collaborative Text Editor.
 | **Ctrl+F** | Find | Focus search box for document search |
 | **Ctrl+Shift+C** | Word Count | Show detailed document statistics |
 | **Ctrl+Shift+L** | Toggle Line Numbers | Show/hide line numbers in editor |
+| **Ctrl+Comma** | Preferences | Open keyboard shortcut customization dialog |
 
 ## Navigation and Interface
 
@@ -66,6 +73,7 @@ Ctrl+B/I/U    Bold/Italic/Underline
 Ctrl+F        Find
 Ctrl+P        Print
 Ctrl+N        New Document
+Ctrl+Comma    Preferences
 ```
 
 ### Document Shortcuts
@@ -88,6 +96,27 @@ Ctrl+Alt+A    Activity Log
 Ctrl+Shift+T  Toggle Toolbar
 ```
 
+## Shortcut Customization
+
+### Quick Setup
+1. **Open Preferences**: Press **Ctrl+Comma** or go to Tools → Preferences
+2. **Click any shortcut** in the dialog to edit it
+3. **Press your desired keys** (e.g., Ctrl+Shift+B for Bold)
+4. **Automatic saving** - changes are saved immediately
+
+### Customization Features
+- **51 customizable shortcuts** across 8 categories
+- **Conflict detection** - prevents duplicate assignments
+- **Industry standards** - defaults follow common conventions
+- **Persistent storage** - settings saved locally in browser
+- **Reset option** - restore defaults anytime
+
+### Tips for Custom Shortcuts
+- **Use modifiers**: Combine Ctrl, Alt, and Shift for unique combinations
+- **Avoid conflicts**: System will warn you of existing assignments
+- **Group by function**: Keep related shortcuts together (Ctrl+1/2/3 for headings)
+- **Test thoroughly**: Make sure new shortcuts feel natural to use
+
 ## Platform Notes
 
 ### Windows/Linux
@@ -98,6 +127,7 @@ Replace **Ctrl** with **Cmd** (⌘) for all shortcuts:
 - **Cmd+C** for Copy
 - **Cmd+B** for Bold
 - **Cmd+N** for New Document
+- **Cmd+Comma** for Preferences
 - etc.
 
 ## Accessibility Notes
@@ -115,6 +145,7 @@ Replace **Ctrl** with **Cmd** (⌘) for all shortcuts:
 - All functionality available via keyboard
 - No mouse-only operations
 - Sticky keys compatible
+- **Customizable shortcuts** allow adaptation for different needs
 
 ## Menu Navigation
 
@@ -129,7 +160,7 @@ Instead of opening menus, use these direct shortcuts:
 - Most File operations: Use toolbar or keyboard shortcuts
 - Edit operations: Ctrl+C, Ctrl+V, etc.
 - Format operations: Ctrl+B, Ctrl+I, etc.
-- Tools: Ctrl+Shift+C for word count
+- Tools: Ctrl+Shift+C for word count, Ctrl+Comma for preferences
 
 ## Tips for Efficiency
 
@@ -138,13 +169,15 @@ Instead of opening menus, use these direct shortcuts:
 2. Type content using **Ctrl+B/I/U** for formatting
 3. **Ctrl+F** to search when needed
 4. **Ctrl+Shift+C** to check word count
-5. **Ctrl+P** to print when finished
+5. **Ctrl+Comma** to customize shortcuts as needed
+6. **Ctrl+P** to print when finished
 
 ### Collaboration Tips
 - Share room URL for others to join
 - Use **Ctrl+F** to quickly find text others mention
 - **Ctrl+Z/Y** works with collaborative changes
 - Your formatting shortcuts work in real-time for all users
+- **Custom shortcuts are personal** - each user can have different preferences
 
 ### Search Efficiency
 1. **Ctrl+F** to focus search
@@ -155,31 +188,47 @@ Instead of opening menus, use these direct shortcuts:
 ## Troubleshooting
 
 ### Shortcuts Not Working
-- Ensure focus is in the editor (click in document area)
-- Some shortcuts don't work in input fields (name, search box)
-- Refresh page if shortcuts stop responding
+**Check these common issues:**
+1. **Editor focus** - Click in document area before using shortcuts
+2. **Input field focus** - Shortcuts don't work in name/search inputs
+3. **Menu open** - Close any open dropdown menus
+4. **Browser override** - Some shortcuts may be reserved by browser
+5. **Custom settings** - Check if shortcuts were modified in Preferences
+
+### Customization Problems
+**If changes don't save:**
+1. **Check browser storage** - Ensure localStorage is enabled
+2. **Try incognito mode** - Test without extensions
+3. **Clear browser cache** - Refresh the page completely
+4. **Reset to defaults** - Use button in Preferences dialog
 
 ### Browser Conflicts
 - Some browsers override certain shortcuts
 - **Ctrl+Shift+C** might open developer tools in some browsers
 - Use menu items as fallback if shortcuts are blocked
+- **Customize conflicting shortcuts** using Preferences dialog
 
 ### Collaboration Issues
 - Shortcuts work independently for each user
 - Your Ctrl+B won't affect other users' cursor positions
 - All users see formatting changes in real-time
+- **Each user can have different shortcuts** - customization is local
 
 ## Custom Shortcuts
 
-### Planned Features
-Future versions may include:
+### Future Features
+Planned enhancements may include:
 - **Ctrl+H** for Find and Replace
 - **Ctrl+Shift+Y** for Dictionary lookup
+- **Import/Export** shortcut configurations
+- **Team shortcut sharing** for collaborative workflows
 
-### Current Limitations
-- No custom shortcut configuration yet
-- Limited to built-in shortcuts
-- Menu items provide full functionality access
+### Current Capabilities
+- **51 shortcuts** can be customized
+- **8 categories**: File, Edit, Format, Tools, View, Help, Search, System
+- **Conflict detection** prevents duplicate assignments
+- **Industry standards** as sensible defaults
+- **Instant updates** - no restart required
 
 ## Integration Notes
 
@@ -194,7 +243,10 @@ All formatting shortcuts (**Ctrl+B/I/U**) use:
 - JavaScript enabled
 - Clipboard API support for copy/paste
 - WebAssembly support for formatting features
+- **localStorage support** for shortcut customization
 
 ---
+
+**Customize Your Shortcuts**: Press **Ctrl+Comma** to open the preferences dialog and make this editor truly yours!
 
 **Print this page**: Use **Ctrl+P** to print this reference guide for offline use.

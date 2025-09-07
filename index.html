@@ -218,7 +218,14 @@
   </div>
 
     <!-- Menu System Script -->
-  <script>
+    <script type="module">
+    // Import the shortcut manager
+    import { shortcutManager } from './src/ui/shortcutManager.js';
+    import { preferencesDialog } from './src/ui/preferencesDialog.js';
+    
+    // Make it available globally so MenuSystem can use it
+    window.shortcutManager = shortcutManager;
+    // Menu System Class
     class MenuSystem {
       constructor() {
         this.activeMenu = null;
@@ -408,7 +415,7 @@
             break;
           
           case 'preferences':
-            this.showPreferences();
+            window.preferencesDialog.show();
             break;
           
           case 'accessibility':
@@ -441,6 +448,9 @@
           case 'update-markdown-preview':
             this.updateMarkdownPreview();
             break;
+          case 'preferences':
+            window.preferencesDialog.show();
+            break;
           case 'about':
             showAboutModal();
             break;
@@ -464,96 +474,98 @@
         }
       }
 
-      setupKeyboardShortcuts()  {
-        document.addEventListener('keydown', (e) => {
-          if (e.ctrlKey || e.metaKey) {
-            console.log('Ctrl/Meta key detected with', e);
+    setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+      // Don't handle shortcuts if preferences dialog is open
+        if (window.preferencesDialog && window.preferencesDialog.isOpen) {
+            return;
+        }
 
-            switch (e.key.toLowerCase()) {
-              case 'n':
+        if (e.ctrlKey || e.metaKey) {
+          console.log('Ctrl/Meta key detected with', e);
+          switch (e.key.toLowerCase()) {
+            case 'n':
+              e.preventDefault();
+              this.handleAction('new');
+              break;
+            case 'f':
+              e.preventDefault();
+              document.getElementById('search-input')?.focus();
+              break;
+            case 'b':
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
                 e.preventDefault();
-                this.handleAction('new');
-                break;
-              case 'f':
+                document.getElementById('bold-button')?.click();
+              }
+              break;
+            case 'i':
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
                 e.preventDefault();
-                document.getElementById('search-input')?.focus();
-                break;
-              case 'b':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('bold-button')?.click();
-                }
-                break;
-              case 'i':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('italic-button')?.click();
-                }
-                break;
-              
-              case 'p':
-                 e.preventDefault();
-                 window.print();
-                 break;      
-
-              case 'a':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
+                document.getElementById('italic-button')?.click();
+              }
+              break;
+            case 'p':
+              e.preventDefault();
+              window.print();
+              break;      
+            case 'a':
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
                 e.preventDefault();
                 this.selectAll();
-                }
-                break;
-  
-               case 'c':
-               if (e.shiftKey) {
-                 // Ctrl+Shift+C = Word count
-                 e.preventDefault();
-                 this.showWordCount();
-               } else if (!e.target.matches('input, textarea, [contenteditable]')) {
-                 // Ctrl+C = Copy (only in editor, not in input fields)
-                 e.preventDefault();
-                 this.copySelection();
-               }
-               break;  
-             case 'x':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                    e.preventDefault();
-                    this.cutSelection();
-                }
-                break;
-  
-             case 'v':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
+              }
+              break;
+            case 'c':
+              if (e.shiftKey) {
+                // Ctrl+Shift+C = Word count
+                e.preventDefault();
+                this.showWordCount();
+              } else if (!e.target.matches('input, textarea, [contenteditable]')) {
+                // Ctrl+C = Copy (only in editor, not in input fields)
+                e.preventDefault();
+                this.copySelection();
+              }
+              break;  
+            case 'x':
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
+                e.preventDefault();
+                this.cutSelection();
+              }
+              break;
+            case 'v':
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
                 e.preventDefault();
                 this.pasteText();
-                }
-                break;
-             
+              }
+              break;
             case 'm':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  this.toggleMarkdownPreview();
-                }
-                break;
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
+                e.preventDefault();
+                this.toggleMarkdownPreview();
+              }
+              break;
             case 'r':
-                if (!e.target.matches('input, textarea, [contenteditable]') && this.isPreviewActive) {
-                  e.preventDefault();
-                  this.updateMarkdownPreview();
-                }
-                break;  
+              if (!e.target.matches('input, textarea, [contenteditable]') && this.isPreviewActive) {
+                e.preventDefault();
+                this.updateMarkdownPreview();
+              }
+              break;  
             case 'u':
-                if (!e.target.matches('input, textarea, [contenteditable]')) {
-                  e.preventDefault();
-                  document.getElementById('underline-button')?.click();
-                }
-                break;
-            }
+              if (!e.target.matches('input, textarea, [contenteditable]')) {
+                e.preventDefault();
+                document.getElementById('underline-button')?.click();
+              }
+              break;
           }
-          
-          if (e.key === 'Escape') {
-            this.closeAllMenus();
-          }
-        });
-      }
+        }
+        
+        if (e.key === 'Escape') {
+          this.closeAllMenus();
+        }
+      });
+    }
+
+
+
        
 
     makeCopy() {
