@@ -7,7 +7,6 @@ test.describe('Real-time Collaboration', () => {
 
   test.beforeEach(async () => {
     roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
   });
 
   test('two users can edit simultaneously', async ({ browser }) => {
