@@ -15,40 +15,40 @@ export class CollabEditorHelpers {
   }
 
   // Comprehensive app initialization waiter
-    async waitForAppInitialization() {
-      console.log('Waiting for app initialization...');
-      
-      // Step 1: Wait for DOM to be ready
-      await this.page.waitForSelector('#editor', { timeout: 15000 });
-      console.log('Editor DOM ready');
-      
-      // Step 2: Wait for app.js to load and initialize CodeMirror
-      await this.page.waitForFunction(() => {
-        return window.editorView && 
-               window.editorView.state && 
-               window.editorView.dom &&
-               document.querySelector('#editor .cm-content');
-      }, { timeout: 20000 });
-      console.log('CodeMirror fully initialized');
-      
-      // Step 3: Wait for toolbar buttons to be ready
-      await this.page.waitForSelector('#bold-button:not([disabled])', { timeout: 10000 });
-      console.log('Toolbar buttons ready');
-      
-      // Step 4: Wait for menu system to be ready
-      await this.page.waitForFunction(() => {
-        return document.querySelector('[data-menu="file"]') && 
-               document.querySelector('#file-menu');
-      }, { timeout: 5000 });
-      console.log('Menu system ready');
-      
-      // Step 5: Additional stability wait
-      await this.page.waitForTimeout(1500);
-      console.log('App fully initialized');
-    }
-
-
-
+  async waitForAppInitialization() {
+    console.log('Waiting for app initialization...');
+    
+    // Step 1: Wait for DOM to be ready
+    await this.page.waitForSelector('#editor', { timeout: 10000 });
+    console.log('Editor DOM ready');
+    
+    // Step 2: Wait for WASM to be initialized
+    await this.page.waitForFunction(() => {
+      return typeof window.toggle_bold !== 'undefined' && 
+             typeof window.format_text !== 'undefined' &&
+             typeof window.calculate_document_stats !== 'undefined';
+    }, { timeout: 15000 });
+    console.log('WASM functions available');
+    
+    // Step 3: Wait for editor view to be initialized
+    await this.page.waitForFunction(() => {
+      return window.editorView && window.editorView.state;
+    }, { timeout: 10000 });
+    console.log('Editor view initialized');
+    
+    // Step 4: Wait for Yjs connection (best effort)
+    await this.page.waitForFunction(() => {
+      const userCount = document.querySelector('#user-count');
+      return userCount && userCount.textContent !== 'Users: 0';
+    }, { timeout: 5000 }).catch(() => {
+      // Yjs connection might be slower, but don't fail the test
+      console.log('Yjs connection may still be establishing');
+    });
+    
+    // Step 5: Additional stability wait
+    await this.page.waitForTimeout(500);
+    console.log('App fully initialized');
+  }
 
   // WASM readiness verification
   async verifyWasmReady() {
@@ -116,9 +116,9 @@ export class CollabEditorHelpers {
 
   // Formatting operations - with WASM verification
   async applyBold() {
-    await this.page.waitForSelector('#bold-button:not([disabled])');
+    await this.verifyWasmReady();
     await this.page.click('#bold-button');
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(300);
   }
 
   async applyItalic() {
