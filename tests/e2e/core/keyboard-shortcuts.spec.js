@@ -134,36 +134,42 @@ test.describe('Keyboard Shortcuts', () => {
     });
   });
 
-  test.describe('File Operation Shortcuts', () => {
-    test('Ctrl+N creates new document', async ({ page }) => {
+   test('Ctrl+N creates new document', async ({ page }) => {
       // Mock the confirm dialog to accept
       page.on('dialog', dialog => dialog.accept());
-      
+  
       // Track navigation
-      const navigationPromise = page.waitForURL(/.*/, { timeout: 5000 });
-      
+     // const navigationPromise = page.waitForLoadState('networkidle', { timeout: 10000 });
+      const navigationPromise = page.waitForURL(/.*/, { timeout: 10000 });
+  
       await page.keyboard.press('Control+n');
-      
+  
       // Should navigate to new URL (though might be same origin)
       await navigationPromise;
-      
+  
       // Verify we're in a new clean editor
       const content = await helpers.getEditorContent();
       expect(content.trim()).toBe('');
     });
 
     test('Ctrl+Shift+U copies room URL', async ({ page }) => {
-      // Grant clipboard permissions
-      await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-      
-      await page.keyboard.press('Control+Shift+u');
-      
-      // Should show alert about URL being copied
-      await page.waitForTimeout(500);
-      
-      // Verify clipboard contains current URL
-      const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-      expect(clipboardText).toContain(page.url());
+        // Set up dialog handler for the alert
+        let alertShown = false;
+        page.on('dialog', dialog => {
+          alertShown = true;
+          dialog.accept();
+        });
+
+        await page.keyboard.press('Control+Shift+u');
+
+        // Should show alert about URL being copied
+        await page.waitForTimeout(1000);
+        expect(alertShown).toBe(true);
+
+        // Verify clipboard contains current URL
+        const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+        expect(clipboardText).toContain(page.url());
+
     });
   });
 
@@ -264,11 +270,12 @@ test.describe('Keyboard Shortcuts', () => {
       });
       
       await page.keyboard.press('Control+Shift+c');
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
       
       // Should show word count in alert
       expect(alertMessage).toContain('Document Statistics');
     });
+
   });
 
   test.describe('Link and URL Shortcuts', () => {

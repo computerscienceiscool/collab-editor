@@ -42,11 +42,12 @@ test.describe('Menu System Functionality', () => {
     expect(title).toBe('Test Document');
 
     // Test New Document action
-    await page.click('[data-action="new"]');
-    // Should navigate to new room
-    await page.waitForTimeout(1000);
-    const newUrl = page.url();
-    expect(newUrl).toContain('?room=');
+    page.on('dialog', dialog => dialog.accept()); // Accept any confirmation dialog
+    await page.click('[data-action="new"]'); 
+    await page.waitForTimeout(2000);
+    const newURL = page.url();
+    expect(newURL).toContain('?room=');
+
   });
 
   test('Edit menu keyboard shortcuts work', async ({ page }) => {

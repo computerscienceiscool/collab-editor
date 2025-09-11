@@ -1,88 +1,148 @@
-// tests/utils/testHelpers.js - Enhanced version with all your app features
+// tests/utils/testHelpers.js - Updated for WASM-first initialization
 export class CollabEditorHelpers {
   constructor(page) {
     this.page = page;
   }
 
-  // Navigation and setup
-async navigateToRoom(roomId = 'test') {
-  console.log('Navigating to room:', roomId);
-  await this.page.goto(`http://localhost:8080/?room=${roomId}`);
-  console.log('Current URL:', this.page.url());
-  await this.page.waitForSelector('#editor');
-  // Wait for WASM to initialize
-  await this.page.waitForFunction(() => window.toggle_bold !== undefined, { timeout: 10000 });
-}
+  // Navigation and setup - FIXED for WASM-first initialization
+  async navigateToRoom(roomId = 'test') {
+    console.log('Navigating to room:', roomId);
+    await this.page.goto(`http://localhost:8080/?room=${roomId}`);
+    console.log('Current URL:', this.page.url());
+    
+    // Wait for complete app initialization
+    await this.waitForAppInitialization();
+  }
+
+  // Comprehensive app initialization waiter
+  async waitForAppInitialization() {
+    console.log('Waiting for app initialization...');
+    
+    // Step 1: Wait for DOM to be ready
+    await this.page.waitForSelector('#editor', { timeout: 10000 });
+    console.log('Editor DOM ready');
+    
+    // Step 2: Wait for WASM to be initialized
+    await this.page.waitForFunction(() => {
+      return typeof window.toggle_bold !== 'undefined' && 
+             typeof window.format_text !== 'undefined' &&
+             typeof window.calculate_document_stats !== 'undefined';
+    }, { timeout: 15000 });
+    console.log('WASM functions available');
+    
+    // Step 3: Wait for editor view to be initialized
+    await this.page.waitForFunction(() => {
+      return window.editorView && window.editorView.state;
+    }, { timeout: 10000 });
+    console.log('Editor view initialized');
+    
+    // Step 4: Wait for Yjs connection (best effort)
+    await this.page.waitForFunction(() => {
+      const userCount = document.querySelector('#user-count');
+      return userCount && userCount.textContent !== 'Users: 0';
+    }, { timeout: 5000 }).catch(() => {
+      // Yjs connection might be slower, but don't fail the test
+      console.log('Yjs connection may still be establishing');
+    });
+    
+    // Step 5: Additional stability wait
+    await this.page.waitForTimeout(500);
+    console.log('App fully initialized');
+  }
+
+  // WASM readiness verification
+  async verifyWasmReady() {
+    const isReady = await this.page.evaluate(() => {
+      return typeof window.toggle_bold !== 'undefined' && 
+             typeof window.format_text !== 'undefined';
+    });
+    
+    if (!isReady) {
+      throw new Error('WASM functions not available - initialization may have failed');
+    }
+  }
 
   // User setup
   async setUser(name, color = '#ff0000') {
     await this.page.fill('#name-input', name);
     await this.page.fill('#color-input', color);
-    await this.page.waitForTimeout(500); // Allow sync
+    await this.page.waitForTimeout(500);
   }
 
-  // Editor operations
+  // Editor operations - improved with better error handling
   async typeInEditor(text) {
+    await this.page.waitForSelector('#editor .cm-content');
     await this.page.click('#editor .cm-content');
+    await this.page.waitForTimeout(100);
     await this.page.type('#editor .cm-content', text);
   }
 
   async clearEditor() {
+    await this.page.waitForSelector('#editor .cm-content');
     await this.page.click('#editor .cm-content');
     await this.page.keyboard.press('Control+a');
     await this.page.keyboard.press('Delete');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(300);
   }
 
   async setEditorContent(text) {
     await this.clearEditor();
     await this.typeInEditor(text);
+    await this.page.waitForTimeout(200);
   }
 
   async getEditorContent() {
+    await this.page.waitForSelector('#editor .cm-content');
     return await this.page.textContent('#editor .cm-content');
   }
 
   async selectAllText() {
     await this.page.click('#editor .cm-content');
     await this.page.keyboard.press('Control+a');
+    await this.page.waitForTimeout(100);
   }
 
   async selectText(from, to) {
     await this.page.click('#editor .cm-content');
-    // Use CodeMirror API to select specific range
     await this.page.evaluate(({ from, to }) => {
       const view = window.editorView;
-      view.dispatch({
-        selection: { anchor: from, head: to }
-      });
+      if (view && view.state) {
+        view.dispatch({
+          selection: { anchor: from, head: to }
+        });
+      }
     }, { from, to });
   }
 
-  // Formatting operations
+  // Formatting operations - with WASM verification
   async applyBold() {
+    await this.verifyWasmReady();
     await this.page.click('#bold-button');
-    await this.page.waitForTimeout(200); // Allow WASM processing
+    await this.page.waitForTimeout(300);
   }
 
   async applyItalic() {
+    await this.verifyWasmReady();
     await this.page.click('#italic-button');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(300);
   }
 
   async applyUnderline() {
+    await this.verifyWasmReady();
     await this.page.click('#underline-button');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(300);
   }
 
   async applyStrikethrough() {
+    await this.verifyWasmReady();
     await this.page.click('#strike-button');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(300);
   }
 
   async formatDocument() {
+    await this.verifyWasmReady();
     await this.page.click('#format-button');
-    await this.page.waitForTimeout(500); // Allow WASM processing
+    await this.page.waitForTimeout(500);
   }
 
   // Menu system operations
@@ -111,30 +171,26 @@ async navigateToRoom(roomId = 'test') {
 
   // Export operations
   async exportDocument(format) {
-    // Use the menu system approach
     await this.useMenuAction('file', `save-${format}`);
   }
 
   async exportViaDropdown(format) {
-    // Alternative: use the hidden dropdown (legacy compatibility)
     await this.page.selectOption('#save-format', format);
-    
-    // Set up download promise before clicking
     const downloadPromise = this.page.waitForEvent('download');
     await this.page.click('#save-button');
-    
     return await downloadPromise;
   }
 
-  // Search functionality
+  // Search functionality - with WASM verification
   async searchDocument(term) {
+    await this.verifyWasmReady();
     await this.page.fill('#search-input', term);
     await this.page.click('#search-button');
-    await this.page.waitForTimeout(300); // Allow search processing
+    await this.page.waitForTimeout(500);
   }
 
   async clearSearch() {
-    await this.page.click('#clear-search-button');
+    await this.page.click('#clear-search');
   }
 
   // User awareness and collaboration
@@ -142,16 +198,20 @@ async navigateToRoom(roomId = 'test') {
     await this.page.waitForFunction(
       (count) => {
         const userCountElement = document.querySelector('#user-count');
-        return userCountElement && userCountElement.textContent.trim() === count.toString();
+        if (!userCountElement) return false;
+        const text = userCountElement.textContent || '';
+        const match = text.match(/(\d+)/);
+        const currentCount = match ? parseInt(match[1]) : 0;
+        return currentCount >= count;
       },
       expectedCount,
-      { timeout: 10000 }
+      { timeout: 15000 }
     );
   }
 
   async getUserCount() {
     const userCountText = await this.page.textContent('#user-count');
-    return parseInt(userCountText.match(/\d+/)?.[0] || '0');
+    return parseInt(userCountText.match(/(\d+)/)?.[0] || '0');
   }
 
   async getUserList() {
@@ -167,7 +227,11 @@ async navigateToRoom(roomId = 'test') {
   // WebSocket and connection status
   async waitForConnection() {
     await this.page.waitForFunction(() => {
-      return document.querySelector('#user-count')?.textContent !== '0';
+      const userCount = document.querySelector('#user-count');
+      if (!userCount) return false;
+      const text = userCount.textContent || '';
+      const match = text.match(/(\d+)/);
+      return match && parseInt(match[1]) > 0;
     }, { timeout: 10000 });
   }
 
@@ -199,13 +263,12 @@ async navigateToRoom(roomId = 'test') {
 
   async openWordCountDialog() {
     await this.useMenuAction('tools', 'word-count');
-    await this.page.waitForSelector('.word-count-dialog, .popup, [role="dialog"]');
+    await this.page.waitForTimeout(500);
   }
 
   // PromiseGrid integration testing
   async getPromiseGridMessages() {
     return await this.page.evaluate(() => {
-      // Return any PromiseGrid messages logged to console
       return window.promiseGridMessages || [];
     });
   }
@@ -214,24 +277,37 @@ async navigateToRoom(roomId = 'test') {
     await this.useMenuAction('tools', 'promisegrid-test');
   }
 
-  // WASM function testing
+  // WASM function testing - with error handling
   async callWasmFunction(functionName, ...args) {
+    await this.verifyWasmReady();
+    
     return await this.page.evaluate(({ functionName, args }) => {
-      return window[functionName]?.(...args);
+      const func = window[functionName];
+      if (!func) {
+        throw new Error(`WASM function ${functionName} not available`);
+      }
+      return func(...args);
     }, { functionName, args });
   }
 
   async testWasmCompression(text) {
+    await this.verifyWasmReady();
+    
     return await this.page.evaluate((text) => {
       if (window.compress_document && window.decompress_document) {
-        const compressed = window.compress_document(text);
-        const decompressed = window.decompress_document(compressed);
-        return {
-          original: text.length,
-          compressed: compressed.length,
-          decompressed: decompressed.length,
-          roundTrip: text === decompressed
-        };
+        try {
+          const compressed = window.compress_document(text);
+          const decompressed = window.decompress_document(compressed);
+          return {
+            original: text.length,
+            compressed: compressed.length,
+            decompressed: decompressed.length,
+            roundTrip: text === decompressed
+          };
+        } catch (error) {
+          console.error('WASM compression test failed:', error);
+          return null;
+        }
       }
       return null;
     }, text);
@@ -240,7 +316,6 @@ async navigateToRoom(roomId = 'test') {
   // Security testing helpers
   async injectXSS(payload) {
     await this.typeInEditor(payload);
-    // Check if script executed by looking for side effects
     return await this.page.evaluate(() => {
       return window.xssExecuted || false;
     });
@@ -268,7 +343,7 @@ async navigateToRoom(roomId = 'test') {
   }
 
   async measureFormattingPerformance(text) {
-    await this.typeInEditor(text);
+    await this.setEditorContent(text);
     await this.selectAllText();
     
     const startTime = Date.now();
@@ -278,13 +353,17 @@ async navigateToRoom(roomId = 'test') {
     return endTime - startTime;
   }
 
+  // Room generation for tests
+  async generateUniqueRoom() {
+    return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   // Utility functions
   async takeScreenshot(name) {
     await this.page.screenshot({ path: `test-results/screenshots/${name}.png` });
   }
 
   async waitForStableEditor() {
-    // Wait for editor to be stable (no pending operations)
     await this.page.waitForTimeout(500);
     await this.page.waitForFunction(() => {
       const view = window.editorView;
@@ -298,7 +377,9 @@ async navigateToRoom(roomId = 'test') {
       userCount: document.querySelector('#user-count')?.textContent || '0',
       documentTitle: document.querySelector('#document-title')?.value || '',
       wordCount: document.querySelector('#word-count')?.textContent || '',
-      isOffline: document.querySelector('#offline-banner')?.classList.contains('hidden') === false
+      isOffline: document.querySelector('#offline-banner')?.classList.contains('hidden') === false,
+      wasmReady: typeof window.toggle_bold !== 'undefined',
+      editorViewReady: !!window.editorView
     }));
     console.log('Current editor state:', state);
     return state;

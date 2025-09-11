@@ -6,8 +6,8 @@ test.describe('Real-time Collaboration', () => {
   let roomId;
 
   test.beforeEach(async () => {
-    const helpers = new CollabEditorHelpers();
-    roomId = await helpers.generateUniqueRoom();
+    roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
   });
 
   test('two users can edit simultaneously', async ({ browser }) => {
@@ -61,21 +61,20 @@ test.describe('Real-time Collaboration', () => {
     await context2.close();
   });
 
-  test('user presence and awareness features work', async ({ browser }) => {
+   test('user presence and awareness features work', async ({ browser }) => {
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();
-    
+  
     const page1 = await context1.newPage();
     const page2 = await context2.newPage();
-    
+  
     const user1 = new CollabEditorHelpers(page1);
     const user2 = new CollabEditorHelpers(page2);
 
-    // Join room
+  // Join room
     await user1.navigateToRoom(roomId);
-    await user2.navigateToRoom(roomId);
+    await user2.navigateToRoom(roomId); 
 
-    // Set distinctive users
     await user1.setUser('Alice', '#ff0000');
     await user2.setUser('Bob', '#0000ff');
 

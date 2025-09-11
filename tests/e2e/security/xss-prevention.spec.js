@@ -75,7 +75,7 @@ test.describe('Security - XSS Prevention', () => {
     await helpers.setDocumentTitle('<script>alert("XSS")</script>Document');
     
     // Attempt to export - filename should be sanitized
-    const download = await helpers.exportDocument('txt');
+    const download = await helpers.exportViaDropdown('txt');
     const filename = download.suggestedFilename();
     
     // Filename should not contain script tags or dangerous characters

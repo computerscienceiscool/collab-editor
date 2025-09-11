@@ -1,4 +1,4 @@
-// tests/e2e/core/basic.spec.js - UPDATED VERSION
+// tests/e2e/core/basic.spec.js 
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
@@ -29,7 +29,7 @@ test.describe('Basic Editor Functionality', () => {
     const helpers = new CollabEditorHelpers(page);
     
     await helpers.navigateToRoom();
-    await helpers.setEditorContent('Format me'); // Clear and set specific content
+    await helpers.setEditorContent('Format me'); 
     
     // Select all text
     await page.keyboard.press('Control+a');
