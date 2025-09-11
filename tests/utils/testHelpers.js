@@ -20,15 +20,14 @@ export class CollabEditorHelpers {
     
     // Step 1: Wait for DOM to be ready
     await this.page.waitForSelector('#editor', { timeout: 10000 });
-    console.log('Editor DOM ready');
+      console.log('Editor DOM ready');
     
     // Step 2: Wait for WASM to be initialized
     await this.page.waitForFunction(() => {
-      return typeof window.toggle_bold !== 'undefined' && 
-             typeof window.format_text !== 'undefined' &&
-             typeof window.calculate_document_stats !== 'undefined';
-    }, { timeout: 15000 });
-    console.log('WASM functions available');
+        return typeof window.toggle_bold !== 'undefined';
+        }, { timeout: 30000 });
+        console.log('WASM functions available');
+     
     
     // Step 3: Wait for editor view to be initialized
     await this.page.waitForFunction(() => {

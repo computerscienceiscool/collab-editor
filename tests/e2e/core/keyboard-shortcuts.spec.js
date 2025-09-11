@@ -287,5 +287,4 @@ test.describe('Keyboard Shortcuts', () => {
       const content = await helpers.getEditorContent();
       expect(content).toBe('[https://github.com](https://github.com)');
     });
-  });
 });

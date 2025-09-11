@@ -160,11 +160,10 @@ test.describe('WASM Text Processing Features', () => {
     // Create large document
     const largeText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '.repeat(1000);
     
-    const typingTime = await helpers.measureTypingPerformance(1000);
   //  expect(typingTime).toBeLessThan(10000); // Should type 1000 chars in under 5 seconds
-    const startTime = Date.now();
+    const startTime2 = Date.now();
     await helpers.typeInEditor('a'.repeat(1000));
-    const typingTime = Date.now() - startTime;
+    const typingTime = Date.now() - startTime2;
     
     // Test formatting performance on large text
     await helpers.selectAllText();
