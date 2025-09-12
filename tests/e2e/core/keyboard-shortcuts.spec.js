@@ -10,21 +10,49 @@ test.describe('Keyboard Shortcuts', () => {
     await helpers.navigateToRoom();
     await helpers.clearEditor(); // Start with clean editor
   });
-
-  test.describe('Text Formatting Shortcuts', () => {
-    test('Ctrl+B applies bold formatting', async ({ page }) => {
+// remove... this tests if there is a problem with keyboard
+  test('Bold button applies bold formatting', async ({ page }) => {
       await helpers.setEditorContent('Bold text test');
-      await page.keyboard.press('Control+a'); // Select all
-      await page.keyboard.press('Control+b'); // Apply bold
+      
+      // Focus editor and select all
+      await page.click('#editor .cm-content');
+      await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
+      
+      // Click the bold button instead of using keyboard shortcut
+      await page.click('#bold-button');
+      await page.waitForTimeout(1000);
       
       const content = await helpers.getEditorContent();
       expect(content).toBe('**Bold text test**');
     });
 
+  test('Ctrl+B applies bold formatting', async ({ page }) => {
+      await helpers.setEditorContent('Bold text test');
+      
+      // Focus editor and select all
+      await page.click('#editor .cm-content');
+      await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
+      
+      // Apply bold with keyboard shortcut
+      await page.keyboard.press('Control+b');
+      await page.waitForTimeout(1000);
+      
+      const content = await helpers.getEditorContent();
+      expect(content).toBe('**Bold text test**');
+    });
+    
+
     test('Ctrl+I applies italic formatting', async ({ page }) => {
       await helpers.setEditorContent('Italic text test');
+      
+      await page.click('#editor .cm-content');
       await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
+      
       await page.keyboard.press('Control+i');
+      await page.waitForTimeout(1000);
       
       const content = await helpers.getEditorContent();
       expect(content).toBe('*Italic text test*');
@@ -32,12 +60,18 @@ test.describe('Keyboard Shortcuts', () => {
 
     test('Ctrl+U applies underline formatting', async ({ page }) => {
       await helpers.setEditorContent('Underline text test');
+      
+      await page.click('#editor .cm-content');
       await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
+      
       await page.keyboard.press('Control+u');
+      await page.waitForTimeout(1000);
       
       const content = await helpers.getEditorContent();
       expect(content).toBe('__Underline text test__');
     });
+
 
     test('Ctrl+Shift+X applies strikethrough', async ({ page }) => {
       await helpers.setEditorContent('Strike text test');
@@ -48,21 +82,28 @@ test.describe('Keyboard Shortcuts', () => {
       expect(content).toBe('~~Strike text test~~');
     });
 
+
+
     test('formatting shortcuts can be combined', async ({ page }) => {
       await helpers.setEditorContent('Combined formatting');
       
       // Apply bold first
+      await page.click('#editor .cm-content');
       await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
       await page.keyboard.press('Control+b');
+      await page.waitForTimeout(500);
       
       // Then apply italic on top
       await page.keyboard.press('Control+a');
+      await page.waitForTimeout(200);
       await page.keyboard.press('Control+i');
+      await page.waitForTimeout(500);
       
       const content = await helpers.getEditorContent();
       expect(content).toBe('***Combined formatting***');
     });
-  });
+
 
   test.describe('Heading Shortcuts', () => {
     test('Ctrl+Alt+1 creates H1 heading', async ({ page }) => {
@@ -132,9 +173,8 @@ test.describe('Keyboard Shortcuts', () => {
       const searchInput = page.locator('#search-input');
       await expect(searchInput).toBeFocused();
     });
-  });
 
-   test('Ctrl+N creates new document', async ({ page }) => {
+       test('Ctrl+N creates new document', async ({ page }) => {
       // Mock the confirm dialog to accept
       page.on('dialog', dialog => dialog.accept());
   
@@ -169,9 +209,10 @@ test.describe('Keyboard Shortcuts', () => {
         // Verify clipboard contains current URL
         const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
         expect(clipboardText).toContain(page.url());
+     });
 
-    });
   });
+
 
   test.describe('Edit Operation Shortcuts', () => {
     test('copy and paste work with keyboard shortcuts', async ({ page }) => {
@@ -287,4 +328,5 @@ test.describe('Keyboard Shortcuts', () => {
       const content = await helpers.getEditorContent();
       expect(content).toBe('[https://github.com](https://github.com)');
     });
+  });
 });
