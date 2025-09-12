@@ -1,6 +1,7 @@
 // tests/e2e/core/wasm-features.spec.js - FIXED VERSION
 import { test, expect } from '@playwright/test';
-import { TestSetup } from '../../helpers/setup.js';
+// import { TestSetup } from '../../helpers/setup.js';
+import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('WASM Text Processing Features', () => {
   let setup;

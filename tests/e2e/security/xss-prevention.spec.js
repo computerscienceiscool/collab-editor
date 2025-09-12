@@ -1,6 +1,6 @@
 // tests/e2e/security/xss-prevention.spec.js
 import { test, expect } from '@playwright/test';
-import { TestSetup } from '../../helpers/setup.js';
+// import { TestSetup } from '../../helpers/setup.js';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js'
 test.describe('Security - XSS Prevention', () => {
   let setup;
