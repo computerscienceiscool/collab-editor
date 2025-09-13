@@ -4,16 +4,12 @@ import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('WASM Text Processing Features', () => {
-  let setup;
-
+  let helpers;
   test.beforeEach(async ({ page }) => {
-    setup = new TestSetup(page);
-    await setup.initializeApp();
-    await setup.clearEditor();
-    
-    // Ensure WASM is available or mocked
-    await setup.mockWasmIfNeeded();
-  });
+      helpers = new CollabEditorHelpers(page);
+      await helpers.navigateToRoom();
+      await helpers.clearEditor();
+    });
 
   test('text formatting functions work correctly', async ({ page }) => {
     const unformattedText = '  This is   unformatted    text  with   extra   spaces  ';
