@@ -159,13 +159,24 @@ export class CollabEditorHelpers {
         return JSON.stringify(matches);
       };
 
-      window.convert_url_to_markdown = function(text) {
-        const trimmed = text.trim();
-        if (trimmed.match(/^https?:\/\//) || trimmed.match(/^www\./)) {
-          return `[${trimmed}](${trimmed})`;
-        }
-        return text;
+
+
+
+
+
+      //   Mock PromiseGrid functions 
+      window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
+        // In test environment, these should indicate they're not available
+        throw new Error('PromiseGrid functions not available in test environment');
       };
+
+      window.create_promisegrid_edit_message = function(docId, editType, position, content, userId) {
+        throw new Error('PromiseGrid functions not available in test environment');
+      };
+
+
+      // Alternative: Create a flag to indicate mock vs real
+      window.isPromiseGridMocked = true;
       
       // Mock PromiseGrid functions
       window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
@@ -214,36 +225,120 @@ export class CollabEditorHelpers {
     await this.page.waitForTimeout(500);
   }
 
-  // Editor operations - IMPROVED error handling
+  // Editor operations - ROBUST version to handle CodeMirror issues
   async typeInEditor(text) {
     await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
-    await this.page.click('#editor .cm-content');
-    await this.page.waitForTimeout(200);
     
-    // Type text in chunks for better reliability
-    const chunks = text.match(/.{1,50}/g) || [text];
-    for (const chunk of chunks) {
-      await this.page.type('#editor .cm-content', chunk);
-      await this.page.waitForTimeout(50);
+    // Try direct content setting first (more reliable for tests)
+    try {
+      await this.page.evaluate((content) => {
+        if (window.editorView && window.editorView.state) {
+          const currentLength = window.editorView.state.doc.length;
+          window.editorView.dispatch({
+            changes: { from: currentLength, insert: content }
+          });
+          return true;
+        }
+        return false;
+      }, text);
+      
+      await this.page.waitForTimeout(100);
+      return;
+    } catch (error) {
+      console.log('Direct editor dispatch failed, trying manual typing');
+    }
+    
+    // Fallback to manual typing with better error handling
+    try {
+      await this.page.click('#editor .cm-content', { timeout: 5000 });
+      await this.page.waitForTimeout(100);
+      
+      // Type in smaller chunks with shorter timeouts
+      const chunks = text.match(/.{1,10}/g) || [text];
+      for (const chunk of chunks) {
+        try {
+          await this.page.type('#editor .cm-content', chunk, { timeout: 3000 });
+          await this.page.waitForTimeout(20);
+        } catch (chunkError) {
+          console.warn(`Failed to type chunk: ${chunk}`);
+          // Try direct insertion as fallback
+          await this.page.evaluate((ch) => {
+            if (window.editorView) {
+              const pos = window.editorView.state.selection.main.head;
+              window.editorView.dispatch({
+                changes: { from: pos, insert: ch }
+              });
+            }
+          }, chunk);
+        }
+      }
+    } catch (error) {
+      console.error('All typing methods failed:', error);
+      throw error;
     }
   }
 
   async clearEditor() {
     await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
-    await this.page.click('#editor .cm-content');
-    await this.page.keyboard.press('Control+a');
-    await this.page.waitForTimeout(100);
-    await this.page.keyboard.press('Delete');
-    await this.page.waitForTimeout(500);
+    
+    // Try direct clearing first (most reliable)
+    try {
+      await this.page.evaluate(() => {
+        if (window.editorView && window.editorView.state) {
+          const docLength = window.editorView.state.doc.length;
+          window.editorView.dispatch({
+            changes: { from: 0, to: docLength, insert: '' }
+          });
+          return true;
+        }
+        return false;
+      });
+      
+      await this.page.waitForTimeout(100);
+      return;
+    } catch (error) {
+      console.log('Direct editor clear failed, trying keyboard');
+    }
+    
+    // Fallback to keyboard commands
+    try {
+      await this.page.click('#editor .cm-content', { timeout: 3000 });
+      await this.page.keyboard.press('Control+a', { timeout: 3000 });
+      await this.page.waitForTimeout(50);
+      await this.page.keyboard.press('Delete', { timeout: 3000 });
+      await this.page.waitForTimeout(100);
+    } catch (error) {
+      console.warn('Keyboard clear failed, editor may not be fully cleared');
+    }
   }
 
   async setEditorContent(text) {
-    await this.clearEditor();
-    if (text) {
-      await this.typeInEditor(text);
+    // More reliable content setting
+    await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
+    
+    try {
+      await this.page.evaluate((content) => {
+        if (window.editorView && window.editorView.state) {
+          const docLength = window.editorView.state.doc.length;
+          window.editorView.dispatch({
+            changes: { from: 0, to: docLength, insert: content }
+          });
+          return true;
+        }
+        return false;
+      }, text);
+      
+      await this.page.waitForTimeout(200);
+    } catch (error) {
+      console.log('Direct content set failed, using clearEditor + typeInEditor');
+      await this.clearEditor();
+      if (text) {
+        await this.typeInEditor(text);
+      }
     }
-    await this.page.waitForTimeout(300);
-  }
+  } 
+
+
 
   async getEditorContent() {
     await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });

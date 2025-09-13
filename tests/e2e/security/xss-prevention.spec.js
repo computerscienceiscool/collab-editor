@@ -1,4 +1,4 @@
-// tests/e2e/security/xss-prevention.spec.js 
+// tests/e2e/security/xss-prevention.spec.js - FIXED VERSION
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
@@ -16,9 +16,6 @@ test.describe('Security - XSS Prevention', () => {
     const xssPayloads = [
       '<script>window.xssExecuted = true;</script>',
       '<img src="x" onerror="window.xssExecuted = true">',
-     // '<svg onload="window.xssExecuted = true">',
-      //'javascript:window.xssExecuted = true',
-      //'<iframe src="javascript:window.xssExecuted = true"></iframe>'
     ];
 
     for (const payload of xssPayloads) {
@@ -38,23 +35,26 @@ test.describe('Security - XSS Prevention', () => {
       
       expect(scriptExecuted).toBe(false);
       
-     
-
-     const editorHtml = await page.locator('#editor').innerHTML();
-     // Check that actual script tags aren't present
-     expect(editorHtml).not.toContain('<script>');
-     expect(editorHtml).not.toContain('<img src=');
-     // onerror= can appear in spans as safe text, that's fine
-
-
-
-      // Verify content is safely displayed as text
+      // Check that actual script tags aren't present in DOM (not just editor content)
+      const editorHtml = await page.locator('#editor').innerHTML();
+      expect(editorHtml).not.toContain('<script');
+      
+      // For img tags, they should be safely escaped/rendered as text
+      // Don't check for raw 'onerror=' since CodeMirror may syntax-highlight it safely
+      if (payload.includes('<img')) {
+        // Verify no actual img elements were created in the editor
+        const imgElements = await page.locator('#editor img').count();
+        expect(imgElements).toBe(0);
+      }
+      
+      // Verify content is safely displayed as text in editor content
       const editorContent = await helpers.getEditorContent();
       expect(editorContent).toContain(payload); // Should be displayed as text
       
       console.log('✓ XSS payload safely handled:', payload);
     }
   });
+
 
   test('safely handles malicious document titles', async ({ page }) => {
     const maliciousTitles = [
