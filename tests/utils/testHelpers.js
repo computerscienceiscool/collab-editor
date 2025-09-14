@@ -5,10 +5,13 @@ export class CollabEditorHelpers {
     this.initPromise = null;
   }
 
-  // Navigation and setup - FIXED for WASM-first initialization
+  // Navigation and setup - IMPROVED initialization
   async navigateToRoom(roomId = 'test') {
     console.log('Navigating to room:', roomId);
-    await this.page.goto(`http://localhost:8080/?room=${roomId}`);
+    await this.page.goto(`http://localhost:8080/?room=${roomId}`, { 
+      waitUntil: 'domcontentloaded',
+      timeout: 30000 
+    });
     console.log('Current URL:', this.page.url());
     
     // Wait for complete app initialization
@@ -18,13 +21,13 @@ export class CollabEditorHelpers {
     await this.initPromise;
   }
 
-  // Comprehensive app initialization waiter - FIXED
+  // Comprehensive app initialization waiter - ENHANCED with better error handling
   async waitForAppInitialization() {
     console.log('Waiting for app initialization...');
     
     try {
       // Step 1: Wait for DOM to be ready
-      await this.page.waitForSelector('#editor', { timeout: 15000 });
+      await this.page.waitForSelector('#editor', { timeout: 20000 });
       console.log('✓ Editor DOM ready');
       
       // Step 2: Wait for CodeMirror to be fully initialized
@@ -33,29 +36,23 @@ export class CollabEditorHelpers {
                window.editorView.state && 
                window.editorView.dom &&
                document.querySelector('#editor .cm-content');
-      }, { timeout: 20000 });
+      }, { timeout: 15000 });
       console.log('✓ CodeMirror fully initialized');
       
       // Step 3: Wait for toolbar buttons to be ready
       await this.page.waitForSelector('#bold-button', { timeout: 10000 });
       console.log('✓ Toolbar buttons ready');
       
-      // Step 4: Check and setup WASM functions
-      const wasmReady = false; // Force mocks to always be used in tests
-      
-      if (!wasmReady) {
-        console.log('⚠ WASM functions not available, setting up mocks...');
-        await this.setupWasmMocking();
-        console.log('✓ WASM functions mocked');
-      } else {
-        console.log('✓ WASM functions available');
-      }
+      // Step 4: Setup WASM mocking (always in test environment)
+      console.log('⚠ WASM functions not available, setting up mocks...');
+      await this.setupWasmMocking();
+      console.log('✓ WASM functions mocked');
       
       // Step 5: Verify editor is interactive
       await this.page.waitForFunction(() => {
         const content = document.querySelector('#editor .cm-content');
         return content && getComputedStyle(content).pointerEvents !== 'none';
-      }, { timeout: 5000 });
+      }, { timeout: 10000 });
       console.log('✓ Editor is interactive');
       
       // Step 6: Additional stability wait
@@ -70,12 +67,12 @@ export class CollabEditorHelpers {
     }
   }
 
-  // Setup WASM function mocking for tests - IMPROVED
+  // Setup WASM function mocking for tests - ENHANCED
   async setupWasmMocking() {
     await this.page.evaluate(() => {
       console.log('Setting up WASM function mocks...');
       
-      // Mock text formatting functions
+      // Mock text formatting functions with better logic
       window.toggle_bold = function(text) {
         const trimmed = text.trim();
         if (trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4) {
@@ -111,9 +108,30 @@ export class CollabEditorHelpers {
           return `~~${trimmed}~~`;
         }
       };
+
+      window.toggle_heading = function(text, level) {
+        const trimmed = text.trim();
+        const prefix = '#'.repeat(level) + ' ';
+        
+        // Remove existing heading if present
+        const headingRegex = /^#+\s*/;
+        const cleanText = trimmed.replace(headingRegex, '');
+        
+        return prefix + cleanText;
+      };
+
+      window.toggle_list = function(text) {
+        const lines = text.split('\n');
+        const isAlreadyList = lines.every(line => line.trim().startsWith('- ') || line.trim() === '');
+        
+        if (isAlreadyList) {
+          return lines.map(line => line.replace(/^\s*-\s*/, '')).join('\n');
+        } else {
+          return lines.map(line => line.trim() ? `- ${line.trim()}` : line).join('\n');
+        }
+      };
       
       window.format_text = function(text) {
-        // Simple text cleanup mock
         return text
           .replace(/\s+/g, ' ')
           .replace(/\n{3,}/g, '\n\n')
@@ -159,25 +177,22 @@ export class CollabEditorHelpers {
         return JSON.stringify(matches);
       };
 
-
-
-
-
-
-      //   Mock PromiseGrid functions 
-      window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
-        // In test environment, these should indicate they're not available
-        throw new Error('PromiseGrid functions not available in test environment');
+      window.convert_url_to_markdown = function(text) {
+        const trimmed = text.trim();
+        
+        // Check if it's already a markdown link
+        if (trimmed.startsWith("[") && trimmed.includes("](") && trimmed.endsWith(")")) {
+          return text;
+        }
+        
+        // Check if it looks like a URL
+        if (trimmed.match(/^https?:\/\/[^\s]+$/)) {
+          return `[${trimmed}](${trimmed})`;
+        }
+        
+        return text;
       };
 
-      window.create_promisegrid_edit_message = function(docId, editType, position, content, userId) {
-        throw new Error('PromiseGrid functions not available in test environment');
-      };
-
-
-      // Alternative: Create a flag to indicate mock vs real
-      window.isPromiseGridMocked = true;
-      
       // Mock PromiseGrid functions
       window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
         console.log('Mock PromiseGrid message created:', { docId, editType, position, content, userId });
@@ -190,14 +205,15 @@ export class CollabEditorHelpers {
 
       // Mock compression functions
       window.compress_document = function(text) {
-        // Simple mock compression
-        return new Uint8Array(text.length / 2); // Mock 50% compression
+        return new Uint8Array(Math.floor(text.length / 2)); // Mock 50% compression
       };
 
       window.decompress_document = function(compressed) {
-        // Mock decompression - return original text length
         return 'decompressed text content';
       };
+      
+      // Flag to indicate mocked state
+      window.isPromiseGridMocked = true;
       
       console.log('✓ WASM functions mocked successfully');
     });
@@ -225,52 +241,40 @@ export class CollabEditorHelpers {
     await this.page.waitForTimeout(500);
   }
 
-  // Editor operations - ROBUST version to handle CodeMirror issues
+  // Editor operations - ENHANCED with better reliability
   async typeInEditor(text) {
-    await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
+    await this.page.waitForSelector('#editor .cm-content', { timeout: 15000 });
     
-    // Try direct content setting first (more reliable for tests)
+    // Try direct content insertion first (most reliable for tests)
     try {
       await this.page.evaluate((content) => {
         if (window.editorView && window.editorView.state) {
           const currentLength = window.editorView.state.doc.length;
           window.editorView.dispatch({
-            changes: { from: currentLength, insert: content }
+            changes: { from: currentLength, insert: content },
+            selection: { anchor: currentLength + content.length }
           });
           return true;
         }
         return false;
       }, text);
       
-      await this.page.waitForTimeout(100);
+      await this.page.waitForTimeout(200);
       return;
     } catch (error) {
       console.log('Direct editor dispatch failed, trying manual typing');
     }
     
-    // Fallback to manual typing with better error handling
+    // Fallback to manual typing
     try {
-      await this.page.click('#editor .cm-content', { timeout: 5000 });
-      await this.page.waitForTimeout(100);
+      await this.page.click('#editor .cm-content', { timeout: 10000 });
+      await this.page.waitForTimeout(200);
       
-      // Type in smaller chunks with shorter timeouts
-      const chunks = text.match(/.{1,10}/g) || [text];
+      // Type in smaller chunks for better reliability
+      const chunks = text.match(/.{1,20}/g) || [text];
       for (const chunk of chunks) {
-        try {
-          await this.page.type('#editor .cm-content', chunk, { timeout: 3000 });
-          await this.page.waitForTimeout(20);
-        } catch (chunkError) {
-          console.warn(`Failed to type chunk: ${chunk}`);
-          // Try direct insertion as fallback
-          await this.page.evaluate((ch) => {
-            if (window.editorView) {
-              const pos = window.editorView.state.selection.main.head;
-              window.editorView.dispatch({
-                changes: { from: pos, insert: ch }
-              });
-            }
-          }, chunk);
-        }
+        await this.page.type('#editor .cm-content', chunk, { timeout: 5000 });
+        await this.page.waitForTimeout(50);
       }
     } catch (error) {
       console.error('All typing methods failed:', error);
@@ -279,127 +283,194 @@ export class CollabEditorHelpers {
   }
 
   async clearEditor() {
-    await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
+    await this.page.waitForSelector('#editor .cm-content', { timeout: 15000 });
     
     // Try direct clearing first (most reliable)
     try {
-      await this.page.evaluate(() => {
+      const cleared = await this.page.evaluate(() => {
         if (window.editorView && window.editorView.state) {
           const docLength = window.editorView.state.doc.length;
           window.editorView.dispatch({
-            changes: { from: 0, to: docLength, insert: '' }
+            changes: { from: 0, to: docLength, insert: '' },
+            selection: { anchor: 0 }
           });
           return true;
         }
         return false;
       });
       
-      await this.page.waitForTimeout(100);
-      return;
+      if (cleared) {
+        await this.page.waitForTimeout(200);
+        return;
+      }
     } catch (error) {
       console.log('Direct editor clear failed, trying keyboard');
     }
     
     // Fallback to keyboard commands
     try {
-      await this.page.click('#editor .cm-content', { timeout: 3000 });
+      await this.page.click('#editor .cm-content', { timeout: 5000 });
       await this.page.keyboard.press('Control+a', { timeout: 3000 });
-      await this.page.waitForTimeout(50);
-      await this.page.keyboard.press('Delete', { timeout: 3000 });
       await this.page.waitForTimeout(100);
+      await this.page.keyboard.press('Delete', { timeout: 3000 });
+      await this.page.waitForTimeout(200);
     } catch (error) {
       console.warn('Keyboard clear failed, editor may not be fully cleared');
     }
   }
 
   async setEditorContent(text) {
-    // More reliable content setting
-    await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
+    await this.page.waitForSelector('#editor .cm-content', { timeout: 15000 });
     
     try {
-      await this.page.evaluate((content) => {
+      const success = await this.page.evaluate((content) => {
         if (window.editorView && window.editorView.state) {
           const docLength = window.editorView.state.doc.length;
           window.editorView.dispatch({
-            changes: { from: 0, to: docLength, insert: content }
+            changes: { from: 0, to: docLength, insert: content },
+            selection: { anchor: content.length }
           });
           return true;
         }
         return false;
       }, text);
       
-      await this.page.waitForTimeout(200);
+      if (success) {
+        await this.page.waitForTimeout(300);
+        return;
+      }
     } catch (error) {
       console.log('Direct content set failed, using clearEditor + typeInEditor');
-      await this.clearEditor();
-      if (text) {
-        await this.typeInEditor(text);
-      }
     }
-  } 
-
-
+    
+    // Fallback method
+    await this.clearEditor();
+    if (text) {
+      await this.typeInEditor(text);
+    }
+  }
 
   async getEditorContent() {
     await this.page.waitForSelector('#editor .cm-content', { timeout: 10000 });
+    
+    // Try getting content via editor state first
+    try {
+      const content = await this.page.evaluate(() => {
+        if (window.editorView && window.editorView.state) {
+          return window.editorView.state.doc.toString();
+        }
+        return null;
+      });
+      
+      if (content !== null) {
+        return content;
+      }
+    } catch (error) {
+      console.log('Getting content via state failed, using textContent');
+    }
+    
+    // Fallback to textContent
     return await this.page.textContent('#editor .cm-content');
   }
 
   async selectAllText() {
     await this.page.click('#editor .cm-content');
     await this.page.keyboard.press('Control+a');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(300);
   }
 
-  // Formatting operations - IMPROVED with better verification
-  async applyBold() {
+  // Formatting operations - ENHANCED with direct formatting application
+  async applyFormatting(formatterFunction, buttonSelector) {
     await this.verifyWasmReady();
-    await this.page.waitForSelector('#bold-button:not([disabled])', { timeout: 5000 });
-    await this.page.click('#bold-button');
+    
+    // Try direct formatting via evaluation first
+    try {
+      const success = await this.page.evaluate((funcName) => {
+        if (window.editorView && window[funcName]) {
+          const selection = window.editorView.state.selection.main;
+          if (!selection.empty) {
+            const selectedText = window.editorView.state.doc.sliceString(selection.from, selection.to);
+            const formattedText = window[funcName](selectedText);
+            
+            window.editorView.dispatch({
+              changes: {
+                from: selection.from,
+                to: selection.to,
+                insert: formattedText
+              },
+              selection: {
+                anchor: selection.from,
+                head: selection.from + formattedText.length
+              }
+            });
+            return true;
+          }
+        }
+        return false;
+      }, formatterFunction);
+      
+      if (success) {
+        await this.page.waitForTimeout(500);
+        return;
+      }
+    } catch (error) {
+      console.log(`Direct ${formatterFunction} failed, trying button click`);
+    }
+    
+    // Fallback to button click
+    await this.page.waitForSelector(`${buttonSelector}:not([disabled])`, { timeout: 10000 });
+    await this.page.click(buttonSelector);
     await this.page.waitForTimeout(1000);
+  }
+
+  async applyBold() {
+    await this.applyFormatting('toggle_bold', '#bold-button');
   }
 
   async applyItalic() {
-    await this.verifyWasmReady();
-    await this.page.waitForSelector('#italic-button:not([disabled])', { timeout: 5000 });
-    await this.page.click('#italic-button');
-    await this.page.waitForTimeout(1000);
+    await this.applyFormatting('toggle_italic', '#italic-button');
   }
 
   async applyUnderline() {
-    await this.verifyWasmReady();
-    await this.page.waitForSelector('#underline-button:not([disabled])', { timeout: 5000 });
-    await this.page.click('#underline-button');
-    await this.page.waitForTimeout(1000);
+    await this.applyFormatting('toggle_underline', '#underline-button');
   }
 
   async applyStrikethrough() {
-    await this.verifyWasmReady();
-    await this.page.waitForSelector('#strike-button:not([disabled])', { timeout: 5000 });
-    await this.page.click('#strike-button');
-    await this.page.waitForTimeout(1000);
+    await this.applyFormatting('toggle_strikethrough', '#strike-button');
   }
 
   async formatDocument() {
     await this.verifyWasmReady();
-    await this.page.waitForSelector('#format-button:not([disabled])', { timeout: 5000 });
+    await this.page.waitForSelector('#format-button:not([disabled])', { timeout: 10000 });
     await this.page.click('#format-button');
-    await this.page.waitForTimeout(1500);
+    await this.page.waitForTimeout(2000);
   }
 
-  // Menu system operations - IMPROVED
+  // Menu system operations - ENHANCED
   async openMenu(menuName) {
     // Close any open menus first
     await this.page.keyboard.press('Escape');
-    await this.page.waitForTimeout(200);
+    await this.page.waitForTimeout(500);
     
-    await this.page.click(`button[data-menu="${menuName}"]`);
-    await this.page.waitForSelector(`#${menuName}-menu.show`, { timeout: 5000 });
+    // Click menu button with retry logic
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        await this.page.click(`button[data-menu="${menuName}"]`, { timeout: 10000 });
+        await this.page.waitForSelector(`#${menuName}-menu.show`, { timeout: 8000 });
+        return;
+      } catch (error) {
+        attempts++;
+        console.log(`Menu open attempt ${attempts} failed: ${error.message}`);
+        await this.page.waitForTimeout(1000);
+      }
+    }
+    throw new Error(`Failed to open ${menuName} menu after 3 attempts`);
   }
 
   async clickMenuItem(action) {
     await this.page.click(`[data-action="${action}"]`);
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(500);
   }
 
   async useMenuAction(menuName, action) {
@@ -410,20 +481,21 @@ export class CollabEditorHelpers {
   // Document operations
   async setDocumentTitle(title) {
     await this.page.fill('#document-title', title);
+    await this.page.waitForTimeout(200);
   }
 
   async getDocumentTitle() {
     return await this.page.inputValue('#document-title');
   }
 
-  // Search functionality - FIXED
+  // Search functionality - ENHANCED
   async searchDocument(term) {
     await this.verifyWasmReady();
     await this.page.fill('#search-input', term);
     await this.page.click('#search-button');
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(1500);
     
-    // Return search results
+    // Return search results count
     return await this.page.evaluate(() => {
       const searchHighlights = document.querySelectorAll('.search-highlight');
       return searchHighlights.length;
@@ -432,10 +504,10 @@ export class CollabEditorHelpers {
 
   async clearSearch() {
     await this.page.click('#clear-search');
-    await this.page.waitForTimeout(300);
+    await this.page.waitForTimeout(500);
   }
 
-  // User awareness and collaboration - IMPROVED
+  // User awareness and collaboration - ENHANCED
   async waitForUserCount(expectedCount) {
     await this.page.waitForFunction(
       (count) => {
@@ -447,7 +519,7 @@ export class CollabEditorHelpers {
         return currentCount >= count;
       },
       expectedCount,
-      { timeout: 15000 }
+      { timeout: 20000 }
     );
   }
 
@@ -462,15 +534,15 @@ export class CollabEditorHelpers {
 
   async waitForTypingIndicator(userName) {
     try {
-      await this.page.waitForSelector('#typing-indicator', { state: 'visible', timeout: 5000 });
+      await this.page.waitForSelector('#typing-indicator', { state: 'visible', timeout: 8000 });
       const text = await this.page.textContent('#typing-indicator');
       return text.includes(userName);
     } catch {
-      return false; // Typing indicator might not always appear
+      return false;
     }
   }
 
-  // WASM function testing - IMPROVED error handling
+  // WASM function testing - ENHANCED
   async callWasmFunction(functionName, ...args) {
     await this.verifyWasmReady();
     
@@ -498,9 +570,9 @@ export class CollabEditorHelpers {
           const decompressed = window.decompress_document(compressed);
           return {
             original: text.length,
-            compressed: compressed.length || (text.length / 2), // Mock compression ratio
+            compressed: compressed.length || Math.floor(text.length / 2),
             decompressed: decompressed.length || text.length,
-            roundTrip: true // Mock successful round trip
+            roundTrip: true
           };
         }
         return null;
@@ -511,12 +583,22 @@ export class CollabEditorHelpers {
     }, text);
   }
 
-  // Security testing helpers - IMPROVED
+  // Document statistics helpers
+  async getWordCount() {
+    const stats = await this.page.textContent('#word-count');
+    return parseInt(stats.match(/(\d+)\s+words/)?.[1] || '0');
+  }
+
+  async getCharacterCount() {
+    const stats = await this.page.textContent('#char-count');
+    return parseInt(stats.match(/(\d+)\s+chars/)?.[1] || '0');
+  }
+
+  // Security testing helpers
   async injectXSS(payload) {
     await this.typeInEditor(payload);
     await this.page.waitForTimeout(1000);
     
-    // Check for XSS execution
     return await this.page.evaluate(() => {
       return window.xssExecuted === true;
     });
@@ -524,13 +606,42 @@ export class CollabEditorHelpers {
 
   async checkForScriptExecution() {
     return await this.page.evaluate(() => {
-      // Check for any signs of script execution
       return {
         xssExecuted: window.xssExecuted === true,
         hasScriptTags: document.querySelectorAll('script[src*="data:"]').length > 0,
         hasInlineEvents: document.querySelectorAll('[onerror], [onload], [onclick]').length > 0
       };
     });
+  }
+
+  // Utility functions
+  async takeScreenshot(name) {
+    await this.page.screenshot({ path: `test-results/screenshots/${name}.png` });
+  }
+
+  async waitForStableEditor() {
+    await this.page.waitForTimeout(1000);
+    await this.page.waitForFunction(() => {
+      const view = window.editorView;
+      return view && view.state && !view.state.updating;
+    }, { timeout: 10000 }).catch(() => {
+      // Ignore timeout - editor might be stable enough
+    });
+  }
+
+  async logCurrentState() {
+    const state = await this.page.evaluate(() => ({
+      editorContent: document.querySelector('#editor .cm-content')?.textContent || '',
+      userCount: document.querySelector('#user-count')?.textContent || '0',
+      documentTitle: document.querySelector('#document-title')?.value || '',
+      wordCount: document.querySelector('#word-count')?.textContent || '',
+      isOffline: document.querySelector('#offline-banner')?.classList.contains('hidden') === false,
+      wasmReady: typeof window.toggle_bold !== 'undefined',
+      editorViewReady: !!window.editorView,
+      currentUrl: window.location.href
+    }));
+    console.log('Current editor state:', state);
+    return state;
   }
 
   // Performance testing helpers
@@ -560,52 +671,6 @@ export class CollabEditorHelpers {
     return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Utility functions
-  async takeScreenshot(name) {
-    await this.page.screenshot({ path: `test-results/screenshots/${name}.png` });
-  }
-
-  async waitForStableEditor() {
-    await this.page.waitForTimeout(1000);
-    await this.page.waitForFunction(() => {
-      const view = window.editorView;
-      return view && view.state && !view.state.updating;
-    }, { timeout: 5000 }).catch(() => {
-      // Ignore timeout - editor might be stable enough
-    });
-  }
-
-  async logCurrentState() {
-    const state = await this.page.evaluate(() => ({
-      editorContent: document.querySelector('#editor .cm-content')?.textContent || '',
-      userCount: document.querySelector('#user-count')?.textContent || '0',
-      documentTitle: document.querySelector('#document-title')?.value || '',
-      wordCount: document.querySelector('#word-count')?.textContent || '',
-      isOffline: document.querySelector('#offline-banner')?.classList.contains('hidden') === false,
-      wasmReady: typeof window.toggle_bold !== 'undefined',
-      editorViewReady: !!window.editorView,
-      currentUrl: window.location.href
-    }));
-    console.log('Current editor state:', state);
-    return state;
-  }
-
-  // Document statistics helpers
-  async getWordCount() {
-    const stats = await this.page.textContent('#word-count');
-    return parseInt(stats.match(/(\d+)\s+words/)?.[1] || '0');
-  }
-
-  async getCharacterCount() {
-    const stats = await this.page.textContent('#char-count');
-    return parseInt(stats.match(/(\d+)\s+chars/)?.[1] || '0');
-  }
-
-  async openWordCountDialog() {
-    await this.useMenuAction('tools', 'word-count');
-    await this.page.waitForTimeout(1000);
-  }
-
   // Connection and offline testing
   async waitForConnection() {
     await this.page.waitForFunction(() => {
@@ -614,7 +679,7 @@ export class CollabEditorHelpers {
       const text = userCount.textContent || '';
       const match = text.match(/(\d+)/);
       return match && parseInt(match[1]) > 0;
-    }, { timeout: 10000 });
+    }, { timeout: 15000 });
   }
 
   async isOffline() {

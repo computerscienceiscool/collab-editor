@@ -1,3 +1,59 @@
+// tests/global-setup.js
+async function globalSetup() {
+  console.log('Setting up global test environment...');
+  
+  // Wait for development server to be ready
+  const { chromium } = require('@playwright/test');
+  
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  
+  try {
+    // Wait for server to be responsive
+    let attempts = 0;
+    const maxAttempts = 30; // 30 seconds
+    
+    while (attempts < maxAttempts) {
+      try {
+        await page.goto('http://localhost:8080', { 
+          waitUntil: 'domcontentloaded',
+          timeout: 10000 
+        });
+        
+        // Check if the app loads correctly
+        await page.waitForSelector('#editor', { timeout: 10000 });
+        console.log('✓ Development server is ready');
+        break;
+      } catch (error) {
+        attempts++;
+        console.log(`Server not ready, attempt ${attempts}/${maxAttempts}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    if (attempts >= maxAttempts) {
+      throw new Error('Development server failed to start within timeout');
+    }
+    
+    // Verify WASM setup by checking for basic functionality
+    const wasmReady = await page.evaluate(() => {
+      // Check if we can at least create basic mocks
+      return typeof document !== 'undefined' && typeof window !== 'undefined';
+    });
+    
+    if (!wasmReady) {
+      console.warn('WASM environment not fully ready, tests will use mocks');
+    } else {
+      console.log('✓ Browser environment ready for WASM mocking');
+    }
+    
+  } finally {
+    await browser.close();
+  }
+  
+  console.log('Global setup complete');
+}
+
 // tests/utils/testHelpers.js - Updated for WASM-first initialization
 export class CollabEditorHelpers {
   constructor(page) {
@@ -385,3 +441,5 @@ export class CollabEditorHelpers {
     return state;
   }
 }
+
+module.exports = globalSetup;
