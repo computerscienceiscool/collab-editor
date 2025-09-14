@@ -3,11 +3,15 @@ import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('Basic Editor Functionality', () => {
-  test('should load editor successfully', async ({ page }) => {
-    const helpers = new CollabEditorHelpers(page);
-    
+  let helpers;
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    helpers = new CollabEditorHelpers(page);
+    helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
-    
+  });
+
+  test('should load editor successfully', async ({ page }) => {
     // Verify editor elements are present
     await expect(page.locator('#editor')).toBeVisible();
     await expect(page.locator('#document-title')).toBeVisible();
@@ -15,9 +19,6 @@ test.describe('Basic Editor Functionality', () => {
   });
 
   test('should handle basic text input', async ({ page }) => {
-    const helpers = new CollabEditorHelpers(page);
-    
-    await helpers.navigateToRoom();
     await helpers.clearEditor(); // Clear any existing content
     await helpers.typeInEditor('Hello World!');
     
@@ -26,9 +27,6 @@ test.describe('Basic Editor Functionality', () => {
   });
 
   test('should apply text formatting', async ({ page }) => {
-    const helpers = new CollabEditorHelpers(page);
-    
-    await helpers.navigateToRoom();
     await helpers.setEditorContent('Format me'); 
     
     // Select all text

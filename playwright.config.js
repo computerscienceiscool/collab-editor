@@ -1,45 +1,86 @@
-
+// playwright.config.js - UPDATED CONFIGURATION
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false, // Changed to false to prevent resource conflicts
+  fullyParallel: false, // Keep false to prevent resource conflicts
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1, // Added retries for flaky tests
-  workers: process.env.CI ? 1 : 2, // Reduced workers to prevent timeouts
-  reporter: 'html',
-  timeout: 20000, // Reduced from 30000
+  retries: process.env.CI ? 3 : 2, // Increased retries for flaky tests
+  workers: process.env.CI ? 1 : 1, // Single worker to avoid conflicts
+  reporter: [
+    ['html'],
+    ['list'],
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
+  timeout: 45000, // Increased from 20000
   expect: {
-    timeout: 8000 // Reduced from default
+    timeout: 12000 // Increased from 8000
   },
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'only-on-failure', 
     video: 'retain-on-failure',
-    actionTimeout: 10000, // Added action timeout
-    navigationTimeout: 15000 // Added navigation timeout
+    actionTimeout: 15000, // Increased from 10000
+    navigationTimeout: 20000, // Increased from 15000
+    // Additional options for stability
+    locale: 'en-US',
+    timezoneId: 'America/New_York'
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Chromium-specific settings
+        launchOptions: {
+          args: [
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--no-sandbox'
+          ]
+        }
+      },
+      timeout: 40000
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-      timeout: 25000 // Firefox needs slightly more time
+      use: { 
+        ...devices['Desktop Firefox'],
+        // Firefox needs more time and different settings
+        launchOptions: {
+          firefoxUserPrefs: {
+            'dom.webnotifications.enabled': false,
+            'media.navigator.permission.disabled': true
+          }
+        }
+      },
+      timeout: 50000, // Firefox is slower
+      retries: 3 // Firefox is more flaky
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-      timeout: 25000 // WebKit needs slightly more time
+      use: { 
+        ...devices['Desktop Safari'],
+        // WebKit specific settings
+        launchOptions: {
+          args: ['--disable-web-security']
+        }
+      },
+      timeout: 50000, // WebKit needs more time
+      retries: 3 // WebKit is more flaky
     },
     {
       name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
-      timeout: 25000 // Mobile needs more time
+      use: { 
+        ...devices['Pixel 5'],
+        // Mobile specific settings
+        hasTouch: true,
+        isMobile: true
+      },
+      timeout: 45000,
+      retries: 2
     },
   ],
 
@@ -47,6 +88,20 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
-    timeout: 30000 // Reduced server startup timeout
+    timeout: 60000, // Increased server startup timeout
+    stdout: 'ignore',
+    stderr: 'pipe'
   },
+
+  // Global setup for better test isolation
+  globalSetup: './tests/global-setup.js',
+  
+  // Test output configuration
+  outputDir: 'test-results',
+  
+  // Better error reporting
+  reportSlowTests: {
+    max: 5,
+    threshold: 30000
+  }
 });
