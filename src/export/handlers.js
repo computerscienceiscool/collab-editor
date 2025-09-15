@@ -273,20 +273,28 @@ async function handleFormat(ytext, view) {
  * @param {string} extension - File extension without the dot
  * @returns {string} - Filename with proper extension
  */
-function getDocumentFilename(extension) {
-  const titleInput = document.getElementById('document-title');
-  let docName = 'document'; // default fallback
-  
-  if (titleInput && titleInput.value.trim()) {
-    docName = titleInput.value.trim()
-      .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters
-      .replace(/\s+/g, '_') // Replace spaces with underscores
-      .toLowerCase();
-  }
-  
-  return `${docName}.${extension}`;
+ // Strict filename sanitizer
+function sanitizeFilename(raw) {
+   const reserved = /[<>:"/\\|?*\u0000-\u001F]/g;        // control + illegal
+   const cleaned  = String(raw || 'document')
+     .replace(reserved, '_')
+     .replace(/\s+/g, ' ')                               // normalize whitespace
+     .replace(/^\.+|\.+$/g, '')                          // trim dots
+     .trim();
+   // strip paths / traversal
+   const noPath = cleaned.replace(/^([A-Za-z]:)?[\\/]+/g, '')
+                         .replace(/\.\.(\/|\\)/g, '');
+   const name = noPath.slice(0, 120) || 'document';
+   const banned = new Set(['CON','PRN','AUX','NUL','COM1','COM2','COM3','LPT1','LPT2','LPT3']);
+   return banned.has(name.toUpperCase()) ? `${name}_` : name;
 }
 
+function getDocumentFilename(extension) {
+   const titleInput = document.getElementById('document-title');
+   const base = sanitizeFilename(titleInput && titleInput.value);
+   const ext  = String(extension || '').replace(/[^a-z0-9]/gi, '').toLowerCase() || 'txt';
+   return `${base}.${ext}`;
+}
 
 /**
  * Gets the PromiseGrid filename based on the title input
@@ -431,15 +439,20 @@ function sendEditAsPromiseGridMessage(editType, position, content, view) {
  * @param {string} filename - Desired filename
  */
 function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+   const url = URL.createObjectURL(blob);
+   try {
+     const a = document.createElement('a');
+     a.href = url;
+     a.download = filename;
+     a.target = '_self';      // never open a new tab
+     a.rel = 'noopener';
+     a.style.display = 'none';
+     document.body.appendChild(a);
+     a.click();
+     document.body.removeChild(a);
+   } finally {
+     URL.revokeObjectURL(url);
+   }
 }
 
 function handleSearch(view) {

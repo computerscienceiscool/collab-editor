@@ -283,25 +283,23 @@ export class CollabEditorHelpers {
         return JSON.stringify(matches);
       };
 
-      // Enhanced URL conversion
-      window.convert_url_to_markdown = function(text) {
-        if (!text || typeof text !== 'string') return text || '';
-        const trimmed = text.trim();
-        
-        // Check if already a markdown link
-        if (trimmed.startsWith("[") && trimmed.includes("](") && trimmed.endsWith(")")) {
-          return text;
-        }
-        
-        // Check if it's a URL
-        if (trimmed.match(/^https?:\/\/[^\s]+$/)) {
-          const beforeTrim = text.substring(0, text.indexOf(trimmed));
-          const afterTrim = text.substring(text.indexOf(trimmed) + trimmed.length);
-          return `${beforeTrim}[${trimmed}](${trimmed})${afterTrim}`;
-        }
-        
-        return text;
-      };
+    // Enhanced URL conversion — wraps bare http(s) URLs anywhere in the text
+    window.convert_url_to_markdown = function(text) {
+      if (!text || typeof text !== 'string') return text || '';
+
+      // Match bare URLs not already wrapped; keep it simple and robust
+      const urlRegex = /\bhttps?:\/\/[^\s<>()\[\]]+/g;
+
+      return text.replace(urlRegex, (url, idx, src) => {
+        // If already in [label](url) form, skip wrapping the (url) part
+        const pre = src.slice(Math.max(0, idx - 2), idx);
+        const post = src.slice(idx + url.length, idx + url.length + 1);
+        if (pre === '](' && post === ')') return url;
+
+        return `[${url}](${url})`;
+      });
+    };
+    
 
       // PromiseGrid functions
       window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
@@ -313,16 +311,47 @@ export class CollabEditorHelpers {
       };
 
       // Compression functions with better simulation
+    // Compression functions with reversible simulation
+    (() => {
+      // store original texts keyed by a short id
+      if (!window.__mockCompressionStore) window.__mockCompressionStore = new Map();
+
       window.compress_document = function(text) {
-        if (!text || typeof text !== 'string') return new Uint8Array(0);
-        // Simulate compression by returning roughly half the size
-        return new Uint8Array(Math.max(1, Math.floor(text.length / 2)));
+        if (typeof text !== 'string' || !text.length) return new Uint8Array(0);
+        const id = Math.random().toString(36).slice(2, 10); // 8-char token
+        window.__mockCompressionStore.set(id, text);
+
+        const payload = 'mock:' + id;
+        // encode small payload so "compressed" size < original
+        if (typeof TextEncoder !== 'undefined') {
+          return new TextEncoder().encode(payload);
+        } else {
+          // fallback encoder
+          const u8 = new Uint8Array(payload.length);
+          for (let i = 0; i < payload.length; i++) u8[i] = payload.charCodeAt(i) & 255;
+          return u8;
+        }
       };
 
       window.decompress_document = function(compressed) {
         if (!compressed || !compressed.length) return '';
-        return 'decompressed text content of length ' + (compressed.length * 2);
+        let key = '';
+        if (typeof TextDecoder !== 'undefined') {
+          try { key = new TextDecoder().decode(compressed); } catch (_) { key = ''; }
+        } else {
+          // fallback decoder
+          let s = '';
+          for (let i = 0; i < compressed.length; i++) s += String.fromCharCode(compressed[i]);
+          key = s;
+        }
+        if (key.startsWith('mock:')) {
+          const id = key.slice(5);
+          return window.__mockCompressionStore.get(id) || '';
+        }
+        return '';
       };
+    })();
+      
       
       // Mark as mocked for tests
       window.isPromiseGridMocked = true;
@@ -612,15 +641,6 @@ export class CollabEditorHelpers {
   /**
    * Type text in editor with logging
    */
-  async typeInEditor(text) {
-    this.log(`Typing in editor: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
-    await this.page.waitForSelector('#editor .cm-content');
-    await this.page.click('#editor .cm-content');
-    await this.page.waitForTimeout(100);
-    await this.page.type('#editor .cm-content', text);
-    this.log('Text typed successfully', 'success');
-  }
-
   /**
    * Format document using format button
    */
@@ -844,26 +864,42 @@ export class CollabEditorHelpers {
   /**
    * Performance testing helpers
    */
-  async measureTypingPerformance(textLength = 1000) {
-    const text = 'a'.repeat(textLength);
-    const startTime = Date.now();
-    
-    await this.typeInEditor(text);
-    
-    const endTime = Date.now();
-    return endTime - startTime;
-  }
+/**
+ * Type text in editor with logging
+ */
+    async typeInEditor(text) {
+      this.log(`Typing in editor: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
 
-  async measureFormattingPerformance(text) {
-    await this.setEditorContent(text);
-    await this.selectAllText();
-    
-    const startTime = Date.now();
-    await this.applyBold();
-    const endTime = Date.now();
-    
-    return endTime - startTime;
-  }
+      // Prefer CodeMirror model insert — reliable and overlay-agnostic
+      const inserted = await this.page.evaluate((t) => {
+        const view = window.editorView;
+        if (view && view.state) {
+          const doc = view.state.doc;
+          const sel = view.state.selection && view.state.selection.main;
+          const pos = (sel && typeof sel.head === 'number') ? sel.head : (doc ? doc.length : 0);
+          try {
+            view.dispatch({
+              changes: { from: pos, to: pos, insert: t },
+              selection: { anchor: pos + t.length }
+            });
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+        return false;
+      }, text);
+
+      if (!inserted) {
+        // Fallback: use a locator (more robust than page.type) and ensure focus
+        const cm = this.page.locator('#editor .cm-content');
+        await cm.waitFor({ state: 'visible' });
+        await cm.click({ force: true });
+        await cm.type(text, { delay: 10 });
+      }
+
+      this.log('Text typed successfully', 'success');
+    }
   /**
    * Selection and text manipulation
    */

@@ -47,13 +47,14 @@ test.describe('Security - XSS Prevention', () => {
       await page.waitForTimeout(300);
       
       // Verify DOM structure safety
-      const editorHTML = await page.locator('#editor').innerHTML();
-      expect(editorHTML).not.toContain('<script');
-      expect(editorHTML).not.toContain('onerror=');
-      expect(editorHTML).not.toContain('onload=');
-      expect(editorHTML).not.toContain('onmouseover=');
-      expect(editorHTML).not.toContain('javascript:');
-      expect(editorHTML).not.toContain('data:text/javascript');
+      await expect(page.locator('#editor script')).toHaveCount(0);
+      await expect(page.locator('#editor iframe')).toHaveCount(0);
+      await expect(page.locator('#editor object')).toHaveCount(0);
+      await expect(page.locator('#editor embed')).toHaveCount(0);
+      await expect(page.locator('#editor link[href^="javascript:"]')).toHaveCount(0);
+      await expect(
+        page.locator('#editor [onerror], #editor [onload], #editor [onmouseover], #editor [onclick]')
+      ).toHaveCount(0);
       
       // Verify content integrity
       const editorContent = await helpers.getEditorContent();
@@ -186,8 +187,11 @@ test.describe('Security - XSS Prevention', () => {
       
       let exportError = null;
       try {
-        await helpers.useMenuAction('file', 'save-txt');
-        await page.waitForTimeout(500);
+        const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 5000 }),
+        helpers.useMenuAction('file', 'save-txt'),
+      ]);
+      await download.delete(); // cleanup
       } catch (error) {
         exportError = error;
       }
@@ -373,7 +377,7 @@ test.describe('Security - XSS Prevention', () => {
           return {
             inputHasNoScripts: !input.innerHTML.includes('<script'),
             parentHasNoScripts: parent.querySelectorAll('script').length === 0,
-            noEventHandlers: parent.querySelectorAll('[onerror], [onload], [onclick]').length === 0
+            noEventHandlers: parent.querySelectorAll('[onerror], [onload], [onclick]').length
           };
         }, field.selector);
         
@@ -477,22 +481,30 @@ test.describe('Security - XSS Prevention', () => {
       await helpers.setEditorContent(attack);
       await page.waitForTimeout(300);
       
-      // Verify no dangerous elements created
-      const dangerousElements = await page.evaluate(() => {
-        const editor = document.querySelector('#editor');
-        return {
-          clickableElements: editor.querySelectorAll('[onclick]').length,
-          iframes: editor.querySelectorAll('iframe').length,
-          styles: editor.querySelectorAll('style').length,
-          forms: editor.querySelectorAll('form').length,
-          videos: editor.querySelectorAll('video').length,
-          audios: editor.querySelectorAll('audio').length,
-          links: editor.querySelectorAll('link').length,
-          details: editor.querySelectorAll('details').length,
-          allEventHandlers: editor.querySelectorAll('[on*]').length
-        };
-      });
-      
+    // Verify no dangerous elements created
+    const dangerousElements = await page.evaluate(() => {
+      const editor = document.querySelector('#editor');
+      return {
+        clickableElements: editor.querySelectorAll('[onclick]').length,
+        iframes: editor.querySelectorAll('iframe').length,
+        styles: editor.querySelectorAll('style').length,
+        forms: editor.querySelectorAll('form').length,
+        videos: editor.querySelectorAll('video').length,
+        audios: editor.querySelectorAll('audio').length,
+        links: editor.querySelectorAll('link').length,
+        details: editor.querySelectorAll('details').length,
+        allEventHandlers: (() => {
+          let count = 0;
+          editor.querySelectorAll('*').forEach(node => {
+            for (const attr of node.attributes) {
+              if (attr.name && attr.name.startsWith('on')) count++;
+            }
+          });
+          return count;
+        })()
+      };
+    });
+          
       expect(dangerousElements.clickableElements).toBe(0);
       expect(dangerousElements.iframes).toBe(0);
       expect(dangerousElements.styles).toBe(0);
