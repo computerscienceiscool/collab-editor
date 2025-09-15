@@ -1090,10 +1090,19 @@
     }
 
     // Initialize when DOM loads
-    document.addEventListener('DOMContentLoaded', () => {
-      new MenuSystem();
-    });
-    
+      document.addEventListener('DOMContentLoaded', () => {
+        new MenuSystem();
+
+        // Bind modal events (moved from inline handlers)
+        const overlay = document.getElementById('modal-overlay');
+        const dialog = document.querySelector('.modal-dialog');
+        const closeButtons = document.querySelectorAll('.modal-close, .modal-button');
+
+        if (overlay) overlay.addEventListener('click', closeModal);
+        if (dialog)  dialog.addEventListener('click', (e) => e.stopPropagation());
+        closeButtons.forEach(btn => btn.addEventListener('click', () => closeModal()));
+      });
+        
         // Modal System JavaScript Functions - ADD THIS SECTION
     function showModal(title, content) {
       document.getElementById('modal-title').textContent = title;
@@ -1174,20 +1183,19 @@
     }
   </script>
     <!-- Modal HTML Structure -->
-    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
-      <div class="modal-dialog" onclick="event.stopPropagation()">
+    <div id="modal-overlay" class="modal-overlay" data-modal-overlay>
+      <div class="modal-dialog" data-modal-dialog>
         <div class="modal-header">
           <h2 id="modal-title" class="modal-title">Dialog Title</h2>
-          <button class="modal-close" onclick="closeModal()">&times;</button>
+          <button class="modal-close" data-modal-close>&times;</button>
         </div>
-        <div id="modal-content" class="modal-content">
-          <!-- Content will be inserted here -->
-        </div>
+        <div id="modal-content" class="modal-content"></div>
         <div class="modal-footer">
-          <button class="modal-button" onclick="closeModal()">Close</button>
+          <button class="modal-button" data-modal-close>Close</button>
         </div>
-  </div>
-</div>
+      </div>
+    </div>
+    
 
 </body>
 </html>

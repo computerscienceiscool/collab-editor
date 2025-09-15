@@ -1,4 +1,4 @@
-// playwright.config.js - UPDATED CONFIGURATION
+// playwright.config.js
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
@@ -28,15 +28,14 @@ export default defineConfig({
     timezoneId: 'America/New_York'
   },
 
+  
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        // Chromium-specific settings
         launchOptions: {
           args: [
-            '--disable-web-security',
             '--disable-features=VizDisplayCompositor',
             '--no-sandbox'
           ]
@@ -46,9 +45,8 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
-        // Firefox needs more time and different settings
         launchOptions: {
           firefoxUserPrefs: {
             'dom.webnotifications.enabled': false,
@@ -56,33 +54,29 @@ export default defineConfig({
           }
         }
       },
-      timeout: 50000, // Firefox is slower
-      retries: 3 // Firefox is more flaky
+      timeout: 50000,
+      retries: 3
     },
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
-        // WebKit specific settings
-        launchOptions: {
-          args: ['--disable-web-security']
-        }
       },
-      timeout: 50000, // WebKit needs more time
-      retries: 3 // WebKit is more flaky
+      timeout: 50000,
+      retries: 3
     },
     {
       name: 'mobile-chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
-        // Mobile specific settings
         hasTouch: true,
         isMobile: true
       },
       timeout: 45000,
       retries: 2
-    },
+    }
   ],
+
 
   webServer: {
     command: 'npm run dev',

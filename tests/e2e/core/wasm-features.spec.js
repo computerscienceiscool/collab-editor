@@ -5,8 +5,9 @@ import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 test.describe('WASM Text Processing Features', () => {
   let helpers;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     helpers = new CollabEditorHelpers(page);
+    helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
     await helpers.clearEditor();
   });

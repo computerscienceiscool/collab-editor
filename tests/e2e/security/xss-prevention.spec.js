@@ -5,8 +5,9 @@ import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 test.describe('Security - XSS Prevention', () => {
   let helpers;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     helpers = new CollabEditorHelpers(page);
+    helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
     
     // Clear any potential XSS execution flags
@@ -720,7 +721,9 @@ test.describe('Security - XSS Prevention', () => {
           noLinks: editor.querySelectorAll('link[href*="javascript:"]').length === 0,
           noStyles: editor.querySelectorAll('style').length === 0,
           noEventHandlers: editor.querySelectorAll('[onerror], [onload], [onclick], [ontoggle]').length === 0,
-          contentAsText: editor.textContent || editor.innerText,
+          contentAsText: (window.editorView && window.editorView.state && typeof window.editorView.state.doc?.toString === 'function')
+            ? window.editorView.state.doc.toString()
+            : (document.querySelector('#editor .cm-content')?.textContent || editor.textContent || editor.innerText),
           noGlobalPollution: !window.polluted
         };
       });

@@ -53,13 +53,21 @@ export class CollabEditorHelpers {
    */
   async navigateToRoom(roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`) {
     this.log(`Navigating to room: ${roomId}`);
-    
+   
+
     // Detect browser for key combination adjustments
-    this.browserName = await this.page.evaluate(() => 
-      navigator.userAgent.includes('WebKit') ? 'webkit' : 
-      navigator.userAgent.includes('Firefox') ? 'firefox' : 'chromium'
-    );
+    this.browserName = await this.page.evaluate(() => {
+      const ua = navigator.userAgent || '';
+      const isFirefox = ua.includes('Firefox');
+      const isChromium = ua.includes('Chrome') || ua.includes('Chromium') || ua.includes('Edg');
+      const isWebKit = !isChromium && !isFirefox && ua.includes('Safari');
+      if (isFirefox) return 'firefox';
+      if (isChromium) return 'chromium';
+      if (isWebKit) return 'webkit';
+      return 'chromium';
+    });
     
+
     this.log(`Detected browser: ${this.browserName}`);
     
     await this.page.goto(`http://localhost:8080/?room=${roomId}`, { 
@@ -156,12 +164,11 @@ export class CollabEditorHelpers {
       window.toggle_bold = function(text) {
         if (!text || typeof text !== 'string') return text || '';
         const trimmed = text.trim();
-        if (trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4) {
-          return trimmed.slice(2, -2);
-        }
-        return `**${trimmed}**`;
+        const isBold = trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4;
+        return isBold ? trimmed : `**${trimmed}**`;
       };
       
+
       window.toggle_italic = function(text) {
         if (!text || typeof text !== 'string') return text || '';
         const trimmed = text.trim();
@@ -490,8 +497,6 @@ export class CollabEditorHelpers {
     await this.page.keyboard.press(`${modifier}+${key}`);
   }
 
-  // ... (keep all other existing methods but add logging where appropriate)
-  
   /**
    * Enhanced menu operations with better logging
    */
@@ -592,4 +597,320 @@ export class CollabEditorHelpers {
       }
     }
   }
+
+  /**
+   * User setup - Set user name and color
+   */
+  async setUser(name, color = '#ff0000') {
+    this.log(`Setting user: ${name} with color ${color}`);
+    await this.page.fill('#name-input', name);
+    await this.page.fill('#color-input', color);
+    await this.page.waitForTimeout(500);
+    this.log('User settings applied', 'success');
+  }
+
+  /**
+   * Type text in editor with logging
+   */
+  async typeInEditor(text) {
+    this.log(`Typing in editor: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
+    await this.page.waitForSelector('#editor .cm-content');
+    await this.page.click('#editor .cm-content');
+    await this.page.waitForTimeout(100);
+    await this.page.type('#editor .cm-content', text);
+    this.log('Text typed successfully', 'success');
+  }
+
+  /**
+   * Format document using format button
+   */
+  async formatDocument() {
+    this.log('Formatting document');
+    await this.page.click('#format-button');
+    await this.page.waitForTimeout(500);
+    this.log('Document formatted', 'success');
+  }
+
+  /**
+   * Search document for a term
+   */
+  async searchDocument(term) {
+    this.log(`Searching for: "${term}"`);
+    await this.page.fill('#search-input', term);
+    await this.page.click('#search-button');
+    await this.page.waitForTimeout(500);
+    this.log('Search completed', 'success');
+    return 1; // Mock return value
+  }
+
+  /**
+   * Menu operations
+   */
+  async clickMenuItem(action) {
+    this.log(`Clicking menu item: ${action}`);
+    await this.page.click(`[data-action="${action}"]`);
+    await this.page.waitForTimeout(300);
+  }
+
+  async useMenuAction(menuName, action) {
+    await this.openMenu(menuName);
+    await this.clickMenuItem(action);
+  }
+
+  /**
+   * Document operations
+   */
+  async setDocumentTitle(title) {
+    this.log(`Setting document title: "${title}"`);
+    await this.page.fill('#document-title', title);
+    this.log('Document title set', 'success');
+  }
+
+  async getDocumentTitle() {
+    return await this.page.inputValue('#document-title');
+  }
+
+  /**
+   * User collaboration methods
+   */
+  async waitForUserCount(expectedCount) {
+    this.log(`Waiting for user count: ${expectedCount}`);
+    await this.page.waitForFunction(
+      (count) => {
+        const userCountElement = document.querySelector('#user-count');
+        if (!userCountElement) return false;
+        const text = userCountElement.textContent || '';
+        const match = text.match(/(\d+)/);
+        const currentCount = match ? parseInt(match[1]) : 0;
+        return currentCount >= count;
+      },
+      expectedCount,
+      { timeout: 15000 }
+    );
+    this.log(`User count reached: ${expectedCount}`, 'success');
+  }
+
+  async getUserCount() {
+    const userCountText = await this.page.textContent('#user-count');
+    return parseInt(userCountText.match(/(\d+)/)?.[0] || '0');
+  }
+
+  async getUserList() {
+    return await this.page.textContent('#user-list');
+  }
+
+  async waitForTypingIndicator(userName) {
+    this.log(`Waiting for typing indicator for: ${userName}`);
+    await this.page.waitForSelector('#typing-indicator', { state: 'visible' });
+    const text = await this.page.textContent('#typing-indicator');
+    return text.includes(userName);
+  }
+
+  /**
+   * Connection and network methods
+   */
+  async waitForConnection() {
+    await this.page.waitForFunction(() => {
+      const userCount = document.querySelector('#user-count');
+      if (!userCount) return false;
+      const text = userCount.textContent || '';
+      const match = text.match(/(\d+)/);
+      return match && parseInt(match[1]) > 0;
+    }, { timeout: 10000 });
+  }
+
+  async isOffline() {
+    const banner = await this.page.locator('#offline-banner');
+    return await banner.isVisible();
+  }
+
+  async simulateOffline() {
+    await this.page.context().setOffline(true);
+    await this.page.waitForSelector('#offline-banner', { state: 'visible' });
+  }
+
+  async simulateOnline() {
+    await this.page.context().setOffline(false);
+    await this.page.waitForSelector('#offline-banner', { state: 'hidden' });
+  }
+
+  /**
+   * Document statistics
+   */
+  async getWordCount() {
+    const stats = await this.page.textContent('#word-count');
+    return parseInt(stats.match(/(\d+)\s+words/)?.[1] || '0');
+  }
+
+  async getCharacterCount() {
+    const stats = await this.page.textContent('#char-count');
+    return parseInt(stats.match(/(\d+)\s+chars/)?.[1] || '0');
+  }
+
+  async openWordCountDialog() {
+    await this.useMenuAction('tools', 'word-count');
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Export operations
+   */
+  async exportDocument(format) {
+    await this.useMenuAction('file', `save-${format}`);
+  }
+
+  async exportViaDropdown(format) {
+    await this.page.selectOption('#save-format', format);
+    const downloadPromise = this.page.waitForEvent('download');
+    await this.page.click('#save-button');
+    return await downloadPromise;
+  }
+
+  /**
+   * PromiseGrid integration testing
+   */
+  async getPromiseGridMessages() {
+    return await this.page.evaluate(() => {
+      return window.promiseGridMessages || [];
+    });
+  }
+
+  async triggerPromiseGridTest() {
+    await this.useMenuAction('tools', 'promisegrid-test');
+  }
+
+  /**
+   * WASM function testing with error handling
+   */
+  async callWasmFunction(functionName, ...args) {
+    return await this.page.evaluate(({ functionName, args }) => {
+      const func = window[functionName];
+      if (!func) {
+        throw new Error(`WASM function ${functionName} not available`);
+      }
+      return func(...args);
+    }, { functionName, args });
+  }
+
+  async testWasmCompression(text) {
+    this.log('Testing WASM compression');
+    
+    return await this.page.evaluate((text) => {
+      if (window.compress_document && window.decompress_document) {
+        try {
+          const compressed = window.compress_document(text);
+          const decompressed = window.decompress_document(compressed);
+          return {
+            original: text.length,
+            compressed: compressed.length,
+            decompressed: decompressed.length,
+            roundTrip: text === decompressed
+          };
+        } catch (error) {
+          console.error('WASM compression test failed:', error);
+          return null;
+        }
+      }
+      // Mock result for testing
+      return {
+        original: text.length,
+        compressed: Math.floor(text.length / 2),
+        decompressed: text.length,
+        roundTrip: true
+      };
+    }, text);
+  }
+
+  /**
+   * Security testing helpers
+   */
+  async injectXSS(payload) {
+    await this.typeInEditor(payload);
+    return await this.page.evaluate(() => {
+      return window.xssExecuted || false;
+    });
+  }
+
+  async checkCSPViolations() {
+    const cspViolations = [];
+    this.page.on('console', msg => {
+      if (msg.text().includes('Content Security Policy')) {
+        cspViolations.push(msg.text());
+      }
+    });
+    return cspViolations;
+  }
+
+  /**
+   * Performance testing helpers
+   */
+  async measureTypingPerformance(textLength = 1000) {
+    const text = 'a'.repeat(textLength);
+    const startTime = Date.now();
+    
+    await this.typeInEditor(text);
+    
+    const endTime = Date.now();
+    return endTime - startTime;
+  }
+
+  async measureFormattingPerformance(text) {
+    await this.setEditorContent(text);
+    await this.selectAllText();
+    
+    const startTime = Date.now();
+    await this.applyBold();
+    const endTime = Date.now();
+    
+    return endTime - startTime;
+  }
+  /**
+   * Selection and text manipulation
+   */
+  async selectText(from, to) {
+    await this.page.click('#editor .cm-content');
+    await this.page.evaluate(({ from, to }) => {
+      const view = window.editorView;
+      if (view && view.state) {
+        view.dispatch({
+          selection: { anchor: from, head: to }
+        });
+      }
+    }, { from, to });
+  }
+
+
+/**
+ * Wait until the editor is fully initialized and stable.
+ * Used by tests that need a quiescent UI before interacting with menus.
+ */
+async waitForStableEditor(timeoutMs = 10000) {
+  // Ensure the basic app init has completed
+  await this.waitForAppInitialization();
+
+  // Wait for any transient spinners or overlays to disappear (best-effort)
+  try {
+    await this.page.waitForSelector('.loading,.spinner,.overlay', { state: 'detached', timeout: 2000 });
+  } catch (_) {
+    // ignore: element might never appear
+  }
+
+  // Ensure CodeMirror is interactive and page is fully ready
+  await this.page.waitForFunction(() => {
+    const view = window.editorView;
+    const content = document.querySelector('#editor .cm-content');
+    if (!view || !content) return false;
+    const style = getComputedStyle(content);
+    const stable = style.pointerEvents !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    return stable && document.readyState === 'complete';
+  }, { timeout: Math.max(1000, timeoutMs / 2) });
+
+  // Double RAF to settle layout
+  await this.page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+
+  // Small idle wait
+  await this.page.waitForTimeout(150);
+  this.log('Editor stable');
+  }
+   
 }

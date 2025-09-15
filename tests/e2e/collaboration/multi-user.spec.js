@@ -5,11 +5,11 @@ import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 test.describe('Real-time Collaboration', () => {
   let roomId;
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }, testInfo) => {
     roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   });
 
-  test('two users can edit simultaneously', async ({ browser }) => {
+  test('two users can edit simultaneously', async ({ browser }, testInfo) => {
     // Create two browser contexts (different users)
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();
@@ -18,7 +18,9 @@ test.describe('Real-time Collaboration', () => {
     const page2 = await context2.newPage();
     
     const user1 = new CollabEditorHelpers(page1);
+    user1.setTestName(testInfo.title + ' - User1');
     const user2 = new CollabEditorHelpers(page2);
+    user2.setTestName(testInfo.title + ' - User2');
 
     // Both users join the same room
     await user1.navigateToRoom(roomId);
@@ -60,7 +62,7 @@ test.describe('Real-time Collaboration', () => {
     await context2.close();
   });
 
-   test('user presence and awareness features work', async ({ browser }) => {
+   test('user presence and awareness features work', async ({ browser }, testInfo) => {
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();
   
@@ -68,7 +70,9 @@ test.describe('Real-time Collaboration', () => {
     const page2 = await context2.newPage();
   
     const user1 = new CollabEditorHelpers(page1);
+    user1.setTestName(testInfo.title + ' - User1');
     const user2 = new CollabEditorHelpers(page2);
+    user2.setTestName(testInfo.title + ' - User2');
 
   // Join room
     await user1.navigateToRoom(roomId);

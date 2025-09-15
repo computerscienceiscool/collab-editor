@@ -1,12 +1,13 @@
-// tests/e2e/core/keyboard-shortcuts.spec.js - FIXED VERSION
+// tests/e2e/core/keyboard-shortcuts.spec.js 
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('Keyboard Shortcuts', () => {
   let helpers;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     helpers = new CollabEditorHelpers(page);
+    helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
     
     // Clear any global state that might affect tests

@@ -1,12 +1,13 @@
-// tests/e2e/core/menu-system.spec.js - FIXED VERSION
+// tests/e2e/core/menu-system.spec.js 
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('Menu System Functionality', () => {
   let helpers;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
     helpers = new CollabEditorHelpers(page);
+    helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
     await helpers.waitForStableEditor();
   });
