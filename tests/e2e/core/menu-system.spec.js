@@ -10,6 +10,9 @@ test.describe('Menu System Functionality', () => {
     helpers.setTestName(testInfo.title);
     await helpers.navigateToRoom();
     await helpers.waitForStableEditor();
+    
+    // Grant clipboard permissions for menu tests
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   });
 
   test('all main menus are visible and clickable', async ({ page }) => {
@@ -23,11 +26,15 @@ test.describe('Menu System Functionality', () => {
       const menuButton = page.locator(`button[data-menu="${menu}"]`);
       await expect(menuButton).toBeVisible({ timeout: 15000 });
       
-      // Click the menu button with retry logic
+      // Click the menu button with retry logic and mobile support
       let menuOpened = false;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          await menuButton.click({ force: true });
+          if (helpers.isMobile) {
+            await menuButton.tap();
+          } else {
+            await menuButton.click({ force: true });
+          }
           await page.waitForTimeout(500);
           
           // Check dropdown appears
@@ -66,7 +73,12 @@ test.describe('Menu System Functionality', () => {
     let fileMenuOpened = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('button[data-menu="file"]');
+        const fileMenuButton = page.locator('button[data-menu="file"]');
+        if (helpers.isMobile) {
+          await fileMenuButton.tap();
+        } else {
+          await fileMenuButton.click();
+        }
         await page.waitForSelector('#file-menu.show', { timeout: 8000 });
         fileMenuOpened = true;
         break;
@@ -88,7 +100,12 @@ test.describe('Menu System Functionality', () => {
     });
     
     // Click new document
-    await page.click('[data-action="new"]');
+    const newDocItem = page.locator('[data-action="new"]');
+    if (helpers.isMobile) {
+      await newDocItem.tap();
+    } else {
+      await newDocItem.click();
+    }
     
     // Wait for either navigation or dialog
     try {
@@ -104,9 +121,6 @@ test.describe('Menu System Functionality', () => {
   });
 
   test('Edit menu keyboard shortcuts work', async ({ page, browserName }) => {
-    // Grant clipboard permissions upfront
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-    
     await helpers.setEditorContent('Test text for editing');
     await page.waitForTimeout(500);
     
@@ -115,7 +129,7 @@ test.describe('Menu System Functionality', () => {
     await page.waitForTimeout(200);
     
     // Test Select All with browser-specific keys
-    const modifier = browserName === 'webkit' ? 'Meta' : 'Control';
+    const modifier = helpers.getKeyModifier();
     await page.keyboard.press(`${modifier}+a`);
     await page.waitForTimeout(300);
     
@@ -133,7 +147,7 @@ test.describe('Menu System Functionality', () => {
     content = await helpers.getEditorContent();
     expect(content).toContain('Test text for editing');
     
-    // Test copy/paste cycle
+    // Test copy/paste cycle (with error handling for test environment)
     await page.keyboard.press(`${modifier}+a`);
     await page.waitForTimeout(200);
     
@@ -152,6 +166,9 @@ test.describe('Menu System Functionality', () => {
     } catch (error) {
       // Clipboard operations might fail in test environment
       console.log('Clipboard operations not fully supported in test environment');
+      // Just verify content is still there
+      const currentContent = await helpers.getEditorContent();
+      expect(currentContent.length).toBeGreaterThan(0);
     }
   });
 
@@ -170,7 +187,12 @@ test.describe('Menu System Functionality', () => {
     let formatMenuOpened = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('button[data-menu="format"]');
+        const formatMenuButton = page.locator('button[data-menu="format"]');
+        if (helpers.isMobile) {
+          await formatMenuButton.tap();
+        } else {
+          await formatMenuButton.click();
+        }
         await page.waitForSelector('#format-menu.show', { timeout: 5000 });
         formatMenuOpened = true;
         break;
@@ -186,7 +208,12 @@ test.describe('Menu System Functionality', () => {
     let boldApplied = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('[data-action="bold"]');
+        const boldMenuItem = page.locator('[data-action="bold"]');
+        if (helpers.isMobile) {
+          await boldMenuItem.tap();
+        } else {
+          await boldMenuItem.click();
+        }
         await page.waitForTimeout(800);
         
         let content = await helpers.getEditorContent();
@@ -213,10 +240,20 @@ test.describe('Menu System Functionality', () => {
     await page.waitForTimeout(200);
     
     // Re-open format menu
-    await page.click('button[data-menu="format"]');
+    const formatMenuButton2 = page.locator('button[data-menu="format"]');
+    if (helpers.isMobile) {
+      await formatMenuButton2.tap();
+    } else {
+      await formatMenuButton2.click();
+    }
     await page.waitForSelector('#format-menu.show', { timeout: 5000 });
     
-    await page.click('[data-action="italic"]');
+    const italicMenuItem = page.locator('[data-action="italic"]');
+    if (helpers.isMobile) {
+      await italicMenuItem.tap();
+    } else {
+      await italicMenuItem.click();
+    }
     await page.waitForTimeout(800);
     
     content = await helpers.getEditorContent();
@@ -251,7 +288,12 @@ test.describe('Menu System Functionality', () => {
     let toolsMenuOpened = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('button[data-menu="tools"]');
+        const toolsMenuButton = page.locator('button[data-menu="tools"]');
+        if (helpers.isMobile) {
+          await toolsMenuButton.tap();
+        } else {
+          await toolsMenuButton.click();
+        }
         await page.waitForSelector('#tools-menu.show', { timeout: 8000 });
         toolsMenuOpened = true;
         break;
@@ -267,7 +309,12 @@ test.describe('Menu System Functionality', () => {
     let wordCountTriggered = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('[data-action="word-count"]');
+        const wordCountItem = page.locator('[data-action="word-count"]');
+        if (helpers.isMobile) {
+          await wordCountItem.tap();
+        } else {
+          await wordCountItem.click();
+        }
         await page.waitForTimeout(1500);
         
         if (dialogShown) {
@@ -291,7 +338,12 @@ test.describe('Menu System Functionality', () => {
     let viewMenuOpened = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        await page.click('button[data-menu="view"]');
+        const viewMenuButton = page.locator('button[data-menu="view"]');
+        if (helpers.isMobile) {
+          await viewMenuButton.tap();
+        } else {
+          await viewMenuButton.click();
+        }
         await page.waitForSelector('#view-menu.show', { timeout: 8000 });
         viewMenuOpened = true;
         break;
@@ -317,7 +369,12 @@ test.describe('Menu System Functionality', () => {
     });
     
     // Click toggle
-    await page.click('[data-action="toggle-log"]');
+    const toggleLogItem = page.locator('[data-action="toggle-log"]');
+    if (helpers.isMobile) {
+      await toggleLogItem.tap();
+    } else {
+      await toggleLogItem.click();
+    }
     await page.waitForTimeout(1000);
     
     // Check if state changed
@@ -343,10 +400,20 @@ test.describe('Menu System Functionality', () => {
     const initialToolbarVisible = await toolbar.isVisible();
     
     // Re-open view menu
-    await page.click('button[data-menu="view"]');
+    const viewMenuButton2 = page.locator('button[data-menu="view"]');
+    if (helpers.isMobile) {
+      await viewMenuButton2.tap();
+    } else {
+      await viewMenuButton2.click();
+    }
     await page.waitForSelector('#view-menu.show', { timeout: 5000 });
     
-    await page.click('[data-action="toggle-toolbar"]');
+    const toggleToolbarItem = page.locator('[data-action="toggle-toolbar"]');
+    if (helpers.isMobile) {
+      await toggleToolbarItem.tap();
+    } else {
+      await toggleToolbarItem.click();
+    }
     await page.waitForTimeout(1000);
     
     const afterToolbarToggle = await toolbar.isVisible();
@@ -355,7 +422,12 @@ test.describe('Menu System Functionality', () => {
 
   test('ESC key closes open menus', async ({ page }) => {
     // Test with File menu
-    await page.click('button[data-menu="file"]');
+    const fileMenuButton = page.locator('button[data-menu="file"]');
+    if (helpers.isMobile) {
+      await fileMenuButton.tap();
+    } else {
+      await fileMenuButton.click();
+    }
     await page.waitForSelector('#file-menu.show', { timeout: 8000 });
     
     // Verify menu is visible
@@ -371,7 +443,12 @@ test.describe('Menu System Functionality', () => {
     expect(menuStillVisible).toBe(false);
     
     // Test with Format menu
-    await page.click('button[data-menu="format"]');
+    const formatMenuButton = page.locator('button[data-menu="format"]');
+    if (helpers.isMobile) {
+      await formatMenuButton.tap();
+    } else {
+      await formatMenuButton.click();
+    }
     await page.waitForSelector('#format-menu.show', { timeout: 5000 });
     
     menuVisible = await page.locator('#format-menu').isVisible();
@@ -401,7 +478,12 @@ test.describe('Menu System Functionality', () => {
       let menuOpened = false;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          await page.click(`button[data-menu="${menu}"]`);
+          const menuButton = page.locator(`button[data-menu="${menu}"]`);
+          if (helpers.isMobile) {
+            await menuButton.tap();
+          } else {
+            await menuButton.click();
+          }
           await page.waitForSelector(`#${menu}-menu.show`, { timeout: 5000 });
           menuOpened = true;
           break;
@@ -415,7 +497,12 @@ test.describe('Menu System Functionality', () => {
       
       // Execute action
       try {
-        await page.click(`[data-action="${action}"]`);
+        const actionItem = page.locator(`[data-action="${action}"]`);
+        if (helpers.isMobile) {
+          await actionItem.tap();
+        } else {
+          await actionItem.click();
+        }
         await page.waitForTimeout(500);
       } catch (error) {
         console.log(`Action ${action} failed, but menu opened successfully`);
@@ -432,37 +519,39 @@ test.describe('Menu System Functionality', () => {
     const activeElement = await page.evaluate(() => document.activeElement?.tagName);
     expect(['BUTTON', 'INPUT']).toContain(activeElement);
     
-    // Test that menus can be opened with Enter key
-    let currentFocus = await page.evaluate(() => document.activeElement);
-    
-    // Navigate to a menu button if not already there
-    for (let i = 0; i < 10; i++) {
-      const focusedElement = await page.evaluate(() => {
-        const el = document.activeElement;
-        return {
-          tagName: el?.tagName,
-          hasDataMenu: el?.hasAttribute('data-menu'),
-          dataMenu: el?.getAttribute('data-menu')
-        };
-      });
+    // Test that menus can be opened with Enter key (skip for mobile)
+    if (!helpers.isMobile) {
+      let currentFocus = await page.evaluate(() => document.activeElement);
       
-      if (focusedElement.hasDataMenu) {
-        await page.keyboard.press('Enter');
-        await page.waitForTimeout(500);
+      // Navigate to a menu button if not already there
+      for (let i = 0; i < 10; i++) {
+        const focusedElement = await page.evaluate(() => {
+          const el = document.activeElement;
+          return {
+            tagName: el?.tagName,
+            hasDataMenu: el?.hasAttribute('data-menu'),
+            dataMenu: el?.getAttribute('data-menu')
+          };
+        });
         
-        // Check if menu opened
-        const menuId = `#${focusedElement.dataMenu}-menu`;
-        const menuVisible = await page.locator(menuId).isVisible().catch(() => false);
-        
-        if (menuVisible) {
-          // Menu opened successfully
-          await page.keyboard.press('Escape');
-          break;
+        if (focusedElement.hasDataMenu) {
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(500);
+          
+          // Check if menu opened
+          const menuId = `#${focusedElement.dataMenu}-menu`;
+          const menuVisible = await page.locator(menuId).isVisible().catch(() => false);
+          
+          if (menuVisible) {
+            // Menu opened successfully
+            await page.keyboard.press('Escape');
+            break;
+          }
         }
+        
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(100);
       }
-      
-      await page.keyboard.press('Tab');
-      await page.waitForTimeout(100);
     }
   });
 
@@ -473,7 +562,12 @@ test.describe('Menu System Functionality', () => {
     const menus = ['file', 'edit', 'format'];
     for (let i = 0; i < 3; i++) {
       for (const menu of menus) {
-        await page.click(`button[data-menu="${menu}"]`);
+        const menuButton = page.locator(`button[data-menu="${menu}"]`);
+        if (helpers.isMobile) {
+          await menuButton.tap();
+        } else {
+          await menuButton.click();
+        }
         await page.waitForTimeout(100); // Very short wait
       }
     }
@@ -483,14 +577,24 @@ test.describe('Menu System Functionality', () => {
     await page.waitForTimeout(500);
     
     // Verify we can still open a menu normally
-    await page.click('button[data-menu="file"]');
+    const fileMenuButton = page.locator('button[data-menu="file"]');
+    if (helpers.isMobile) {
+      await fileMenuButton.tap();
+    } else {
+      await fileMenuButton.click();
+    }
     const fileMenuVisible = await page.waitForSelector('#file-menu.show', { timeout: 5000 }).then(() => true).catch(() => false);
     expect(fileMenuVisible).toBe(true);
     
     await page.keyboard.press('Escape');
     
     // 2. Test clicking outside menus
-    await page.click('button[data-menu="edit"]');
+    const editMenuButton = page.locator('button[data-menu="edit"]');
+    if (helpers.isMobile) {
+      await editMenuButton.tap();
+    } else {
+      await editMenuButton.click();
+    }
     await page.waitForSelector('#edit-menu.show', { timeout: 5000 });
     
     // Click outside
@@ -506,7 +610,12 @@ test.describe('Menu System Functionality', () => {
     await helpers.applyBold();
     
     // Menu should still work
-    await page.click('button[data-menu="tools"]');
+    const toolsMenuButton = page.locator('button[data-menu="tools"]');
+    if (helpers.isMobile) {
+      await toolsMenuButton.tap();
+    } else {
+      await toolsMenuButton.click();
+    }
     const toolsMenuVisible = await page.waitForSelector('#tools-menu.show', { timeout: 5000 }).then(() => true).catch(() => false);
     expect(toolsMenuVisible).toBe(true);
   });

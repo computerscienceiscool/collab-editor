@@ -1,4 +1,4 @@
-// tests/e2e/core/wasm-features.spec.js  
+// tests/e2e/core/wasm-features.spec.js
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 

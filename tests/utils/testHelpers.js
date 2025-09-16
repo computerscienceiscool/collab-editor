@@ -5,6 +5,7 @@ export class CollabEditorHelpers {
     this.initPromise = null;
     this.browserName = null;
     this.testName = 'Unknown Test';
+    this.isMobile = false;
   }
 
   /**
@@ -54,21 +55,25 @@ export class CollabEditorHelpers {
   async navigateToRoom(roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`) {
     this.log(`Navigating to room: ${roomId}`);
    
-
-    // Detect browser for key combination adjustments
-    this.browserName = await this.page.evaluate(() => {
+    // Detect browser and mobile status for key combination adjustments
+    const browserInfo = await this.page.evaluate(() => {
       const ua = navigator.userAgent || '';
       const isFirefox = ua.includes('Firefox');
       const isChromium = ua.includes('Chrome') || ua.includes('Chromium') || ua.includes('Edg');
       const isWebKit = !isChromium && !isFirefox && ua.includes('Safari');
-      if (isFirefox) return 'firefox';
-      if (isChromium) return 'chromium';
-      if (isWebKit) return 'webkit';
-      return 'chromium';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua) || window.innerWidth <= 768;
+      
+      let browserName = 'chromium';
+      if (isFirefox) browserName = 'firefox';
+      else if (isWebKit) browserName = 'webkit';
+      
+      return { browserName, isMobile };
     });
     
-
-    this.log(`Detected browser: ${this.browserName}`);
+    this.browserName = browserInfo.browserName;
+    this.isMobile = browserInfo.isMobile;
+    
+    this.log(`Detected browser: ${this.browserName}, mobile: ${this.isMobile}`);
     
     await this.page.goto(`http://localhost:8080/?room=${roomId}`, { 
       waitUntil: 'domcontentloaded',
@@ -148,7 +153,6 @@ export class CollabEditorHelpers {
       const originalLog = console.log;
       window.testConsoleLog = originalLog;
       console.log = function(...args) {
-        // Only log if it's not the repetitive app initialization messages
         const message = args.join(' ');
         if (!message.includes('Starting app initialization') &&
             !message.includes('WASM mocks set up') &&
@@ -165,10 +169,9 @@ export class CollabEditorHelpers {
         if (!text || typeof text !== 'string') return text || '';
         const trimmed = text.trim();
         const isBold = trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4;
-        return isBold ? trimmed : `**${trimmed}**`;
+        return isBold ? trimmed.slice(2, -2) : `**${trimmed}**`;
       };
       
-
       window.toggle_italic = function(text) {
         if (!text || typeof text !== 'string') return text || '';
         const trimmed = text.trim();
@@ -221,10 +224,10 @@ export class CollabEditorHelpers {
       window.format_text = function(text) {
         if (!text || typeof text !== 'string') return '';
         return text
-          .replace(/[ \t]+/g, ' ')           // Multiple spaces/tabs to single space
-          .replace(/\n{3,}/g, '\n\n')       // Multiple newlines to double
-          .replace(/[ \t]+$/gm, '')         // Trailing spaces on lines
-          .replace(/^[ \t]+/gm, '')         // Leading spaces on lines (optional)
+          .replace(/[ \t]+/g, ' ')           
+          .replace(/\n{3,}/g, '\n\n')       
+          .replace(/[ \t]+$/gm, '')         
+          .replace(/^[ \t]+/gm, '')         
           .trim();
       };
       
@@ -276,31 +279,24 @@ export class CollabEditorHelpers {
           });
           start = pos + 1;
           
-          // Prevent infinite loops with very large documents
           if (matches.length > 1000) break;
         }
         
         return JSON.stringify(matches);
       };
 
-    // Enhanced URL conversion — wraps bare http(s) URLs anywhere in the text
-    window.convert_url_to_markdown = function(text) {
-      if (!text || typeof text !== 'string') return text || '';
-
-      // Match bare URLs not already wrapped; keep it simple and robust
-      const urlRegex = /\bhttps?:\/\/[^\s<>()\[\]]+/g;
-
-      return text.replace(urlRegex, (url, idx, src) => {
-        // If already in [label](url) form, skip wrapping the (url) part
-        const pre = src.slice(Math.max(0, idx - 2), idx);
-        const post = src.slice(idx + url.length, idx + url.length + 1);
-        if (pre === '](' && post === ')') return url;
-
-        return `[${url}](${url})`;
-      });
-    };
-    
-
+      // Enhanced URL conversion
+      window.convert_url_to_markdown = function(text) {
+        if (!text || typeof text !== 'string') return text || '';
+        const urlRegex = /\bhttps?:\/\/[^\s<>()\[\]]+/g;
+        return text.replace(urlRegex, (url, idx, src) => {
+          const pre = src.slice(Math.max(0, idx - 2), idx);
+          const post = src.slice(idx + url.length, idx + url.length + 1);
+          if (pre === '](' && post === ')') return url;
+          return `[${url}](${url})`;
+        });
+      };
+      
       // PromiseGrid functions
       window.createPromiseGridMessage = function(docId, editType, position, content, userId) {
         return new Uint8Array([0x67, 0x72, 0x69, 0x64, 0x01, 0x02, 0x03, 0x04]);
@@ -310,53 +306,75 @@ export class CollabEditorHelpers {
         return window.createPromiseGridMessage(docId, editType, position, content, userId);
       };
 
-      // Compression functions with better simulation
-    // Compression functions with reversible simulation
-    (() => {
-      // store original texts keyed by a short id
-      if (!window.__mockCompressionStore) window.__mockCompressionStore = new Map();
+      // Compression functions with reversible simulation
+      (() => {
+        if (!window.__mockCompressionStore) window.__mockCompressionStore = new Map();
 
-      window.compress_document = function(text) {
-        if (typeof text !== 'string' || !text.length) return new Uint8Array(0);
-        const id = Math.random().toString(36).slice(2, 10); // 8-char token
-        window.__mockCompressionStore.set(id, text);
+        window.compress_document = function(text) {
+          if (typeof text !== 'string' || !text.length) return new Uint8Array(0);
+          const id = Math.random().toString(36).slice(2, 10);
+          window.__mockCompressionStore.set(id, text);
 
-        const payload = 'mock:' + id;
-        // encode small payload so "compressed" size < original
-        if (typeof TextEncoder !== 'undefined') {
-          return new TextEncoder().encode(payload);
-        } else {
-          // fallback encoder
-          const u8 = new Uint8Array(payload.length);
-          for (let i = 0; i < payload.length; i++) u8[i] = payload.charCodeAt(i) & 255;
-          return u8;
-        }
-      };
+          const payload = 'mock:' + id;
+          if (typeof TextEncoder !== 'undefined') {
+            return new TextEncoder().encode(payload);
+          } else {
+            const u8 = new Uint8Array(payload.length);
+            for (let i = 0; i < payload.length; i++) u8[i] = payload.charCodeAt(i) & 255;
+            return u8;
+          }
+        };
 
-      window.decompress_document = function(compressed) {
-        if (!compressed || !compressed.length) return '';
-        let key = '';
-        if (typeof TextDecoder !== 'undefined') {
-          try { key = new TextDecoder().decode(compressed); } catch (_) { key = ''; }
-        } else {
-          // fallback decoder
-          let s = '';
-          for (let i = 0; i < compressed.length; i++) s += String.fromCharCode(compressed[i]);
-          key = s;
-        }
-        if (key.startsWith('mock:')) {
-          const id = key.slice(5);
-          return window.__mockCompressionStore.get(id) || '';
-        }
-        return '';
-      };
-    })();
-      
+        window.decompress_document = function(compressed) {
+          if (!compressed || !compressed.length) return '';
+          let key = '';
+          if (typeof TextDecoder !== 'undefined') {
+            try { key = new TextDecoder().decode(compressed); } catch (_) { key = ''; }
+          } else {
+            let s = '';
+            for (let i = 0; i < compressed.length; i++) s += String.fromCharCode(compressed[i]);
+            key = s;
+          }
+          if (key.startsWith('mock:')) {
+            const id = key.slice(5);
+            return window.__mockCompressionStore.get(id) || '';
+          }
+          return '';
+        };
+      })();
       
       // Mark as mocked for tests
       window.isPromiseGridMocked = true;
       window.wasmMocksReady = true;
     });
+  }
+
+  /**
+   * Get appropriate key modifier for browser - FIXED FOR WEBKIT
+   */
+  getKeyModifier() {
+    // WebKit (Safari) uses Meta key on Mac, Ctrl on Windows/Linux
+    if (this.browserName === 'webkit') {
+      return 'Meta'; // Always use Meta for WebKit in tests
+    }
+    return this.browserName === 'firefox' ? 'Control' : 'Control';
+  }
+
+  /**
+   * Press keyboard shortcut with browser-specific modifier - ENHANCED
+   */
+  async pressShortcut(key, options = {}) {
+    const modifier = options.modifier || this.getKeyModifier();
+    const keyCombo = `${modifier}+${key}`;
+    this.log(`Pressing ${keyCombo} (browser: ${this.browserName})`);
+    
+    try {
+      await this.page.keyboard.press(keyCombo);
+      await this.page.waitForTimeout(100); // Brief pause for key processing
+    } catch (error) {
+      this.log(`Keyboard shortcut failed: ${error.message}`, 'error');
+      throw error;
+    }
   }
 
   /**
@@ -386,7 +404,6 @@ export class CollabEditorHelpers {
     }, text);
     
     if (success) {
-      // Verify content was set correctly
       await this.page.waitForFunction((expectedText) => {
         return window.editorView?.state.doc.toString() === expectedText;
       }, text, { timeout: 5000 });
@@ -400,7 +417,6 @@ export class CollabEditorHelpers {
     await this.page.keyboard.press('Control+a');
     await this.page.waitForTimeout(100);
     
-    // Type in chunks to avoid overwhelming the editor
     const chunks = text.match(/.{1,100}/g) || [text];
     for (const chunk of chunks) {
       await this.page.type('#editor .cm-content', chunk, { delay: 20 });
@@ -435,7 +451,7 @@ export class CollabEditorHelpers {
   }
 
   /**
-   * Generic formatting application with comprehensive retry logic and logging
+   * Generic formatting application with comprehensive retry logic - FIXED
    */
   async applyFormatting(type) {
     const buttonMap = {
@@ -511,23 +527,7 @@ export class CollabEditorHelpers {
   }
 
   /**
-   * Get appropriate key modifier for browser
-   */
-  getKeyModifier() {
-    return this.browserName === 'webkit' ? 'Meta' : 'Control';
-  }
-
-  /**
-   * Press keyboard shortcut with browser-specific modifier
-   */
-  async pressShortcut(key) {
-    const modifier = this.getKeyModifier();
-    this.log(`Pressing ${modifier}+${key}`);
-    await this.page.keyboard.press(`${modifier}+${key}`);
-  }
-
-  /**
-   * Enhanced menu operations with better logging
+   * Enhanced menu operations with better mobile support
    */
   async openMenu(menuName) {
     this.log(`Opening ${menuName} menu`);
@@ -537,18 +537,26 @@ export class CollabEditorHelpers {
     await this.page.waitForTimeout(200);
     
     let attempts = 0;
-    while (attempts < 3) {
+    while (attempts < 5) { // Increased attempts for mobile
       try {
-        await this.page.click(`button[data-menu="${menuName}"]`);
+        const menuButton = this.page.locator(`button[data-menu="${menuName}"]`);
+        
+        if (this.isMobile) {
+          // For mobile, use tap instead of click
+          await menuButton.tap();
+        } else {
+          await menuButton.click();
+        }
+        
         await this.page.waitForSelector(`#${menuName}-menu.show`, { timeout: 5000 });
-        await this.page.waitForTimeout(300);
+        await this.page.waitForTimeout(500); // Longer wait for mobile
         this.log(`${menuName} menu opened successfully`, 'success');
         return;
       } catch (error) {
         attempts++;
-        this.log(`Menu open attempt ${attempts} failed for ${menuName}`, 'warning');
-        await this.page.waitForTimeout(500);
-        if (attempts >= 3) {
+        this.log(`Menu open attempt ${attempts} failed for ${menuName}: ${error.message}`, 'warning');
+        await this.page.waitForTimeout(1000); // Longer retry delay
+        if (attempts >= 5) {
           this.log(`Failed to open ${menuName} menu after ${attempts} attempts`, 'error');
           throw error;
         }
@@ -560,7 +568,6 @@ export class CollabEditorHelpers {
    * Get current editor content with logging
    */
   async getEditorContent() {
-    // Try editorView first
     const content = await this.page.evaluate(() => {
       if (window.editorView && window.editorView.state) {
         return window.editorView.state.doc.toString();
@@ -573,7 +580,6 @@ export class CollabEditorHelpers {
       return content;
     }
     
-    // Fallback to DOM content
     const fallbackContent = await this.page.textContent('#editor .cm-content') || '';
     this.log(`Retrieved content via fallback: "${fallbackContent.substring(0, 30)}${fallbackContent.length > 30 ? '...' : ''}" (${fallbackContent.length} chars)`);
     return fallbackContent;
@@ -588,7 +594,7 @@ export class CollabEditorHelpers {
   }
 
   /**
-   * Select all text with logging
+   * Select all text with enhanced cross-browser support
    */
   async selectAllText() {
     this.log('Selecting all text');
@@ -639,14 +645,59 @@ export class CollabEditorHelpers {
   }
 
   /**
-   * Type text in editor with logging
+   * Type text in editor with enhanced mobile support
    */
+  async typeInEditor(text) {
+    this.log(`Typing in editor: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
+
+    const inserted = await this.page.evaluate((t) => {
+      const view = window.editorView;
+      if (view && view.state) {
+        const doc = view.state.doc;
+        const sel = view.state.selection && view.state.selection.main;
+        const pos = (sel && typeof sel.head === 'number') ? sel.head : (doc ? doc.length : 0);
+        try {
+          view.dispatch({
+            changes: { from: pos, to: pos, insert: t },
+            selection: { anchor: pos + t.length }
+          });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    }, text);
+
+    if (!inserted) {
+      const cm = this.page.locator('#editor .cm-content');
+      await cm.waitFor({ state: 'visible' });
+      
+      if (this.isMobile) {
+        await cm.tap();
+      } else {
+        await cm.click({ force: true });
+      }
+      
+      await cm.type(text, { delay: this.isMobile ? 50 : 10 });
+    }
+
+    this.log('Text typed successfully', 'success');
+  }
+
   /**
    * Format document using format button
    */
   async formatDocument() {
     this.log('Formatting document');
-    await this.page.click('#format-button');
+    const formatButton = this.page.locator('#format-button');
+    
+    if (this.isMobile) {
+      await formatButton.tap();
+    } else {
+      await formatButton.click();
+    }
+    
     await this.page.waitForTimeout(500);
     this.log('Document formatted', 'success');
   }
@@ -657,18 +708,32 @@ export class CollabEditorHelpers {
   async searchDocument(term) {
     this.log(`Searching for: "${term}"`);
     await this.page.fill('#search-input', term);
-    await this.page.click('#search-button');
+    
+    const searchButton = this.page.locator('#search-button');
+    if (this.isMobile) {
+      await searchButton.tap();
+    } else {
+      await searchButton.click();
+    }
+    
     await this.page.waitForTimeout(500);
     this.log('Search completed', 'success');
     return 1; // Mock return value
   }
 
   /**
-   * Menu operations
+   * Enhanced menu operations with mobile support
    */
   async clickMenuItem(action) {
     this.log(`Clicking menu item: ${action}`);
-    await this.page.click(`[data-action="${action}"]`);
+    const menuItem = this.page.locator(`[data-action="${action}"]`);
+    
+    if (this.isMobile) {
+      await menuItem.tap();
+    } else {
+      await menuItem.click();
+    }
+    
     await this.page.waitForTimeout(300);
   }
 
@@ -782,7 +847,14 @@ export class CollabEditorHelpers {
   async exportViaDropdown(format) {
     await this.page.selectOption('#save-format', format);
     const downloadPromise = this.page.waitForEvent('download');
-    await this.page.click('#save-button');
+    
+    const saveButton = this.page.locator('#save-button');
+    if (this.isMobile) {
+      await saveButton.tap();
+    } else {
+      await saveButton.click();
+    }
+    
     return await downloadPromise;
   }
 
@@ -864,42 +936,27 @@ export class CollabEditorHelpers {
   /**
    * Performance testing helpers
    */
-/**
- * Type text in editor with logging
- */
-    async typeInEditor(text) {
-      this.log(`Typing in editor: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
+  async measureTypingPerformance(textLength = 1000) {
+    const text = 'a'.repeat(textLength);
+    const startTime = Date.now();
+    
+    await this.typeInEditor(text);
+    
+    const endTime = Date.now();
+    return endTime - startTime;
+  }
 
-      // Prefer CodeMirror model insert — reliable and overlay-agnostic
-      const inserted = await this.page.evaluate((t) => {
-        const view = window.editorView;
-        if (view && view.state) {
-          const doc = view.state.doc;
-          const sel = view.state.selection && view.state.selection.main;
-          const pos = (sel && typeof sel.head === 'number') ? sel.head : (doc ? doc.length : 0);
-          try {
-            view.dispatch({
-              changes: { from: pos, to: pos, insert: t },
-              selection: { anchor: pos + t.length }
-            });
-            return true;
-          } catch (e) {
-            return false;
-          }
-        }
-        return false;
-      }, text);
+  async measureFormattingPerformance(text) {
+    await this.setEditorContent(text);
+    await this.selectAllText();
+    
+    const startTime = Date.now();
+    await this.applyBold();
+    const endTime = Date.now();
+    
+    return endTime - startTime;
+  }
 
-      if (!inserted) {
-        // Fallback: use a locator (more robust than page.type) and ensure focus
-        const cm = this.page.locator('#editor .cm-content');
-        await cm.waitFor({ state: 'visible' });
-        await cm.click({ force: true });
-        await cm.type(text, { delay: 10 });
-      }
-
-      this.log('Text typed successfully', 'success');
-    }
   /**
    * Selection and text manipulation
    */
@@ -915,38 +972,96 @@ export class CollabEditorHelpers {
     }, { from, to });
   }
 
+  /**
+   * Wait until the editor is fully initialized and stable.
+   */
+  async waitForStableEditor(timeoutMs = 10000) {
+    await this.waitForAppInitialization();
 
-/**
- * Wait until the editor is fully initialized and stable.
- * Used by tests that need a quiescent UI before interacting with menus.
- */
-async waitForStableEditor(timeoutMs = 10000) {
-  // Ensure the basic app init has completed
-  await this.waitForAppInitialization();
+    try {
+      await this.page.waitForSelector('.loading,.spinner,.overlay', { state: 'detached', timeout: 2000 });
+    } catch (_) {
+      // ignore: element might never appear
+    }
 
-  // Wait for any transient spinners or overlays to disappear (best-effort)
-  try {
-    await this.page.waitForSelector('.loading,.spinner,.overlay', { state: 'detached', timeout: 2000 });
-  } catch (_) {
-    // ignore: element might never appear
+    await this.page.waitForFunction(() => {
+      const view = window.editorView;
+      const content = document.querySelector('#editor .cm-content');
+      if (!view || !content) return false;
+      const style = getComputedStyle(content);
+      const stable = style.pointerEvents !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+      return stable && document.readyState === 'complete';
+    }, { timeout: Math.max(1000, timeoutMs / 2) });
+
+    await this.page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await this.page.waitForTimeout(150);
+    this.log('Editor stable');
   }
 
-  // Ensure CodeMirror is interactive and page is fully ready
-  await this.page.waitForFunction(() => {
-    const view = window.editorView;
-    const content = document.querySelector('#editor .cm-content');
-    if (!view || !content) return false;
-    const style = getComputedStyle(content);
-    const stable = style.pointerEvents !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-    return stable && document.readyState === 'complete';
-  }, { timeout: Math.max(1000, timeoutMs / 2) });
-
-  // Double RAF to settle layout
-  await this.page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-
-  // Small idle wait
-  await this.page.waitForTimeout(150);
-  this.log('Editor stable');
+  /**
+   * Enhanced clipboard operations with proper error handling
+   */
+  async copyToClipboard() {
+    this.log('Copying to clipboard');
+    try {
+      await this.pressShortcut('c');
+      await this.page.waitForTimeout(300);
+      this.log('Copy operation completed', 'success');
+    } catch (error) {
+      this.log(`Copy failed: ${error.message}`, 'error');
+      throw error;
+    }
   }
-   
+
+  async cutToClipboard() {
+    this.log('Cutting to clipboard');
+    try {
+      await this.pressShortcut('x');
+      await this.page.waitForTimeout(300);
+      this.log('Cut operation completed', 'success');
+    } catch (error) {
+      this.log(`Cut failed: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+
+  async pasteFromClipboard() {
+    this.log('Pasting from clipboard');
+    try {
+      await this.pressShortcut('v');
+      await this.page.waitForTimeout(300);
+      this.log('Paste operation completed', 'success');
+    } catch (error) {
+      this.log(`Paste failed: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+
+  /**
+   * Room generation for tests
+   */
+  async generateUniqueRoom() {
+    return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Utility functions
+   */
+  async takeScreenshot(name) {
+    await this.page.screenshot({ path: `test-results/screenshots/${name}.png` });
+  }
+
+  async logCurrentState() {
+    const state = await this.page.evaluate(() => ({
+      editorContent: document.querySelector('#editor .cm-content')?.textContent || '',
+      userCount: document.querySelector('#user-count')?.textContent || '0',
+      documentTitle: document.querySelector('#document-title')?.value || '',
+      wordCount: document.querySelector('#word-count')?.textContent || '',
+      isOffline: document.querySelector('#offline-banner')?.classList.contains('hidden') === false,
+      wasmReady: typeof window.toggle_bold !== 'undefined',
+      editorViewReady: !!window.editorView
+    }));
+    console.log('Current editor state:', state);
+    return state;
+  }
 }
