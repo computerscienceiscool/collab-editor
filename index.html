@@ -555,6 +555,19 @@
                 document.getElementById('underline-button')?.click();
               }
               break;
+
+             case 't': {
+               // Ctrl+Shift+T (or ⌘+Shift+T) toggles the toolbar
+               if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.target.matches('input, textarea, [contenteditable]')) {
+                 e.preventDefault();
+                 const toolbar = document.getElementById('toolbar');
+                 if (toolbar) {
+                   toolbar.classList.toggle('hidden'); // CSS already defines .hidden { display:none !important; }
+                 }
+               }
+               break;
+             }
+            
           }
         }
         

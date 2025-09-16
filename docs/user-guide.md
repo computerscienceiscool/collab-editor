@@ -134,7 +134,7 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 
 **Interface Control:**
 - **Toggle Activity Log (Ctrl+Alt+A)**: Show/hide user activity sidebar
-- **Toggle Toolbar (Ctrl+Shift+T)**: Show/hide formatting toolbar
+- **Toggle Toolbar (Ctrl+Shift+\)**: Show/hide formatting toolbar
 - **Toggle Markdown Preview (Ctrl+M)**: Show/hide side-by-side markdown preview pane
 - **Update Preview (Ctrl+R)**: Refresh markdown preview with current document text
 - **Full Screen Mode**: Browser fullscreen for distraction-free editing
@@ -164,7 +164,7 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 - Ctrl+M: Toggle Markdown Preview
 - Ctrl+R: Update Preview
 - Ctrl+Alt+A: Toggle Activity Log
-- Ctrl+Shift+T: Toggle Toolbar
+- Ctrl+Shift+\: Toggle Toolbar
 
 **Tools:**
 - Ctrl+Shift+C: Word Count
@@ -537,3 +537,4 @@ http://localhost:8080
 ```
 
 Share this with others to collaborate!
+

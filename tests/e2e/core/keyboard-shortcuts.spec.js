@@ -646,9 +646,9 @@ test.describe('Keyboard Shortcuts', () => {
       await expect(toolbar).toBeVisible();
       
       if (browserName === 'webkit') {
-        await page.keyboard.press('Meta+Shift+t');
+        await page.keyboard.press('Meta+Shift+\\');
       } else {
-        await page.keyboard.press('Control+Shift+t');
+        await page.keyboard.press('Control+Shift+\\');
       }
       
       // Enhanced wait for toolbar toggle with retry
@@ -1165,5 +1165,14 @@ test.describe('Keyboard Shortcuts', () => {
       const content = await helpers.getEditorContent();
       expect(content.length).toBeGreaterThanOrEqual('Code line to comment'.length);
     });
+
+      // Grant clipboard permissions for clipboard tests
+    test.beforeEach(async ({ page }) => {
+      await page.context().grantPermissions(
+        ['clipboard-read', 'clipboard-write'],
+        { origin: 'http://localhost:8080' }
+      );
+    });
+          
   });
 });
