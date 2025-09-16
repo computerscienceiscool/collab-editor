@@ -74,7 +74,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 | Feature | Keyboard Shortcut | Status | Description |
 |---------|-------------------|--------|-------------|
 | **Show/Hide Activity Log** | Ctrl+Alt+A | Implemented | Toggle user activity sidebar |
-| **Show/Hide Toolbar** | Ctrl+Shift+\ | Implemented | Toggle formatting toolbar visibility |
+| **Show/Hide Toolbar** | Ctrl+Alt+Y | Implemented | Toggle formatting toolbar visibility |
 | **Toggle Markdown Preview** | Ctrl+M | Implemented | Toggle side-by-side markdown preview pane |
 | **Update Preview** | Ctrl+R | Implemented | Refresh markdown preview with current text content |
 | **Full Screen Mode** | - | Implemented | Browser fullscreen toggle |

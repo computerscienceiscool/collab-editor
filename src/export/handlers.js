@@ -536,25 +536,20 @@ function clearHighlights(view) {
 }
 
 
-// === Ctrl/Cmd + Shift + \: toggle toolbar visibility (deterministic for tests) ===
+// === Ctrl/Cmd + Alt + Y: toggle toolbar visibility (deterministic for tests) ===
+// Paste this at the END of src/ui/shortcutManager.js
 (function attachToggleToolbarShortcut() {
   if (window.__toggleToolbarShortcutAttached) return; // idempotent
   window.__toggleToolbarShortcutAttached = true;
 
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
 
-  function isBackslashKey(ev) {
-    // Works across layouts: code is stable, key may be "\" or "|" depending on Shift/layout
-    return ev.code === 'Backslash' || ev.key === '\\' || ev.key === '|';
-  }
-
   function toggleToolbar() {
     const toolbar = document.getElementById('toolbar');
     if (!toolbar) return;
 
+    // Use a class the tests detect and keep ARIA in sync
     toolbar.classList.toggle('hidden');
-
-    // Keep ARIA in sync for accessibility (Playwright asserts this indirectly)
     const nowHidden =
       toolbar.classList.contains('hidden') ||
       getComputedStyle(toolbar).display === 'none';
@@ -563,7 +558,11 @@ function clearHighlights(view) {
 
   document.addEventListener('keydown', (e) => {
     const mod = isMac ? e.metaKey : e.ctrlKey;
-    if (mod && e.shiftKey && isBackslashKey(e)) {
+
+    // Layout-safe: prefer code, then key (so non-US keyboards still work)
+    const isY = e.code === 'KeyY' || (e.key && e.key.toLowerCase() === 'y');
+
+    if (mod && e.altKey && isY) {
       e.preventDefault();
       e.stopPropagation();
       toggleToolbar();
@@ -788,7 +787,7 @@ document.addEventListener('keydown', (e) => {
       return;
     }
 
-    // Ctrl/Meta + Shift + T => toggle toolbar visibility
+    // Ctrl/Meta + Alt + y => toggle toolbar visibility
     if (primaryModPressed(e) && e.shiftKey && !e.altKey && key === 't') {
       e.preventDefault();
       toggleToolbar();
@@ -853,7 +852,7 @@ document.addEventListener('keydown', (e) => {
       a.download = safeName;
       a.rel = 'noopener';
       a.style.display = 'none';
-      document.body.appendChild(a);
+      document.body.appendChild/(a);
 
       // Real click to guarantee Chromium emits the "download" event
       a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));

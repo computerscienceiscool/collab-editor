@@ -119,7 +119,7 @@ These combinations are not allowed:
 | Toggle Line Numbers | `Ctrl+Shift+L` | Show/hide line numbers |
 | Preferences | `Ctrl+Comma` | Open this preferences dialog |
 | Toggle Activity Log | `Ctrl+Alt+L` | Show/hide user activity |
-| Toggle Toolbar | `Ctrl+Shift+\` | Show/hide formatting toolbar |
+| Toggle Toolbar | `Ctrl+Alt+Y` | Show/hide formatting toolbar |
 | Toggle Markdown Preview | `Ctrl+M` | Show/hide preview pane |
 | Update Preview | `Ctrl+R` | Refresh markdown preview |
 | About | `F1` | Show about information |

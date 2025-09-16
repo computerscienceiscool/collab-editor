@@ -60,7 +60,7 @@ See [docs/keyboard-preferences.md](docs/keyboard-preferences.md) for complete cu
 | **Ctrl+M** | Toggle Markdown Preview | Show/hide side-by-side markdown preview |
 | **Ctrl+R** | Update Preview | Refresh markdown preview with current text |
 | **Ctrl+Alt+A** | Toggle Activity Log | Show/hide user activity sidebar |
-| **Ctrl+Shift+\** | Toggle Toolbar | Show/hide formatting toolbar |
+| **Ctrl+Alt+Y** | Toggle Toolbar | Show/hide formatting toolbar |
 | **Esc** | Close Menus | Close any open dropdown menu |
 
 ## Quick Reference Card
@@ -93,7 +93,7 @@ Ctrl+Shift+E  Email Document
 Ctrl+Alt+1/2/3 Headings
 Ctrl+Shift+7/8 Lists
 Ctrl+Alt+A    Activity Log
-Ctrl+Shift+\  Toggle Toolbar
+Ctrl+Alt+Y  Toggle Toolbar
 ```
 
 ## Shortcut Customization

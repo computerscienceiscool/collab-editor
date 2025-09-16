@@ -641,17 +641,14 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test.describe('Interface Shortcuts', () => {
-    test('Ctrl+Shift+\\ toggles toolbar', async ({ page, browserName }) => {
+    test('Ctrl+Alt+k toggles toolbar', async ({ page, browserName }) => {
       const toolbar = page.locator('#toolbar');
       await expect(toolbar).toBeVisible();
       
-      if (browserName === 'webkit') {
-        await page.keyboard.press('Meta+Shift+\\');
-      } else {
-        await page.keyboard.press('Control+Shift+\\');
-      }
+      const mod = browserName === 'webkit' ? 'Meta' : 'Control';
+      await page.keyboard.press(`${mod}+Alt+y`); 
       
-      // Enhanced wait for toolbar toggle with retry
+        // Enhanced wait for toolbar toggle with retry
       let toggleSuccess = false;
       for (let i = 0; i < 5; i++) {
         await page.waitForTimeout(500);
