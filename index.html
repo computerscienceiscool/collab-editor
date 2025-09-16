@@ -555,31 +555,18 @@
                 document.getElementById('underline-button')?.click();
               }
               break;
-            case 'y':
-            case 'Y': {
-              // Ctrl/Cmd + Alt + Y — toggle toolbar visibility
-              const modOK = e.ctrlKey || e.metaKey;
-              if (modOK && e.altKey) {
-                // allow inside the editor; only skip real form inputs
-                const tag = (e.target?.tagName || '').toUpperCase();
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') break;
-
+            case 'y': {
+              // Ctrl+Alt+Y (or ⌘+Alt+Y) toggles the toolbar
+              if ((e.ctrlKey || e.metaKey) && e.altKey && !e.target.matches('input, textarea, [contenteditable]')) {
                 e.preventDefault();
-                e.stopPropagation();
-
                 const toolbar = document.getElementById('toolbar');
                 if (toolbar) {
-                  toolbar.classList.toggle('hidden'); // .hidden { display:none !important; }
-
-                  // keep ARIA in sync (helps tests & a11y)
-                  const nowHidden = toolbar.classList.contains('hidden') ||
-                                    getComputedStyle(toolbar).display === 'none';
-                  toolbar.setAttribute('aria-hidden', String(nowHidden));
+                  toolbar.classList.toggle('hidden');
                 }
               }
               break;
             }
-            
+                
             
           }
         }

@@ -537,7 +537,6 @@ function clearHighlights(view) {
 
 
 // === Ctrl/Cmd + Alt + Y: toggle toolbar visibility (deterministic for tests) ===
-// Paste this at the END of src/ui/shortcutManager.js
 (function attachToggleToolbarShortcut() {
   if (window.__toggleToolbarShortcutAttached) return; // idempotent
   window.__toggleToolbarShortcutAttached = true;
@@ -559,7 +558,7 @@ function clearHighlights(view) {
   document.addEventListener('keydown', (e) => {
     const mod = isMac ? e.metaKey : e.ctrlKey;
 
-    // Layout-safe: prefer code, then key (so non-US keyboards still work)
+    // Layout-safe: prefer code, then key
     const isY = e.code === 'KeyY' || (e.key && e.key.toLowerCase() === 'y');
 
     if (mod && e.altKey && isY) {
