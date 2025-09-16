@@ -557,7 +557,7 @@
               break;
 
              case 't': {
-               // Ctrl+Shift+T (or ⌘+Shift+T) toggles the toolbar
+               // Ctrl+Shift+\ (or ⌘+Shift+\) toggles the toolbar
                if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.target.matches('input, textarea, [contenteditable]')) {
                  e.preventDefault();
                  const toolbar = document.getElementById('toolbar');

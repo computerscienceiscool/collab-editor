@@ -69,7 +69,7 @@ export class ShortcutManager {
 
       // View Menu Actions
       'toggle-log': { key: 'Ctrl+Alt+L', category: 'View', description: 'Toggle Activity Log' },
-      'toggle-toolbar': { key: 'Ctrl+Shift+T', category: 'View', description: 'Toggle Toolbar' },
+      'toggle-toolbar': { key: 'Ctrl+Shift+\\', category: 'View', description: 'Toggle Toolbar' },
       'toggle-markdown-preview': { key: 'Ctrl+M', category: 'View', description: 'Toggle Markdown Preview' },
       'update-markdown-preview': { key: 'Ctrl+R', category: 'View', description: 'Update Markdown Preview' },
 

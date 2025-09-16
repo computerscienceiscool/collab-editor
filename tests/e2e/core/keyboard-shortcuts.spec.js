@@ -641,7 +641,7 @@ test.describe('Keyboard Shortcuts', () => {
   });
 
   test.describe('Interface Shortcuts', () => {
-    test('Ctrl+Shift+T toggles toolbar', async ({ page, browserName }) => {
+    test('Ctrl+Shift+\\ toggles toolbar', async ({ page, browserName }) => {
       const toolbar = page.locator('#toolbar');
       await expect(toolbar).toBeVisible();
       

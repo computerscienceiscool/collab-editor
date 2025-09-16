@@ -184,7 +184,7 @@ test('should apply text formatting', async ({ page }) => {
 - **Text Formatting**: Ctrl+B (Bold), Ctrl+I (Italic), Ctrl+Alt+U (Underline)
 - **Document Navigation**: Ctrl+A (Select All), Ctrl+F (Find)
 - **File Operations**: Ctrl+N (New), Ctrl+P (Print)
-- **Interface Control**: Ctrl+Shift+T (Toggle Toolbar), Esc (Close Menus)
+- **Interface Control**: Ctrl+Shift+\ (Toggle Toolbar), Esc (Close Menus)
 
 **Known Issues**:
 - **Ctrl+U conflicts** with browser "View Source" - resolved by using Ctrl+Alt+U
