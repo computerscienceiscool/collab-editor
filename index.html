@@ -222,15 +222,19 @@
     // Import the shortcut manager
     import { shortcutManager } from './src/ui/shortcutManager.js';
     import { preferencesDialog } from './src/ui/preferencesDialog.js';
-    
+   
+    window.preferencesDialog = preferencesDialog; 
     // Make it available globally so MenuSystem can use it
     window.shortcutManager = shortcutManager;
+    window.preferencesDialog = preferencesDialog;
+
     // Menu System Class
     class MenuSystem {
       constructor() {
         this.activeMenu = null;
         this.init();
       }
+
 
       init() {
         this.setupMenuToggling();
@@ -447,9 +451,6 @@
             break;
           case 'update-markdown-preview':
             this.updateMarkdownPreview();
-            break;
-          case 'preferences':
-            window.preferencesDialog.show();
             break;
           case 'about':
             showAboutModal();
@@ -1116,7 +1117,7 @@
         closeButtons.forEach(btn => btn.addEventListener('click', () => closeModal()));
       });
         
-        // Modal System JavaScript Functions - ADD THIS SECTION
+        // Modal System JavaScript Functions 
     function showModal(title, content) {
       document.getElementById('modal-title').textContent = title;
       document.getElementById('modal-content').innerHTML = content;
@@ -1208,7 +1209,5 @@
         </div>
       </div>
     </div>
-    
-
 </body>
 </html>

@@ -9,6 +9,7 @@ export class PreferencesDialog {
     this.isOpen = false;
     this.editingAction = null;
     this.editingElement = null;
+    this.keydownHandler = null; // Track handler for cleanup
   }
 
   /**
@@ -44,6 +45,11 @@ export class PreferencesDialog {
     
     const modal = document.getElementById('preferences-modal');
     if (modal) {
+      // Clean up event listeners
+      if (this.keydownHandler) {
+        document.removeEventListener('keydown', this.keydownHandler);
+        this.keydownHandler = null;
+      }
       modal.remove();
     }
     
@@ -59,11 +65,13 @@ export class PreferencesDialog {
     const modal = document.createElement('div');
     modal.id = 'preferences-modal';
     modal.className = 'modal-overlay show';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-labelledby', 'preferences-title');
     
     modal.innerHTML = `
       <div class="modal-dialog preferences-dialog">
         <div class="modal-header">
-          <h2 class="modal-title">Keyboard Shortcuts</h2>
+          <h2 id="preferences-title" class="modal-title">Keyboard Shortcuts</h2>
           <button class="modal-close" onclick="window.preferencesDialog.hide()">&times;</button>
         </div>
         <div class="modal-content">
@@ -92,8 +100,9 @@ export class PreferencesDialog {
    */
   populateShortcuts() {
     const container = document.getElementById('shortcuts-container');
-    const shortcuts = window.shortcutManager.getShortcutsByCategory();
+    if (!container || !window.shortcutManager) return;
     
+    const shortcuts = window.shortcutManager.getShortcutsByCategory();
     container.innerHTML = '';
     
     // Sort categories in logical order
@@ -138,6 +147,7 @@ export class PreferencesDialog {
    */
   setupEventListeners() {
     const modal = document.getElementById('preferences-modal');
+    if (!modal) return;
     
     // Click outside to close
     modal.addEventListener('click', (e) => {
@@ -147,12 +157,12 @@ export class PreferencesDialog {
     });
     
     // Escape key to close or cancel editing
-    document.addEventListener('keydown', this.handleKeyDown.bind(this));
-   
+    this.keydownHandler = this.handleKeyDown.bind(this);
+    document.addEventListener('keydown', this.keydownHandler);
 
     // Click on shortcut keys to edit them
     modal.addEventListener('click', (e) => {
-    if (e.target.matches('.shortcut-key')) {
+      if (e.target.matches('.shortcut-key')) {
         e.preventDefault();
         e.stopPropagation();
         const action = e.target.dataset.action;
@@ -162,7 +172,9 @@ export class PreferencesDialog {
     
     // Reset button
     const resetBtn = document.getElementById('reset-shortcuts');
-    resetBtn.addEventListener('click', this.resetToDefaults.bind(this));
+    if (resetBtn) {
+      resetBtn.addEventListener('click', this.resetToDefaults.bind(this));
+    }
   }
 
   /**
@@ -190,40 +202,37 @@ export class PreferencesDialog {
   /**
    * Parse keyboard event to shortcut string (same as shortcut manager)
    */
-  
-
-
   parseKeyEvent(event) {
-      const parts = [];
-      
-      if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
-      if (event.altKey) parts.push('Alt');
-      if (event.shiftKey) parts.push('Shift');
-      
-      let key = event.key;
-      
-      // Skip modifier keys themselves
-      if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
-        return '';
-      }
-      
-      // Handle special keys
-      if (key === ' ') key = 'Space';
-      else if (key === 'Escape') key = 'Escape';
-      else if (key === 'Enter') key = 'Enter';
-      else if (key === 'Delete') key = 'Delete';
-      else if (key === ',') key = 'Comma';
-      else if (key.startsWith('F') && key.length <= 3) key = key; // F1, F2, etc.
-      else if (key.length === 1) key = key.toUpperCase();
-      
-      // Only add the key if we have modifiers OR it's a special key
-      if (parts.length === 0 && !/^(F\d+|Escape|Enter|Delete|Space)$/.test(key)) {
-        return '';
-      }
-      
-      parts.push(key);
-      return parts.join('+');
-}  
+    const parts = [];
+    
+    if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
+    if (event.altKey) parts.push('Alt');
+    if (event.shiftKey) parts.push('Shift');
+    
+    let key = event.key;
+    
+    // Skip modifier keys themselves
+    if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
+      return '';
+    }
+    
+    // Handle special keys
+    if (key === ' ') key = 'Space';
+    else if (key === 'Escape') key = 'Escape';
+    else if (key === 'Enter') key = 'Enter';
+    else if (key === 'Delete') key = 'Delete';
+    else if (key === ',') key = 'Comma';
+    else if (key.startsWith('F') && key.length <= 3) key = key; // F1, F2, etc.
+    else if (key.length === 1) key = key.toUpperCase();
+    
+    // Only add the key if we have modifiers OR it's a special key
+    if (parts.length === 0 && !/^(F\d+|Escape|Enter|Delete|Space)$/.test(key)) {
+      return '';
+    }
+    
+    parts.push(key);
+    return parts.join('+');
+  }  
 
   /**
    * Start editing a shortcut
@@ -248,7 +257,9 @@ export class PreferencesDialog {
     if (this.editingAction && this.editingElement) {
       this.editingElement.classList.remove('editing');
       const shortcut = window.shortcutManager.getShortcut(this.editingAction);
-      this.editingElement.textContent = shortcut.key;
+      if (shortcut) {
+        this.editingElement.textContent = shortcut.key;
+      }
     }
     
     this.editingAction = null;
@@ -290,12 +301,14 @@ export class PreferencesDialog {
   }
 
   /**
-   * Update a shortcut (simplified version)
+   * Update a shortcut
    */
   updateShortcut(action, newKey) {
     try {
       // Update shortcut manager
       const shortcut = window.shortcutManager.getShortcut(action);
+      if (!shortcut) return false;
+      
       const oldKey = shortcut.key;
       
       // Remove old mapping
@@ -366,7 +379,9 @@ export class PreferencesDialog {
       modal.appendChild(messageDiv);
       
       setTimeout(() => {
-        messageDiv.remove();
+        if (messageDiv.parentNode) {
+          messageDiv.remove();
+        }
       }, 2000);
     }
   }

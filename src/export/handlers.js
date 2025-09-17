@@ -268,27 +268,26 @@ async function handleFormat(ytext, view) {
     alert("Failed to format text: " + error.message);
   }
 }
-/**
- * Gets the document filename based on the title input
- * @param {string} extension - File extension without the dot
- * @returns {string} - Filename with proper extension
- */
  // Strict filename sanitizer
-function sanitizeFilename(raw) {
-   const reserved = /[<>:"/\\|?*\u0000-\u001F]/g;        // control + illegal
-   const cleaned  = String(raw || 'document')
-     .replace(reserved, '_')
-     .replace(/\s+/g, ' ')                               // normalize whitespace
-     .replace(/^\.+|\.+$/g, '')                          // trim dots
-     .trim();
-   // strip paths / traversal
-   const noPath = cleaned.replace(/^([A-Za-z]:)?[\\/]+/g, '')
-                         .replace(/\.\.(\/|\\)/g, '');
-   const name = noPath.slice(0, 120) || 'document';
-   const banned = new Set(['CON','PRN','AUX','NUL','COM1','COM2','COM3','LPT1','LPT2','LPT3']);
-   return banned.has(name.toUpperCase()) ? `${name}_` : name;
+function sanitizeFilename(raw, fallback = 'document.txt') {
+  if (!raw || typeof raw !== 'string') return fallback;
+  
+  const cleaned = String(raw)
+    // Remove Unicode control chars including RTL override (U+202E) that caused the crash
+    .replace(/[\u0000-\u001F\u007F-\u009F\u200E-\u202E]/g, '')
+    // Remove path separators and shell metacharacters
+    .replace(/[\/\\<>:"|?*`$&;(){}[\]]/g, '_')
+    // Handle Windows reserved names
+    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)/i, 'safe_$1$2')
+    // Normalize whitespace and trim
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+  
+  if (!cleaned || cleaned === '.' || cleaned === '..') return fallback;
+  if (!/\.[a-z0-9]{1,5}$/i.test(cleaned)) return cleaned + '.txt';
+  return cleaned;
 }
-
 function getDocumentFilename(extension) {
    const titleInput = document.getElementById('document-title');
    const base = sanitizeFilename(titleInput && titleInput.value);
