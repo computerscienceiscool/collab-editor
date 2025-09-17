@@ -1,4 +1,4 @@
-// File: src/ui/preferencesDialog.js
+// File: src/ui/preferencesDialog.js 
 
 /**
  * Keyboard shortcut preferences dialog
@@ -9,7 +9,7 @@ export class PreferencesDialog {
     this.isOpen = false;
     this.editingAction = null;
     this.editingElement = null;
-    this.keydownHandler = null; // Track handler for cleanup
+    this.keydownHandler = null;
   }
 
   /**
@@ -149,6 +149,7 @@ export class PreferencesDialog {
       container.appendChild(categoryDiv);
     });
   }
+
   /**
    * Setup event listeners for the dialog
    */
@@ -218,45 +219,49 @@ export class PreferencesDialog {
     if (this.editingAction) {
       event.preventDefault();
       const keyString = this.parseKeyEvent(event);
-      this.handleShortcutInput(keyString);
+      if (keyString) {
+        this.handleShortcutInput(keyString);
+      }
     }
   }
 
   /**
    * Parse keyboard event to shortcut string
    */
-  parseKeyEvent(event) {
-    const parts = [];
-    
-    if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
-    if (event.altKey) parts.push('Alt');
-    if (event.shiftKey) parts.push('Shift');
-    
-    let key = event.key;
-    
-    // Skip modifier keys themselves
-    if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
-      return '';
+    parseKeyEvent(event) {
+      const parts = [];
+      
+      if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
+      if (event.altKey) parts.push('Alt');
+      if (event.shiftKey) parts.push('Shift');
+      
+      let key = event.key;
+      
+      // Skip modifier keys themselves
+      if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
+        return '';
+      }
+      
+      // Handle special keys
+      if (key === ' ') key = 'Space';
+      else if (key === 'Escape') key = 'Escape';
+      else if (key === 'Enter') key = 'Enter';
+      else if (key === 'Delete') key = 'Delete';
+      else if (key === ',') key = 'Comma';
+      else if (key.startsWith('F') && key.length <= 3) key = key; // F1, F2, etc.
+      else if (key.length === 1) key = key.toUpperCase();
+      
+      // Debug log to see what we're getting
+      console.log('Key event:', { key: event.key, parts, finalKey: key });
+      
+      // Only add the key if we have modifiers OR it's a special key
+      if (parts.length === 0 && !/^(F\d+|Escape|Enter|Delete|Space)$/.test(key)) {
+        return '';
+      }
+      
+      parts.push(key);
+      return parts.join('+');
     }
-    
-    // Handle special keys
-    if (key === ' ') key = 'Space';
-    else if (key === 'Escape') key = 'Escape';
-    else if (key === 'Enter') key = 'Enter';
-    else if (key === 'Delete') key = 'Delete';
-    else if (key === ',') key = 'Comma';
-    else if (key.startsWith('F') && key.length <= 3) key = key; // F1, F2, etc.
-    else if (key.length === 1) key = key.toUpperCase();
-    
-    // Only add the key if we have modifiers OR it's a special key
-    if (parts.length === 0 && !/^(F\d+|Escape|Enter|Delete|Space)$/.test(key)) {
-      return '';
-    }
-    
-    parts.push(key);
-    return parts.join('+');
-  }
-
   /**
    * Start editing a shortcut
    */
@@ -295,7 +300,7 @@ export class PreferencesDialog {
   handleShortcutInput(keyString) {
     if (!this.editingAction || !this.editingElement) return;
     
-    // Skip empty key strings (like when just pressing Ctrl)
+    // Skip empty key strings
     if (!keyString || keyString.trim() === '') return;
     
     // Basic validation
@@ -413,5 +418,5 @@ export class PreferencesDialog {
 // Create global instance
 export const preferencesDialog = new PreferencesDialog();
 
-// Make available globally for modal buttons
+// Make available globally for modal buttons and menu system
 window.preferencesDialog = preferencesDialog;

@@ -125,7 +125,7 @@ test.describe('Preferences Dialog', () => {
     await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
     
     // Click X button
-    const closeButton = page.locator('.modal-close').first();
+    const closeButton = page.locator('#preferences-modal .modal-close');
     await closeButton.click();
     
     // Verify dialog is closed
@@ -149,7 +149,7 @@ test.describe('Preferences Dialog', () => {
     await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
     
     // Click Close button in footer
-    const closeButton = page.locator('.modal-footer .modal-button').first();
+    const closeButton = page.locator('#preferences-modal .modal-footer .modal-button');    
     await closeButton.click();
     
     // Verify dialog is closed
@@ -210,7 +210,7 @@ test.describe('Preferences Dialog', () => {
         await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
         
         // Click inside dialog content
-        const modalContent = page.locator('.modal-content').first();
+        const modalContent = page.locator('#preferences-modal .modal-content');
         await modalContent.click();
         
         // Verify dialog remains open

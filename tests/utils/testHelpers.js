@@ -185,33 +185,16 @@ export class CollabEditorHelpers {
     
     // Step 2: Setup WASM function mocks BEFORE waiting for other components
     await this.setupWasmMocking();
-    // Minimal preferences dialog for tests
-    window.preferencesDialog = {
-      isOpen: false,
-      show() { 
-        this.isOpen = true;
-        const modal = document.createElement('div');
-        modal.id = 'preferences-modal';
-        modal.className = 'modal-overlay show';
-        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;z-index:10000';
-        modal.innerHTML = '<div class="modal-dialog"><button class="modal-close">&times;</button><button class="modal-button">Close</button></div>';
-        document.body.appendChild(modal);
-        modal.querySelector('.modal-close').onclick = () => this.hide();
-        modal.querySelector('.modal-button').onclick = () => this.hide();
-      },
-      hide() { 
-        this.isOpen = false;
-        const modal = document.getElementById('preferences-modal');
-        if (modal) modal.remove();
-      }
-    };
-    console.log('PREFERENCES DIALOG CREATED:', typeof window.preferencesDialog); 
-
-
-
-
     this.log('WASM mocks ready');
-    
+
+    // Step 3: Wait for real preferences dialog to be imported and available
+    await this.page.waitForFunction(() => {
+      return window.preferencesDialog && 
+             typeof window.preferencesDialog.show === 'function' &&
+             typeof window.preferencesDialog.hide === 'function';
+    }, { timeout: 10000 });
+    this.log('Preferences dialog ready'); 
+
     // Step 3: Wait for CodeMirror editor with longer timeout
     await this.page.waitForFunction(() => {
       return window.editorView && 
