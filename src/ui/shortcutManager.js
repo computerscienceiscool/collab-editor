@@ -251,3 +251,6 @@ export class ShortcutManager {
 
 // Create and export global instance
 export const shortcutManager = new ShortcutManager();
+
+// Make available globally for the preferences dialog
+window.shortcutManager = shortcutManager;

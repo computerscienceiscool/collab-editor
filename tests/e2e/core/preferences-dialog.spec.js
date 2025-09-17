@@ -52,29 +52,27 @@ test.describe('Preferences Dialog', () => {
 
   test.describe('Dialog Opening and Closing', () => {
     test('opens preferences dialog via menu', async ({ page }) => {
-      // First verify that the preferences dialog functionality exists
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined' && 
-               typeof window.preferencesDialog.show === 'function';
-      });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      // Open Tools menu and click Preferences
-      await helpers.useMenuAction('tools', 'preferences');
-      
-      // Verify dialog is visible
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 10000 });
-      
-    //  const modalTitle = await page.locator('.modal-title').first();
-    //  await expect(modalTitle).toBeVisible();
-      
-      // Check if body scroll is disabled
-      const bodyOverflow = await page.evaluate(() => document.body.style.overflow);
-      expect(['hidden', '']).toContain(bodyOverflow);
+    // First verify that the preferences dialog functionality exists
+    const hasPreferencesDialog = await page.evaluate(() => {
+      return typeof window.preferencesDialog !== 'undefined' && 
+             typeof window.preferencesDialog.show === 'function';
+    });
+    
+    if (!hasPreferencesDialog) {
+      test.skip('Preferences dialog not implemented yet');
+      return;
+    }
+    
+    // Open Tools menu and click Preferences
+    await helpers.openMenu('tools');
+    await helpers.clickMenuItem('preferences');
+    
+    // Verify dialog is visible
+    await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 10000 });
+    
+    // Check if body scroll is disabled
+    const bodyOverflow = await page.evaluate(() => document.body.style.overflow);
+    expect(['hidden', '']).toContain(bodyOverflow);
     });
 
     test('opens via window.preferencesDialog.show()', async ({ page }) => {
@@ -99,50 +97,49 @@ test.describe('Preferences Dialog', () => {
     });
 
     test('closes via X button', async ({ page }) => {
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined';
-      });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      await page.evaluate(() => window.preferencesDialog.show());
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
-      
-      // Click X button
-      const closeButton = page.locator('.modal-close').first();
-      await closeButton.click();
-      
-      // Verify dialog is closed
-      await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
-      
-      const isOpen = await page.evaluate(() => window.preferencesDialog.isOpen);
-      expect(isOpen).toBe(false);
+    const hasPreferencesDialog = await page.evaluate(() => {
+      return typeof window.preferencesDialog !== 'undefined';
+    });
+    
+    if (!hasPreferencesDialog) {
+      test.skip('Preferences dialog not implemented yet');
+      return;
+    }
+    
+    await page.evaluate(() => window.preferencesDialog.show());
+    await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
+    
+    // Click X button
+    const closeButton = page.locator('.modal-close').first();
+    await closeButton.click();
+    
+    // Verify dialog is closed
+    await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
+    
+    const isOpen = await page.evaluate(() => window.preferencesDialog.isOpen);
+    expect(isOpen).toBe(false);
     });
 
     test('closes via Close button', async ({ page }) => {
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined';
-      });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      await page.evaluate(() => window.preferencesDialog.show());
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
-      
-      // Click Close button in footer
-      const closeButton = page.locator('.modal-footer .modal-button').first();
-      await closeButton.click();
-      
-      // Verify dialog is closed
-      await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
+    const hasPreferencesDialog = await page.evaluate(() => {
+      return typeof window.preferencesDialog !== 'undefined';
     });
-
+    
+    if (!hasPreferencesDialog) {
+      test.skip('Preferences dialog not implemented yet');
+      return;
+    }
+    
+    await page.evaluate(() => window.preferencesDialog.show());
+    await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
+    
+    // Click Close button in footer
+    const closeButton = page.locator('.modal-footer .modal-button').first();
+    await closeButton.click();
+    
+    // Verify dialog is closed
+    await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
+  });
     test('closes via Escape key', async ({ page }) => {
       const hasPreferencesDialog = await page.evaluate(() => {
         return typeof window.preferencesDialog !== 'undefined';
@@ -161,49 +158,53 @@ test.describe('Preferences Dialog', () => {
       
       // Verify dialog is closed
       await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
-    });
-
-    test('closes via click outside modal', async ({ page }) => {
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined';
       });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      await page.evaluate(() => window.preferencesDialog.show());
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
-      
-      // Click on overlay (outside dialog)
-      const overlay = page.locator('.modal-overlay');
-      await overlay.click({ position: { x: 10, y: 10 } });
-      
-      // Verify dialog is closed
-      await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
-    });
 
-    test('does not close when clicking inside dialog', async ({ page }) => {
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined';
-      });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      await page.evaluate(() => window.preferencesDialog.show());
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
-      
-      // Click inside dialog content
-      const modalContent = page.locator('.modal-content').first();
-      await modalContent.click();
-      
-      // Verify dialog remains open
-      await expect(page.locator('#preferences-modal')).toBeVisible();
-    });
+      test('closes via click outside modal', async ({ page }) => {
+        const hasPreferencesDialog = await page.evaluate(() => {
+          return typeof window.preferencesDialog !== 'undefined';
+        });
+        
+        if (!hasPreferencesDialog) {
+          test.skip('Preferences dialog not implemented yet');
+          return;
+        }
+        
+        await page.evaluate(() => window.preferencesDialog.show());
+        await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
+        
+        // Click on overlay (outside dialog)
+        const overlay = page.locator('#preferences-modal');
+        await overlay.click({ position: { x: 10, y: 10 } });
+        
+        // Verify dialog is closed
+        await expect(page.locator('#preferences-modal')).not.toBeVisible({ timeout: 5000 });
+     });
+
+     test('does not close when clicking inside dialog', async ({ page }) => {
+        const hasPreferencesDialog = await page.evaluate(() => {
+          return typeof window.preferencesDialog !== 'undefined';
+        });
+        
+        if (!hasPreferencesDialog) {
+          test.skip('Preferences dialog not implemented yet');
+          return;
+        }
+        
+        await page.evaluate(() => window.preferencesDialog.show());
+        await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
+        
+        // Click inside dialog content
+        const modalContent = page.locator('.modal-content').first();
+        await modalContent.click();
+        
+        // Verify dialog remains open
+        await expect(page.locator('#preferences-modal')).toBeVisible();
+        
+        const isOpen = await page.evaluate(() => window.preferencesDialog.isOpen);
+        expect(isOpen).toBe(true);
+      }); 
+
 
     test('prevents multiple dialogs from opening', async ({ page }) => {
       const hasPreferencesDialog = await page.evaluate(() => {
@@ -640,32 +641,32 @@ test.describe('Preferences Dialog', () => {
 
   test.describe('Accessibility', () => {
     test('dialog has proper ARIA attributes', async ({ page }) => {
-      const hasPreferencesDialog = await page.evaluate(() => {
-        return typeof window.preferencesDialog !== 'undefined';
-      });
-      
-      if (!hasPreferencesDialog) {
-        test.skip('Preferences dialog not implemented yet');
-        return;
-      }
-      
-      await page.evaluate(() => window.preferencesDialog.show());
-      await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
-      
-      const modal = page.locator('#preferences-modal');
-      await expect(modal).toHaveAttribute('role', 'dialog');
-      
-      // Check for title and aria-labelledby (if implemented)
-      const title = page.locator('.modal-title').first();
-      const titleExists = await title.count() > 0;
-      
-      if (titleExists) {
-        const titleId = await title.getAttribute('id');
-        if (titleId) {
-          await expect(modal).toHaveAttribute('aria-labelledby', titleId);
-        }
-      }
+    const hasPreferencesDialog = await page.evaluate(() => {
+      return typeof window.preferencesDialog !== 'undefined';
     });
+    
+    if (!hasPreferencesDialog) {
+      test.skip('Preferences dialog not implemented yet');
+      return;
+    }
+    
+    await page.evaluate(() => window.preferencesDialog.show());
+    await expect(page.locator('#preferences-modal')).toBeVisible({ timeout: 5000 });
+    
+    const modal = page.locator('#preferences-modal');
+    await expect(modal).toHaveAttribute('role', 'dialog');
+    
+    // Check for title and aria-labelledby (if implemented)
+    const title = page.locator('#preferences-title').first();
+    const titleExists = await title.count() > 0;
+    
+    if (titleExists) {
+      const titleId = await title.getAttribute('id');
+      if (titleId) {
+        await expect(modal).toHaveAttribute('aria-labelledby', titleId);
+      }
+    }
+  });
 
     test('keyboard navigation works within dialog', async ({ page }) => {
       const hasPreferencesDialog = await page.evaluate(() => {

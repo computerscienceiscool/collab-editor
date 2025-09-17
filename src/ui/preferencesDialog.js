@@ -72,11 +72,11 @@ export class PreferencesDialog {
       <div class="modal-dialog preferences-dialog">
         <div class="modal-header">
           <h2 id="preferences-title" class="modal-title">Keyboard Shortcuts</h2>
-          <button class="modal-close" onclick="window.preferencesDialog.hide()">&times;</button>
+          <button class="modal-close" type="button">&times;</button>
         </div>
         <div class="modal-content">
           <div class="preferences-actions">
-            <button id="reset-shortcuts" class="preferences-button">Reset to Defaults</button>
+            <button id="reset-shortcuts" class="preferences-button" type="button">Reset to Defaults</button>
             <div class="preferences-info">
               Click any shortcut to edit it. Press Escape to cancel editing.
             </div>
@@ -87,7 +87,7 @@ export class PreferencesDialog {
           </div>
         </div>
         <div class="modal-footer">
-          <button class="modal-button" onclick="window.preferencesDialog.hide()">Close</button>
+          <button class="modal-button" type="button">Close</button>
         </div>
       </div>
     `;
@@ -127,13 +127,21 @@ export class PreferencesDialog {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'shortcut-item';
         
-        itemDiv.innerHTML = `
-          <div class="shortcut-description">${item.description}</div>
-          <div class="shortcut-key-container">
-            <span class="shortcut-key" data-action="${item.action}">${item.key}</span>
-          </div>
-        `;
+        const descDiv = document.createElement('div');
+        descDiv.className = 'shortcut-description';
+        descDiv.textContent = item.description;
         
+        const keyContainer = document.createElement('div');
+        keyContainer.className = 'shortcut-key-container';
+        
+        const keySpan = document.createElement('span');
+        keySpan.className = 'shortcut-key';
+        keySpan.setAttribute('data-action', item.action);
+        keySpan.textContent = item.key;
+        
+        keyContainer.appendChild(keySpan);
+        itemDiv.appendChild(descDiv);
+        itemDiv.appendChild(keyContainer);
         itemsDiv.appendChild(itemDiv);
       });
       
@@ -156,6 +164,22 @@ export class PreferencesDialog {
       }
     });
     
+    // Close button in header
+    const headerCloseButton = modal.querySelector('.modal-close');
+    if (headerCloseButton) {
+      headerCloseButton.addEventListener('click', () => {
+        this.hide();
+      });
+    }
+    
+    // Close button in footer
+    const footerCloseButton = modal.querySelector('.modal-footer .modal-button');
+    if (footerCloseButton) {
+      footerCloseButton.addEventListener('click', () => {
+        this.hide();
+      });
+    }
+    
     // Escape key to close or cancel editing
     this.keydownHandler = this.handleKeyDown.bind(this);
     document.addEventListener('keydown', this.keydownHandler);
@@ -171,9 +195,9 @@ export class PreferencesDialog {
     });
     
     // Reset button
-    const resetBtn = document.getElementById('reset-shortcuts');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', this.resetToDefaults.bind(this));
+    const resetButton = document.getElementById('reset-shortcuts');
+    if (resetButton) {
+      resetButton.addEventListener('click', this.resetToDefaults.bind(this));
     }
   }
 
@@ -200,7 +224,7 @@ export class PreferencesDialog {
   }
 
   /**
-   * Parse keyboard event to shortcut string (same as shortcut manager)
+   * Parse keyboard event to shortcut string
    */
   parseKeyEvent(event) {
     const parts = [];
@@ -232,7 +256,7 @@ export class PreferencesDialog {
     
     parts.push(key);
     return parts.join('+');
-  }  
+  }
 
   /**
    * Start editing a shortcut

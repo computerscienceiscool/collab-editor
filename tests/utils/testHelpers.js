@@ -52,6 +52,71 @@ export class CollabEditorHelpers {
   }
 
   /**
+   * Open preferences dialog via menu
+   */
+  async openPreferencesDialog() {
+    this.log('Opening preferences dialog');
+    
+    // Try direct call first
+    const directSuccess = await this.page.evaluate(() => {
+      if (window.preferencesDialog && typeof window.preferencesDialog.show === 'function') {
+        window.preferencesDialog.show();
+        return true;
+      }
+      return false;
+    });
+    
+    if (directSuccess) {
+      await this.page.waitForSelector('#preferences-modal', { timeout: 5000 });
+      this.log('Preferences dialog opened directly', 'success');
+      return;
+    }
+    
+    // Fallback to menu action
+    try {
+      await this.useMenuAction('tools', 'preferences');
+      await this.page.waitForSelector('#preferences-modal', { timeout: 5000 });
+      this.log('Preferences dialog opened via menu', 'success');
+    } catch (error) {
+      this.log(`Failed to open preferences dialog: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+
+   /**
+   * Close preferences dialog
+   */
+  async closePreferencesDialog() {
+    this.log('Closing preferences dialog');
+    
+    const success = await this.page.evaluate(() => {
+      if (window.preferencesDialog && typeof window.preferencesDialog.hide === 'function') {
+        window.preferencesDialog.hide();
+        return true;
+      }
+      return false;
+    });
+    
+    if (success) {
+      await this.page.waitForSelector('#preferences-modal', { state: 'detached', timeout: 5000 });
+      this.log('Preferences dialog closed', 'success');
+    } else {
+      this.log('Failed to close preferences dialog', 'error');
+    }
+  }
+
+  /**
+   * Wait for preferences dialog to be ready
+   */
+  async waitForPreferencesDialog() {
+    await this.page.waitForSelector('#preferences-modal.show', { timeout: 10000 });
+    await this.page.waitForSelector('.shortcuts-container', { timeout: 5000 });
+    await this.page.waitForTimeout(500); // Allow for full rendering
+    this.log('Preferences dialog is ready', 'success');
+  }
+
+
+  /**
    * Navigate to a test room and initialize the application
    */
   async navigateToRoom(roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`) {
@@ -89,13 +154,14 @@ export class CollabEditorHelpers {
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
-    
+    :w
     if (!this.initPromise) {
       this.initPromise = this.waitForAppInitialization();
     }
     await this.initPromise;
     this.log('Navigation and initialization complete', 'success');
   }
+
   /**
    * Wait for all application components to be ready for testing
    */
@@ -120,6 +186,15 @@ export class CollabEditorHelpers {
     // Step 2: Setup WASM function mocks BEFORE waiting for other components
     await this.setupWasmMocking();
     this.log('WASM mocks ready');
+    // Enhanced shortcut manager for preferences dialog tests
+      if (!window.shortcutManager) {
+        window.shortcutManager = {
+          shortcuts: new Map([
+            ['bold', { key: 'Ctrl+B', category: 'Format', description: 'Bold' }],
+            ['italic', { key: 'Ctrl+I', category: 'Format', description: 'Italic' }],
+            ['underline', { key: 'Ctrl+U', category: 'Format', description: 'Underline' }],
+            ['new', { key: 'Ctrl+N', category: 'File', description: 'New Document' }],
+            ['about', { key: 'F1', category: 'Help', description: 'About' }]  
     
     // Step 3: Wait for CodeMirror editor with longer timeout
     await this.page.waitForFunction(() => {
@@ -751,6 +826,17 @@ export class CollabEditorHelpers {
       // Mark as mocked for tests
       window.isPromiseGridMocked = true;
       window.wasmMocksReady = true;
+      
+      // Ensure preferences dialog is available for tests
+      if (!window.preferencesDialog) {
+        window.preferencesDialog = {
+          isOpen: false,
+          editingAction: null,
+          editingElement: null,
+          show() { this.isOpen = true; },
+          hide() { this.isOpen = false; }
+        };
+      }  
     });
   }
 
@@ -1086,12 +1172,17 @@ export class CollabEditorHelpers {
         await cm.click({ force: true });
       }
       
-      await cm.type(text, { delay: this.isMobile ? 50 : 10 });
+      // Handle number pad input specially
+      if (/^\d+$/.test(text)) {
+        // For numeric input, use slower typing to ensure registration
+        await cm.type(text, { delay: this.isMobile ? 100 : 50 });
+      } else {
+        await cm.type(text, { delay: this.isMobile ? 50 : 10 });
+      }
     }
 
     this.log('Text typed successfully', 'success');
   }
-
   /**
    * Format document using format button
    */

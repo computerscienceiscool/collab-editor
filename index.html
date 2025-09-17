@@ -223,8 +223,7 @@
     import { shortcutManager } from './src/ui/shortcutManager.js';
     import { preferencesDialog } from './src/ui/preferencesDialog.js';
    
-    window.preferencesDialog = preferencesDialog; 
-    // Make it available globally so MenuSystem can use it
+    // Make them available globally so MenuSystem can use them
     window.shortcutManager = shortcutManager;
     window.preferencesDialog = preferencesDialog;
 
@@ -366,7 +365,7 @@
           case 'make-copy':
             this.makeCopy();
             break;
-  
+
           case 'share':
             this.shareDocument();
             break;
@@ -418,14 +417,12 @@
             this.showNotificationSettings();
             break;
           
-          case 'preferences':
-            window.preferencesDialog.show();
-            break;
-          
           case 'accessibility':
               showAccessibilityModal();
               break;
-
+          case 'preferences':
+            window.preferencesDialog.show();
+            break;
           case 'promisegrid-test':
             if (window.createPromiseGridMessage) {
               try {
@@ -1188,7 +1185,42 @@
   </script>
   <!-- Load your existing app.js -->
   <script type="module" src="/src/app.js"></script>
-  
+  <!-- Modal System Enhancement for Tests -->
+  <script>
+    (() => {
+      // Global modal system utilities for consistency in tests
+      window.modalUtils = {
+        isModalOpen() {
+          return document.querySelector('.modal-overlay.show') !== null;
+        },
+        getCurrentModal() {
+          return document.querySelector('.modal-overlay.show');
+        },
+        closeAllModals() {
+          const modals = document.querySelectorAll('.modal-overlay');
+          modals.forEach(modal => {
+            modal.classList.remove('show');
+            if (modal.parentNode) {
+              modal.parentNode.removeChild(modal);
+            }
+          });
+          document.body.style.overflow = 'auto';
+        }
+      };
+
+      // Enhanced event handling for modals
+      document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+          if (e.target.id === 'preferences-modal' && window.preferencesDialog) {
+            window.preferencesDialog.hide();
+          }
+        }
+      }, true);
+    })();
+  </script>
+
+
+
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
