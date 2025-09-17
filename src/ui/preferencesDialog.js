@@ -149,7 +149,6 @@ export class PreferencesDialog {
       container.appendChild(categoryDiv);
     });
   }
-
   /**
    * Setup event listeners for the dialog
    */

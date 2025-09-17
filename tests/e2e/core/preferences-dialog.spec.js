@@ -2,6 +2,21 @@
 import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
+test('DEBUG - check what exists', async ({ page }) => {
+  const debug = await page.evaluate(() => {
+    return {
+      hasPreferencesDialog: typeof window.preferencesDialog !== 'undefined',
+      hasShortcutManager: typeof window.shortcutManager !== 'undefined',
+      preferencesType: typeof window.preferencesDialog,
+      shortcutType: typeof window.shortcutManager,
+      bodyHtml: document.body.innerHTML.substring(0, 500)
+    };
+  });
+  console.log('DEBUG:', JSON.stringify(debug, null, 2));
+});
+
+
+
 test.describe('Preferences Dialog', () => {
   let helpers;
 

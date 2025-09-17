@@ -227,6 +227,13 @@
     window.shortcutManager = shortcutManager;
     window.preferencesDialog = preferencesDialog;
 
+    // Initialize preferences dialog on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.preferencesDialog.isInitialized) {
+        window.preferencesDialog.isInitialized = true;
+      }
+    });
+
     // Menu System Class
     class MenuSystem {
       constructor() {
@@ -421,8 +428,13 @@
               showAccessibilityModal();
               break;
           case 'preferences':
-            window.preferencesDialog.show();
-            break;
+             if (window.preferencesDialog) {
+               window.preferencesDialog.show();
+             } else {
+              alert('Preferences dialog not available');
+             }
+             break;
+
           case 'promisegrid-test':
             if (window.createPromiseGridMessage) {
               try {

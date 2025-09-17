@@ -154,7 +154,7 @@ export class CollabEditorHelpers {
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
-    :w
+    
     if (!this.initPromise) {
       this.initPromise = this.waitForAppInitialization();
     }
@@ -185,16 +185,32 @@ export class CollabEditorHelpers {
     
     // Step 2: Setup WASM function mocks BEFORE waiting for other components
     await this.setupWasmMocking();
+    // Minimal preferences dialog for tests
+    window.preferencesDialog = {
+      isOpen: false,
+      show() { 
+        this.isOpen = true;
+        const modal = document.createElement('div');
+        modal.id = 'preferences-modal';
+        modal.className = 'modal-overlay show';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;z-index:10000';
+        modal.innerHTML = '<div class="modal-dialog"><button class="modal-close">&times;</button><button class="modal-button">Close</button></div>';
+        document.body.appendChild(modal);
+        modal.querySelector('.modal-close').onclick = () => this.hide();
+        modal.querySelector('.modal-button').onclick = () => this.hide();
+      },
+      hide() { 
+        this.isOpen = false;
+        const modal = document.getElementById('preferences-modal');
+        if (modal) modal.remove();
+      }
+    };
+    console.log('PREFERENCES DIALOG CREATED:', typeof window.preferencesDialog); 
+
+
+
+
     this.log('WASM mocks ready');
-    // Enhanced shortcut manager for preferences dialog tests
-      if (!window.shortcutManager) {
-        window.shortcutManager = {
-          shortcuts: new Map([
-            ['bold', { key: 'Ctrl+B', category: 'Format', description: 'Bold' }],
-            ['italic', { key: 'Ctrl+I', category: 'Format', description: 'Italic' }],
-            ['underline', { key: 'Ctrl+U', category: 'Format', description: 'Underline' }],
-            ['new', { key: 'Ctrl+N', category: 'File', description: 'New Document' }],
-            ['about', { key: 'F1', category: 'Help', description: 'About' }]  
     
     // Step 3: Wait for CodeMirror editor with longer timeout
     await this.page.waitForFunction(() => {
@@ -226,7 +242,9 @@ export class CollabEditorHelpers {
     // Step 6: Final stability wait
     await this.page.waitForTimeout(500);
     this.log('App initialization complete', 'success');
-  }
+  
+    }
+   
 
 
 
@@ -236,6 +254,7 @@ export class CollabEditorHelpers {
    * Enhanced WASM function mocks with better error handling and preferences support
    */
   async setupWasmMocking() {
+    console.log('SETUP WASM MOCKING CALLED'); // Add this line  
     await this.page.evaluate(() => {
       // Suppress console logs from app initialization during tests
       const originalLog = console.log;
@@ -319,17 +338,17 @@ export class CollabEditorHelpers {
           getAction(key) {
             return this.keyToAction.get(key) || null;
           },
-          
-          getShortcutsByCategory() {
-            const categories = {};
-            this.shortcuts.forEach((config, action) => {
-              if (!categories[config.category]) {
-                categories[config.category] = [];
-              }
-              categories[config.category].push({ action, ...config });
-            });
-            return categories;
-          }
+         getShortcutsByCategory() {
+          const categories = {};
+          this.shortcuts.forEach((config, action) => {
+            const category = config.category || 'Other';
+            if (!categories[category]) {
+              categories[category] = [];
+            }
+            categories[category].push({ action, ...config });
+          });
+          return categories;
+          } 
         };
         
         // Initialize defaults
@@ -337,309 +356,6 @@ export class CollabEditorHelpers {
         window.shortcutManager.loadUserCustomizations();
       }
 
-      // Set up preferences dialog mock if not already present
-      if (!window.preferencesDialog) {
-        window.preferencesDialog = {
-          isOpen: false,
-          editingAction: null,
-          editingElement: null,
-          
-          show() {
-            if (this.isOpen) return;
-            
-            this.isOpen = true;
-            document.body.style.overflow = 'hidden';
-            
-            const modal = this.createModalHTML();
-            document.body.appendChild(modal);
-            
-            this.populateShortcuts();
-            this.setupEventListeners();
-          },
-          
-          hide() {
-            if (!this.isOpen) return;
-            
-            this.isOpen = false;
-            document.body.style.overflow = 'auto';
-            
-            const modal = document.getElementById('preferences-modal');
-            if (modal) {
-              modal.remove();
-            }
-            
-            this.editingAction = null;
-            this.editingElement = null;
-          },
-          
-          createModalHTML() {
-            const modal = document.createElement('div');
-            modal.id = 'preferences-modal';
-            modal.className = 'modal-overlay show';
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-labelledby', 'preferences-title');
-            
-            modal.innerHTML = `
-              <div class="modal-dialog preferences-dialog">
-                <div class="modal-header">
-                  <h2 class="modal-title">Keyboard Shortcuts</h2>
-                  <button class="modal-close" onclick="window.preferencesDialog.hide()">&times;</button>
-                </div>
-                <div class="modal-content">
-                  <div class="preferences-actions">
-                    <button id="reset-shortcuts" class="preferences-button">Reset to Defaults</button>
-                    <div class="preferences-info">
-                      Click any shortcut to edit it. Press Escape to cancel editing.
-                    </div>
-                  </div>
-                  
-                  <div class="shortcuts-container" id="shortcuts-container">
-                    <!-- Shortcuts will be populated here -->
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button class="modal-button" onclick="window.preferencesDialog.hide()">Close</button>
-                </div>
-              </div>
-            `;
-            
-            return modal;
-          },
-          
-          populateShortcuts() {
-            const container = document.getElementById('shortcuts-container');
-            if (!container || !window.shortcutManager) return;
-            
-            const shortcuts = window.shortcutManager.getShortcutsByCategory();
-            container.innerHTML = '';
-            
-            const categoryOrder = ['File', 'Edit', 'Format', 'Tools', 'View', 'Help'];
-            const sortedCategories = categoryOrder.filter(cat => shortcuts[cat]);
-            
-            sortedCategories.forEach(category => {
-              const items = shortcuts[category];
-              
-              const categoryDiv = document.createElement('div');
-              categoryDiv.className = 'shortcut-category';
-              
-              const categoryTitle = document.createElement('h3');
-              categoryTitle.className = 'category-title';
-              categoryTitle.textContent = category;
-              categoryDiv.appendChild(categoryTitle);
-              
-              const itemsDiv = document.createElement('div');
-              itemsDiv.className = 'shortcut-items';
-              
-              items.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'shortcut-item';
-                
-                itemDiv.innerHTML = `
-                  <div class="shortcut-description">${item.description}</div>
-                  <div class="shortcut-key-container">
-                    <span class="shortcut-key" data-action="${item.action}">${item.key}</span>
-                  </div>
-                `;
-                
-                itemsDiv.appendChild(itemDiv);
-              });
-              
-              categoryDiv.appendChild(itemsDiv);
-              container.appendChild(categoryDiv);
-            });
-          },
-          
-          setupEventListeners() {
-            const modal = document.getElementById('preferences-modal');
-            if (!modal) return;
-            
-            // Click outside to close
-            modal.addEventListener('click', (e) => {
-              if (e.target === modal) {
-                this.hide();
-              }
-            });
-            
-            // Escape key handling
-            const keyHandler = (e) => {
-              if (!this.isOpen) return;
-              
-              if (e.key === 'Escape') {
-                if (this.editingAction) {
-                  this.cancelEditing();
-                } else {
-                  this.hide();
-                }
-                return;
-              }
-              
-              if (this.editingAction) {
-                e.preventDefault();
-                const keyString = this.parseKeyEvent(e);
-                this.handleShortcutInput(keyString);
-              }
-            };
-            
-            document.addEventListener('keydown', keyHandler);
-            
-            // Store handler for cleanup
-            modal._keyHandler = keyHandler;
-            
-            // Click on shortcut keys to edit them
-            modal.addEventListener('click', (e) => {
-              if (e.target.matches('.shortcut-key')) {
-                e.preventDefault();
-                e.stopPropagation();
-                const action = e.target.dataset.action;
-                this.startEditing(action, e.target);
-              }
-            });
-            
-            // Reset button
-            const resetBtn = document.getElementById('reset-shortcuts');
-            if (resetBtn) {
-              resetBtn.addEventListener('click', () => this.resetToDefaults());
-            }
-          },
-          
-          parseKeyEvent(event) {
-            const parts = [];
-            
-            if (event.ctrlKey || event.metaKey) parts.push('Ctrl');
-            if (event.altKey) parts.push('Alt');
-            if (event.shiftKey) parts.push('Shift');
-            
-            let key = event.key;
-            
-            if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
-              return '';
-            }
-            
-            if (key === ' ') key = 'Space';
-            else if (key === 'Escape') key = 'Escape';
-            else if (key === 'Enter') key = 'Enter';
-            else if (key === 'Delete') key = 'Delete';
-            else if (key === ',') key = 'Comma';
-            else if (key.startsWith('F') && key.length <= 3) key = key;
-            else if (key.length === 1) key = key.toUpperCase();
-            
-            if (parts.length === 0 && !/^(F\d+|Escape|Enter|Delete|Space)$/.test(key)) {
-              return '';
-            }
-            
-            parts.push(key);
-            return parts.join('+');
-          },
-          
-          startEditing(action, element) {
-            this.cancelEditing();
-            
-            this.editingAction = action;
-            this.editingElement = element;
-            
-            element.classList.add('editing');
-            element.textContent = 'Press keys...';
-          },
-          
-          cancelEditing() {
-            if (this.editingAction && this.editingElement) {
-              this.editingElement.classList.remove('editing');
-              const shortcut = window.shortcutManager.getShortcut(this.editingAction);
-              if (shortcut) {
-                this.editingElement.textContent = shortcut.key;
-              }
-            }
-            
-            this.editingAction = null;
-            this.editingElement = null;
-          },
-          
-          handleShortcutInput(keyString) {
-            if (!this.editingAction || !this.editingElement) return;
-            
-            if (!keyString || keyString.trim() === '') return;
-            
-            if (!this.isValidShortcut(keyString)) {
-              this.showTemporaryMessage('Invalid shortcut. Use Ctrl, Alt, or Shift + another key.');
-              return;
-            }
-            
-            const existingAction = window.shortcutManager.getAction(keyString);
-            if (existingAction && existingAction !== this.editingAction) {
-              const existingShortcut = window.shortcutManager.getShortcut(existingAction);
-              this.showTemporaryMessage(`"${keyString}" is already used by "${existingShortcut.description}"`);
-              return;
-            }
-            
-            const success = this.updateShortcut(this.editingAction, keyString);
-            if (success) {
-              this.editingElement.textContent = keyString;
-              this.editingElement.classList.remove('editing');
-              this.showTemporaryMessage(`Updated to "${keyString}"`);
-              this.editingAction = null;
-              this.editingElement = null;
-            }
-          },
-          
-          updateShortcut(action, newKey) {
-            try {
-              const shortcut = window.shortcutManager.getShortcut(action);
-              if (!shortcut) return false;
-              
-              const oldKey = shortcut.key;
-              
-              window.shortcutManager.keyToAction.delete(oldKey);
-              shortcut.key = newKey;
-              window.shortcutManager.keyToAction.set(newKey, action);
-              window.shortcutManager.saveCustomizations();
-              
-              return true;
-            } catch (error) {
-              console.error('Failed to update shortcut:', error);
-              return false;
-            }
-          },
-          
-          isValidShortcut(keyString) {
-            if (!/^(F\d+|Escape)$/.test(keyString) && !/^(Ctrl|Alt|Shift)/.test(keyString)) {
-              return false;
-            }
-            return true;
-          },
-          
-          resetToDefaults() {
-            const confirmed = confirm('Reset all keyboard shortcuts to defaults? This cannot be undone.');
-            
-            if (confirmed) {
-              localStorage.removeItem('keyboard-shortcuts');
-              window.shortcutManager.loadDefaults();
-              window.shortcutManager.loadUserCustomizations();
-              this.populateShortcuts();
-              this.showTemporaryMessage('Reset to defaults');
-            }
-          },
-          
-          showTemporaryMessage(message) {
-            const existing = document.querySelector('.preferences-message');
-            if (existing) existing.remove();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'preferences-message';
-            messageDiv.textContent = message;
-            
-            const modal = document.querySelector('.preferences-dialog');
-            if (modal) {
-              modal.appendChild(messageDiv);
-              
-              setTimeout(() => {
-                if (messageDiv.parentNode) {
-                  messageDiv.remove();
-                }
-              }, 2000);
-            }
-          }
-        };
-      }
 
       // Enhanced text formatting functions with better edge case handling
       window.toggle_bold = function(text) {
@@ -826,17 +542,12 @@ export class CollabEditorHelpers {
       // Mark as mocked for tests
       window.isPromiseGridMocked = true;
       window.wasmMocksReady = true;
-      
       // Ensure preferences dialog is available for tests
-      if (!window.preferencesDialog) {
-        window.preferencesDialog = {
-          isOpen: false,
-          editingAction: null,
-          editingElement: null,
-          show() { this.isOpen = true; },
-          hide() { this.isOpen = false; }
-        };
-      }  
+      window.preferencesDialog = window.preferencesDialog || {
+        isOpen: false,
+        show() { this.isOpen = true; },
+        hide() { this.isOpen = false; }
+      };
     });
   }
 
