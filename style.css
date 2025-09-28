@@ -1023,3 +1023,280 @@ html, body {
 [onblur] {
   pointer-events: none !important;
 }
+
+/* GitHub Integration Styles */
+
+/* GitHub settings dialog */
+.github-dialog {
+  max-width: 600px;
+}
+
+/* GitHub commit dialog */
+.github-commit-dialog {
+  max-width: 650px;
+}
+
+/* Settings sections */
+.settings-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.settings-section h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #202124;
+}
+
+.settings-help {
+  font-size: 13px;
+  color: #5f6368;
+  margin-bottom: 10px;
+}
+
+/* Input groups */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #3c4043;
+}
+
+.settings-input {
+  padding: 8px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 1px #1a73e8;
+}
+
+textarea.settings-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.settings-button {
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #3c4043;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.settings-button:hover {
+  background: #e8eaed;
+}
+
+/* Status messages */
+.status-message {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+  min-height: 22px;
+}
+
+.status-valid, .status-success {
+  background-color: #e6f4ea;
+  color: #0d652d;
+}
+
+.status-error {
+  background-color: #fce8e6;
+  color: #c5221f;
+}
+
+.status-warning {
+  background-color: #fef7e0;
+  color: #b06000;
+}
+
+.status-loading {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
+
+.status-loading::after {
+  content: "...";
+  animation: ellipsis 1.5s infinite;
+}
+
+@keyframes ellipsis {
+  0% { content: "."; }
+  33% { content: ".."; }
+  66% { content: "..."; }
+}
+
+/* Co-authors list */
+.co-authors-list {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 8px;
+  border: 1px solid #dadce0;
+}
+
+.co-author-placeholder {
+  color: #5f6368;
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.co-author-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background: white;
+}
+
+.co-author-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.co-author-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: #3c4043;
+}
+
+.co-author-email {
+  margin-left: auto;
+  font-size: 12px;
+  color: #5f6368;
+  font-family: monospace;
+}
+
+/* Button styles */
+.primary-button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  background: #1557b0;
+}
+
+.secondary-button {
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #3c4043;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondary-button:hover {
+  background: #e8eaed;
+}
+
+.danger-button {
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #f6aea9;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.danger-button:hover {
+  background: #fad2cf;
+}
+
+/* GitHub link */
+.github-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e8f0fe;
+  transition: background-color 0.2s;
+}
+
+.github-link:hover {
+  background: #d2e3fc;
+  text-decoration: underline;
+}
+
+/* Modal footer adjustments */
+.github-dialog .modal-footer,
+.github-commit-dialog .modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .github-dialog,
+  .github-commit-dialog {
+    width: 95%;
+  }
+  
+  .co-author-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .co-author-email {
+    margin-left: 24px;
+  }
+  
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .settings-input {
+    width: 100%;
+  }
+  
+  .github-dialog .modal-footer,
+  .github-commit-dialog .modal-footer {
+    flex-wrap: wrap;
+  }
+}
+/* End of GitHub Integration Styles */
+
+

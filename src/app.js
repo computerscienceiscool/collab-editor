@@ -11,6 +11,7 @@ import { setupUserLogging } from './ui/logging.js';
 import { setupTypingIndicator } from './ui/typingIndicator.js';
 import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
+import { githubService } from './github/githubService.js';
 
 // 2. Declare a typingTimeout variable — it’s needed across functions
 let typingTimeout = null;
@@ -78,6 +79,14 @@ window.addEventListener('DOMContentLoaded', async() => {
       const visible = logPanel.style.display !== 'none';
       logPanel.style.display = visible ? 'none' : 'block';
     });
+  }
+  // Make key components available globally for GitHub integration
+  window.ydoc = ydoc;
+  window.awareness = awareness;
+
+  // Initialize GitHub integration if token exists
+  if (githubService.settings.token) {
+    console.log("GitHub integration available");
   }
 });
 // initWasm();

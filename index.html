@@ -1253,5 +1253,26 @@
         </div>
       </div>
     </div>
+    <script type="module">
+  // Import GitHub integration
+  import { setupGitHubMenuItems } from './src/github/githubMenuIntegration.js';
+  import { githubService } from './src/github/githubService.js';
+  import { githubDialog } from './src/ui/githubDialog.js';
+  import { githubCommitDialog } from './src/ui/githubCommitDialog.js';
+  
+  // Make them available globally
+  window.githubService = githubService;
+  window.githubDialog = githubDialog;
+  window.githubCommitDialog = githubCommitDialog;
+  
+  // Initialize GitHub integration after DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Wait for menu system to be ready
+    setTimeout(() => {
+      setupGitHubMenuItems();
+      console.log('GitHub integration initialized');
+    }, 1000);
+  });
+  </script>
 </body>
 </html>
