@@ -1341,3 +1341,28 @@ textarea.settings-input {
 .warning-message strong {
   font-weight: 500;
 }
+
+
+/* Enhanced co-authors list styles */
+.co-author-separator {
+  font-weight: 500;
+  color: #5f6368;
+  margin: 10px 0 8px 0;
+  border-top: 1px solid #e8eaed;
+  padding-top: 8px;
+  font-size: 13px;
+}
+
+.local-user {
+  background-color: #e8f0fe;
+  border: 1px solid #d2e3fc;
+}
+
+.local-user .co-author-name em {
+  font-style: italic;
+  font-weight: normal;
+  color: #5f6368;
+  font-size: 12px;
+}
+
+

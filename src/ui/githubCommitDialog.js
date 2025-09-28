@@ -239,58 +239,83 @@ export class GitHubCommitDialog {
   /**
    * Populate co-authors from awareness
    */
-  populateCoAuthors() {
-    if (!this.awareness) return;
-    
-    const coAuthorsList = document.getElementById('co-authors-list');
-    if (!coAuthorsList) return;
-    
-    // Clear existing list
-    coAuthorsList.innerHTML = '';
-    
-    // Get local client ID
-    const localClientID = this.awareness.clientID;
-    
-    // Get all clients from awareness
-    const clients = Array.from(this.awareness.getStates().entries());
-    
-    // Filter out local client and get user data
-    const collaborators = clients
-      .filter(([id]) => id !== localClientID)
-      .map(([id, state]) => state.user)
-      .filter(user => user && user.name);
-    
-    if (collaborators.length === 0) {
-      coAuthorsList.innerHTML = '<div class="co-author-placeholder">No other collaborators detected</div>';
-      return;
+    populateCoAuthors() {
+      const coAuthorsList = document.getElementById('co-authors-list');
+      if (!coAuthorsList) return;
+      
+      // Clear existing list
+      coAuthorsList.innerHTML = '';
+      
+      // Check if awareness is available
+      if (!this.awareness) {
+        console.warn('Awareness not available for co-author detection');
+        coAuthorsList.innerHTML = '<div class="co-author-placeholder">No awareness system available - collaborators cannot be detected</div>';
+        return;
+      }
+      
+      try {
+        // Get local client ID
+        const localClientID = this.awareness.clientID;
+        console.log(`Local client ID: ${localClientID}`);
+        
+        // Get all users from awareness
+        const states = this.awareness.getStates();
+        console.log(`Found ${states.size} total users in room`);
+        
+        // Log all users for debugging
+        states.forEach((state, id) => {
+          console.log(`User ID ${id}:`, state.user);
+        });
+        
+        // Get all clients except local user
+        const clients = Array.from(states.entries())
+          .filter(([id]) => id !== localClientID);
+        
+        console.log(`After filtering local user, found ${clients.length} other clients`);
+        
+        // Filter out clients without user data
+        const collaborators = clients
+          .map(([id, state]) => state.user)
+          .filter(user => user && user.name);
+        
+        console.log(`Found ${collaborators.length} collaborators with names`);
+        
+        if (collaborators.length === 0) {
+          coAuthorsList.innerHTML = '<div class="co-author-placeholder">No other collaborators detected in this session</div>';
+          return;
+        }
+        
+        // Add each collaborator to the list
+        collaborators.forEach(user => {
+          const coAuthorElement = document.createElement('div');
+          coAuthorElement.className = 'co-author-item';
+          
+          const colorDot = document.createElement('span');
+          colorDot.className = 'co-author-color';
+          colorDot.style.backgroundColor = user.color || '#ccc';
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'co-author-name';
+          nameSpan.textContent = user.name;
+          
+          const emailSpan = document.createElement('span');
+          emailSpan.className = 'co-author-email';
+          emailSpan.textContent = `${user.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`;
+          
+          coAuthorElement.appendChild(colorDot);
+          coAuthorElement.appendChild(nameSpan);
+          coAuthorElement.appendChild(emailSpan);
+          
+          coAuthorsList.appendChild(coAuthorElement);
+        });
+      } catch (error) {
+        console.error('Error populating co-authors:', error);
+        coAuthorsList.innerHTML = '<div class="co-author-placeholder">Error detecting collaborators</div>';
+      }
     }
-    
-    // Add each collaborator to the list
-    collaborators.forEach(user => {
-      const coAuthorElement = document.createElement('div');
-      coAuthorElement.className = 'co-author-item';
-      
-      const colorDot = document.createElement('span');
-      colorDot.className = 'co-author-color';
-      colorDot.style.backgroundColor = user.color || '#ccc';
-      
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'co-author-name';
-      nameSpan.textContent = user.name;
-      
-      const emailSpan = document.createElement('span');
-      emailSpan.className = 'co-author-email';
-      emailSpan.textContent = `${user.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`;
-      
-      coAuthorElement.appendChild(colorDot);
-      coAuthorElement.appendChild(nameSpan);
-      coAuthorElement.appendChild(emailSpan);
-      
-      coAuthorsList.appendChild(coAuthorElement);
-    });
-  }
 
-  /**
+
+    /**
    * Execute commit to GitHub
    */
   async executeCommit() {
@@ -369,29 +394,54 @@ export class GitHubCommitDialog {
     }
   }
 
-  /**
-   * Get co-authors from the UI
-   * @returns {Array<Object>} List of co-authors {name, email}
-   */
+/**
+ * Get co-authors from the awareness system
+ * @returns {Array<Object>} List of co-authors {name, email}
+ */
   getCoAuthors() {
-    if (!this.awareness) return [];
-    
-    // Get local client ID
-    const localClientID = this.awareness.clientID;
-    
-    // Get all clients from awareness
-    const clients = Array.from(this.awareness.getStates().entries());
-    
-    // Filter out local client and get user data
-    return clients
-      .filter(([id]) => id !== localClientID)
-      .map(([id, state]) => state.user)
-      .filter(user => user && user.name)
-      .map(user => ({
-        name: user.name,
-        email: `${user.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`
-      }));
+  if (!this.awareness) {
+    console.warn('Awareness not available for co-author detection');
+    return [];
   }
+  
+  // Get local client ID
+  const localClientID = this.awareness.clientID;
+  
+  // Get all clients from awareness and log them for debugging
+  const clients = Array.from(this.awareness.getStates().entries());
+  console.log(`Found ${clients.length} total users in the room (including self)`);
+  
+  // Get all user data for logging purposes
+  const allUsers = clients.map(([id, state]) => {
+    return {
+      id,
+      name: state.user?.name || 'Unknown',
+      isLocal: id === localClientID
+    };
+  });
+  console.log('All users in room:', allUsers);
+  
+  // Filter out local client and get user data for co-authors
+  const collaborators = clients
+    .filter(([id]) => id !== localClientID)
+    .map(([id, state]) => state.user)
+    .filter(user => user && user.name);
+  
+  console.log(`Found ${collaborators.length} collaborators to add as co-authors`);
+  
+  // Create co-author objects with name and email
+  return collaborators.map(user => {
+    // Generate an email based on the name (or use a default)
+    const email = user.name 
+      ? `${user.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`
+      : 'user@example.com';
+    
+    return {
+      name: user.name || 'Anonymous User',
+      email: email
+    };
+  });
+ }
 
   /**
    * Set status message

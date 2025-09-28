@@ -255,17 +255,29 @@ function handleGitHubCommit() {
   }
   
   // Get the Yjs text and awareness instances
-  // Get from global objects or from component
+  // Try several ways to get the awareness object
   const ytext = window.ydoc ? window.ydoc.getText('codemirror') : null;
-  const awareness = window.awareness || (window.provider ? window.provider.awareness : null);
+  let awareness = null;
+  
+  // Try different ways to access awareness (based on your app structure)
+  if (window.awareness) {
+    awareness = window.awareness;
+  } else if (window.provider && window.provider.awareness) {
+    awareness = window.provider.awareness;
+  }
+  
+  // Debug log the awareness object
+  console.log("Awareness object for commit:", awareness);
+  if (awareness) {
+    console.log("Current users in room:", Array.from(awareness.getStates().entries()));
+  }
   
   // Get document content
   const content = view.state.doc.toString();
   
-  // Show commit dialog
+  // Show commit dialog with awareness explicitly passed
   githubCommitDialog.show(content, ytext, awareness);
 }
-
 /**
  * Handle GitHub pull action
  */

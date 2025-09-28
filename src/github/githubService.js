@@ -114,98 +114,137 @@ export class GitHubService {
       throw new Error('Failed to fetch GitHub repositories: ' + error.message);
     }
   }
-
   /**
-   * Commit file to GitHub repository
-   * @param {string} content - Document content
-   * @param {string} filePath - File path in repository
-   * @param {string} commitMessage - Commit message
-   * @param {Array<Object>} coAuthors - List of co-authors {name, email}
-   * @returns {Promise<Object>} Commit result
-   */
+  * Commit file to GitHub repository
+  * @param {string} content - Document content
+  * @param {string} filePath - File path in repository
+  * @param {string} commitMessage - Commit message
+  * @param {Array<Object>} coAuthors - List of co-authors {name, email}
+  * @returns {Promise<Object>} Commit result
+  */
   async commitFile(content, filePath, commitMessage, coAuthors = []) {
-    if (!this.settings.token || !this.settings.selectedRepo) {
-      throw new Error('GitHub settings not configured');
-    }
+  if (!this.settings.token || !this.settings.selectedRepo) {
+    throw new Error('GitHub settings not configured');
+  }
 
-    const selectedRepo = this.settings.repos.find(r => r.fullName === this.settings.selectedRepo);
-    if (!selectedRepo) {
-      throw new Error('Selected repository not found');
-    }
+  const selectedRepo = this.settings.repos.find(r => r.fullName === this.settings.selectedRepo);
+  if (!selectedRepo) {
+    throw new Error('Selected repository not found');
+  }
 
+  console.log(`Starting commit to ${this.settings.selectedRepo}, path: ${filePath}`);
+  console.log(`With ${coAuthors.length} co-authors`);
+  
+  try {
+    // First, check if file exists to get SHA if it does
+    let fileSha = null;
+    let existingFile = false;
+    
     try {
-      // First, check if file exists to get SHA if it does
-      let fileSha = null;
-      try {
-        const fileResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
-          headers: {
-            'Authorization': `token ${this.settings.token}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
-        
-        if (fileResponse.ok) {
-          const fileData = await fileResponse.json();
-          fileSha = fileData.sha;
-        }
-      } catch (error) {
-        // File likely doesn't exist yet, which is fine
-        console.log('File does not exist yet, will create new');
-      }
-
-      // Build commit message with co-authors
-      let fullCommitMessage = commitMessage;
-      
-      if (coAuthors && coAuthors.length > 0) {
-        fullCommitMessage += '\n\n';
-        coAuthors.forEach(author => {
-          fullCommitMessage += `Co-authored-by: ${author.name} <${author.email}>\n`;
-        });
-      }
-
-      // Create or update file
-      const payload = {
-        message: fullCommitMessage,
-        content: btoa(unescape(encodeURIComponent(content))), // Base64 encode the content
-        branch: selectedRepo.defaultBranch
-      };
-
-      // Add SHA if file exists (update instead of create)
-      if (fileSha) {
-        payload.sha = fileSha;
-      }
-
-      const commitResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
-        method: 'PUT',
+      console.log(`Checking if file exists: ${filePath}`);
+      const fileResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
         headers: {
           'Authorization': `token ${this.settings.token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+          'Accept': 'application/vnd.github.v3+json'
+        }
       });
-
-      if (!commitResponse.ok) {
-        const error = await commitResponse.json();
-        throw new Error(`GitHub API error: ${error.message}`);
+      
+      if (fileResponse.ok) {
+        const fileData = await fileResponse.json();
+        fileSha = fileData.sha;
+        existingFile = true;
+        console.log(`File exists with SHA: ${fileSha}`);
       }
-
-      const result = await commitResponse.json();
-      
-      // Save last commit info
-      this.settings.lastCommit = {
-        sha: result.commit.sha,
-        url: result.commit.html_url,
-        date: new Date().toISOString()
-      };
-      this.saveSettings();
-      
-      return result;
     } catch (error) {
-      console.error('Failed to commit file:', error);
-      throw new Error('Failed to commit to GitHub: ' + error.message);
+      // File likely doesn't exist yet, which is fine
+      console.log('File does not exist yet, will create new file');
+      existingFile = false;
     }
+
+    // Build commit message with co-authors
+    let fullCommitMessage = commitMessage.trim();
+    
+    if (coAuthors && coAuthors.length > 0) {
+      // Add a blank line between commit message and co-authors
+      fullCommitMessage += '\n\n';
+      
+      // Log co-authors for debugging
+      console.log('Adding co-authors to commit:');
+      
+      // Add each co-author in the correct format
+      coAuthors.forEach(author => {
+        // Make sure name and email are properly formatted and sanitized
+        const sanitizedName = author.name.replace(/[<>]/g, '').trim();
+        let sanitizedEmail = author.email;
+        
+        // If email is missing, generate one from the name
+        if (!sanitizedEmail) {
+          sanitizedEmail = `${sanitizedName.toLowerCase().replace(/[^a-z0-9]/g, '')}@example.com`;
+        }
+        
+        sanitizedEmail = sanitizedEmail.replace(/[<>]/g, '').trim();
+        
+        // Add co-author line in the correct format
+        fullCommitMessage += `Co-authored-by: ${sanitizedName} <${sanitizedEmail}>\n`;
+        console.log(`- ${sanitizedName} <${sanitizedEmail}>`);
+      });
+    }
+
+    console.log('Preparing commit payload');
+    
+    // Create or update file
+    const payload = {
+      message: fullCommitMessage,
+      content: btoa(unescape(encodeURIComponent(content))), // Base64 encode the content
+      branch: selectedRepo.defaultBranch
+    };
+
+    // Add SHA if file exists (update instead of create)
+    if (existingFile && fileSha) {
+      payload.sha = fileSha;
+      console.log(`Updating existing file with SHA: ${fileSha}`);
+    } else {
+      console.log('Creating new file');
+    }
+
+    console.log('Sending commit request to GitHub API');
+    
+    // Make the commit API request
+    const commitResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${this.settings.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!commitResponse.ok) {
+      const errorData = await commitResponse.json();
+      console.error('GitHub API error:', errorData);
+      throw new Error(`GitHub API error: ${errorData.message || 'Unknown error'}`);
+    }
+
+    const result = await commitResponse.json();
+    console.log('Commit successful:', result.commit.html_url);
+    
+    // Save last commit info
+    this.settings.lastCommit = {
+      sha: result.commit.sha,
+      url: result.commit.html_url,
+      date: new Date().toISOString(),
+      path: filePath,
+      repository: this.settings.selectedRepo
+    };
+    this.saveSettings();
+    
+    return result;
+  } catch (error) {
+    console.error('Failed to commit file:', error);
+    throw new Error('Failed to commit to GitHub: ' + error.message);
   }
+ }
 
   /**
    * Get file content from GitHub
