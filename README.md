@@ -237,6 +237,7 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 
 ### Core Documentation
 - [User Guide](docs/user-guide.md) — How to use the editor and its features 
+- [Github Integration](docs/github-integration.md) — How to connect to GitHub repositories
 - [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
@@ -246,7 +247,7 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 - [docs/promisegrid-integration.md](docs/promisegrid-integration.md) — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
 - [docs/editor-menu.md](docs/editor-menu.md) — Full list of menu features and keyboard shortcuts
 - [docs/keyboard-preferences.md](docs/keyboard-preferences.md) — Complete guide to customizing keyboard shortcuts
-- [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
+- [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features:wq
 
 ---
 
