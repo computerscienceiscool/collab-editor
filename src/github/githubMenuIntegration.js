@@ -278,8 +278,23 @@ function handleGitHubPull() {
     return;
   }
   
-  // Show pull file dialog (could extend to implement this dialog)
-  alert('Pull from GitHub functionality coming soon!');
+  // Get the editor view and document content
+  const view = window.editorView;
+  if (!view) {
+    alert('Editor not available. Please try again.');
+    return;
+  }
+  
+  // Get the Yjs text instance
+  const ytext = window.ydoc ? window.ydoc.getText('codemirror') : null;
+  
+  // Show pull dialog
+  if (window.githubPullDialog) {
+    window.githubPullDialog.show(ytext, view);
+  } else {
+    console.error('GitHub pull dialog not available');
+    alert('GitHub pull functionality not available. Please check the console for errors.');
+  }
 }
 
 /**

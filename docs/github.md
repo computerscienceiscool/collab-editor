@@ -7,6 +7,7 @@ This guide explains how to use the GitHub integration features in the Collaborat
 The GitHub integration allows you to:
 
 - Commit documents directly to GitHub repositories
+- Pull existing files from GitHub repositories into your editor
 - Include all collaborators as co-authors in commits
 - Configure GitHub settings with your personal access token
 - Access GitHub features through menu items and keyboard shortcuts
@@ -38,26 +39,31 @@ Before you can use the GitHub integration, you need to configure your GitHub set
 
 ## Committing Documents to GitHub
 
-Once your GitHub settings are configured, you can commit documents:
+Once your GitHub settings are configured, you can commit documents to your GitHub repository:
 
-### Method 1: Using the File Menu
+### How to Commit a Document
 
 1. Create or edit a document in the editor
-2. Go to **File → Commit to GitHub**
+2. Go to **File → Commit to GitHub** (or press **Ctrl+Alt+G**)
 3. In the commit dialog:
-   - Verify or change the repository and file path
+   - Verify or change the repository selection
+   - Enter the file path where you want to save the document
    - Enter a descriptive commit message
    - Review the list of co-authors (all current collaborators will be included)
    - Click "Commit to GitHub"
 4. Wait for the commit to complete (you'll see a success message)
-5. Click the "View on GitHub" link to see your commit
+5. Click the "View on GitHub" link to see your commit in the browser
 
-### Method 2: Using Keyboard Shortcuts
+### Commit Dialog Options
 
-1. Press **Ctrl+Alt+G** to open the commit dialog
-2. Complete the same steps as in Method 1
+The commit dialog provides several options:
 
-## Co-Author Attribution
+- **Repository**: Select which of your GitHub repositories to use
+- **File Path**: Specify where in the repository the file should be saved
+- **Commit Message**: A description of your changes (use standard Git conventions)
+- **Co-Authors**: Displays collaborators who will be credited in the commit
+
+### Co-Author Attribution
 
 The GitHub integration automatically detects all collaborators in your current editing session:
 
@@ -73,6 +79,35 @@ Update document with new content
 Co-authored-by: Jane Smith <janesmith@example.com>
 Co-authored-by: Bob Johnson <bobjohnson@example.com>
 ```
+
+## Pulling Documents from GitHub
+
+You can also retrieve existing files from GitHub repositories and load them into the editor:
+
+### How to Pull a Document
+
+1. Go to **File → Pull from GitHub**
+2. In the pull dialog:
+   - Select the repository containing the file
+   - Enter the file path of the document you want to pull
+   - Click "Preview File" to see the content before pulling
+   - Review the file preview to ensure it's the correct document
+   - Click "Pull File" to load the document into your editor
+3. Confirm that you want to replace your current document
+4. The file will be loaded into your editor
+
+### Pull Dialog Options
+
+The pull dialog provides several options:
+
+- **Repository**: Select which of your GitHub repositories to pull from
+- **File Path**: Specify the path to the file you want to retrieve
+- **File Preview**: Shows a preview of the file content before you pull it
+- **Pull File**: Replaces your current document with the GitHub file content
+
+### Important Warning
+
+When pulling a file from GitHub, it will replace any content currently in your editor. Make sure to save or commit your current work before pulling a file if you want to keep your changes.
 
 ## Keyboard Shortcuts
 
@@ -107,6 +142,34 @@ If you want to remove your GitHub token and settings:
 2. Click the "Clear Settings" button at the bottom
 3. Confirm the action when prompted
 
+## Common Workflows
+
+### Creating a New Document in GitHub
+
+1. Create a new document in the editor
+2. Edit your content as needed
+3. Go to File → Commit to GitHub
+4. Enter a file path for your new document (e.g., "docs/new-document.md")
+5. Enter a commit message like "Add new document"
+6. Click "Commit to GitHub"
+
+### Updating an Existing Document
+
+1. Pull the document from GitHub (File → Pull from GitHub)
+2. Make your edits in the editor
+3. Commit the changes back to GitHub (File → Commit to GitHub)
+4. Use the same file path as before
+5. Enter a commit message describing your changes
+6. Click "Commit to GitHub"
+
+### Collaborative Editing and Committing
+
+1. Share your room URL with collaborators
+2. Edit the document together in real-time
+3. When ready, one person commits the document to GitHub
+4. All active collaborators will be listed as co-authors in the commit
+5. The commit will appear in GitHub with all contributors credited
+
 ## Troubleshooting
 
 ### Common Issues and Solutions
@@ -126,7 +189,12 @@ If you want to remove your GitHub token and settings:
 - Ensure the repository still exists
 - Verify you have write access to the repository
 
-**Menu items not appearing**
+**"Pull failed" error**
+- Verify the file exists at the specified path
+- Check that you have read access to the repository
+- Ensure the file isn't too large (GitHub has file size limits)
+
+**Menu items not appearing or duplicated**
 - Reload the page
 - Check browser console (F12) for any JavaScript errors
 
@@ -137,16 +205,12 @@ If you want to remove your GitHub token and settings:
 - For security, use a token with only the necessary 'repo' scope
 - If you're on a shared computer, remember to clear settings when finished
 
-## Feature Limitations
-
-- **Pull from GitHub**: This feature is planned for future updates
-- **Branch selection**: Currently uses the default branch of the repository
-- **Conflict resolution**: Commits may fail if there are conflicts with remote changes
-
 ## Best Practices
 
 - **Use descriptive commit messages** to explain your changes
 - **Check co-authors** before committing to ensure all contributors are credited
 - **Organize repositories** with logical file paths for your documents
+- **Preview files** before pulling them to avoid accidentally overwriting content
+- **Use consistent file paths** when committing and pulling the same document
 - **Create separate tokens** for different applications or devices
 - **Regularly update** your GitHub token for security (every few months)

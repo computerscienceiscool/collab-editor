@@ -1253,26 +1253,28 @@
         </div>
       </div>
     </div>
-    <script type="module">
-  // Import GitHub integration
-  import { setupGitHubMenuItems } from './src/github/githubMenuIntegration.js';
-  import { githubService } from './src/github/githubService.js';
-  import { githubDialog } from './src/ui/githubDialog.js';
-  import { githubCommitDialog } from './src/ui/githubCommitDialog.js';
+   <script type="module">
+   // Import GitHub integration
+   import { setupGitHubMenuItems } from './src/github/githubMenuIntegration.js';
+   import { githubService } from './src/github/githubService.js';
+   import { githubDialog } from './src/ui/githubDialog.js';
+   import { githubCommitDialog } from './src/ui/githubCommitDialog.js';
+   import { githubPullDialog } from './src/ui/githubPullDialog.js';
   
-  // Make them available globally
-  window.githubService = githubService;
-  window.githubDialog = githubDialog;
-  window.githubCommitDialog = githubCommitDialog;
+   // Make them available globally
+   window.githubService = githubService;
+   window.githubDialog = githubDialog;
+   window.githubCommitDialog = githubCommitDialog;
+   window.githubPullDialog = githubPullDialog;
   
-  // Initialize GitHub integration after DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
+   // Initialize GitHub integration after DOM is loaded
+   document.addEventListener('DOMContentLoaded', () => {
     // Wait for menu system to be ready
     setTimeout(() => {
       setupGitHubMenuItems();
       console.log('GitHub integration initialized');
     }, 1000);
   });
-  </script>
+ </script>
 </body>
 </html>

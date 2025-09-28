@@ -1297,6 +1297,47 @@ textarea.settings-input {
     flex-wrap: wrap;
   }
 }
-/* End of GitHub Integration Styles */
 
+/* GitHub Pull Dialog Styles */
+.preview-container {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 0;
+  border: 1px solid #dadce0;
+}
 
+.file-preview {
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.preview-content {
+  padding: 12px;
+  margin: 0;
+  background: #f8f9fa;
+}
+
+.preview-placeholder {
+  color: #5f6368;
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.warning-message {
+  background-color: #fef7e0;
+  color: #b06000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.warning-message strong {
+  font-weight: 500;
+}
