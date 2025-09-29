@@ -187,6 +187,9 @@ case $RUN_MODE in
     "collaboration")
         TEST_CMD="$TEST_CMD tests/e2e/collaboration/"
         ;;
+    "github")
+        TEST_CMD="$TEST_CMD tests/e2e/github/"
+        ;;
     "quick")
         # Run only basic tests for quick validation
         TEST_CMD="$TEST_CMD tests/e2e/core/basic.spec.js"

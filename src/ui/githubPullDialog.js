@@ -10,6 +10,7 @@ export class GitHubPullDialog {
     this.isOpen = false;
     this.isLoading = false;
     this.repositories = [];
+    this.handleEscape = null;
   }
 
   /**
@@ -51,6 +52,12 @@ export class GitHubPullDialog {
     
     this.isOpen = false;
     document.body.style.overflow = 'auto';
+    
+    // Remove escape key listener
+    if (this.handleEscape) {
+      document.removeEventListener('keydown', this.handleEscape);
+      this.handleEscape = null;
+    }
     
     const modal = document.getElementById('github-pull-modal');
     if (modal) {
@@ -179,6 +186,17 @@ export class GitHubPullDialog {
   setupEventListeners() {
     const modal = document.getElementById('github-pull-modal');
     if (!modal) return;
+    
+    // Escape key handler
+    this.handleEscape = (e) => {
+      if (e.key === 'Escape' && this.isOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hide();
+      }
+    };
+    
+    document.addEventListener('keydown', this.handleEscape);
     
     // Close modal when clicking outside
     modal.addEventListener('click', (e) => {
