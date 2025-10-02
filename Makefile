@@ -1,7 +1,7 @@
 
 SHELL := /bin/bash
 BACKEND_PORT=3000  # for Rust or Go backend
-PORT=8080 # for frontend
+PORT=8080
 WS_PORT=1234  # for Yjs websocket server
 # Define the branch too use the branch already in use by the machine
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
