@@ -62,7 +62,7 @@ This demo has been extended with additional features that are useful to teams, i
 ### Export Options
 - Plain text
 - CodeMirror state (JSON)
-- **PromiseGrid CBOR** (protocol-compliant messages)
+- PromiseGrid CBOR (protocol-compliant messages)
 - Yjs snapshot (binary `.ysnap`)
 - Yjs update (JSON array)
 
