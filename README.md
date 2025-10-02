@@ -77,7 +77,6 @@ This demo has been extended with additional features that are useful to teams, i
 - **Settings persistence**: GitHub configuration saved locally
 - **Menu integration**: Access via File menu or keyboard shortcuts (Ctrl+Alt+G)
 - **Multi-user workflow**: Real-time collaboration with GitHub version control
-  
 ---
 
 ## PromiseGrid Integration Highlights
