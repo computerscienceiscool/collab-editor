@@ -66,6 +66,18 @@ This demo has been extended with additional features that are useful to teams, i
 - Yjs snapshot (binary `.ysnap`)
 - Yjs update (JSON array)
 
+### GitHub Integration
+- **Direct repository commits**: Commit documents directly from the editor
+- **Pull from GitHub**: Import existing files from your repositories
+- **Automatic co-author attribution**: All collaborators credited in commits
+- **Token-based authentication**: Secure GitHub Personal Access Token integration
+- **Repository management**: Browse and select from your GitHub repositories
+- **File preview**: Preview files before pulling them into the editor
+- **Commit history**: Track commits with links to view on GitHub
+- **Settings persistence**: GitHub configuration saved locally
+- **Menu integration**: Access via File menu or keyboard shortcuts (Ctrl+Alt+G)
+- **Multi-user workflow**: Real-time collaboration with GitHub version control
+  
 ---
 
 ## PromiseGrid Integration Highlights
