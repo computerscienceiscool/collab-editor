@@ -1365,4 +1365,50 @@ textarea.settings-input {
   font-size: 12px;
 }
 
+/* Git Dialog Specific Styles */
+.git-platform-selector {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e8eaed;
+}
 
+.platform-option {
+  display: inline-block;
+  margin-right: 15px;
+  padding: 8px 15px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.platform-option.active {
+  background-color: #e8f0fe;
+  border-color: #1a73e8;
+  color: #1a73e8;
+}
+
+.setting-help {
+  font-size: 12px;
+  color: #5f6368;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* Git link */
+.git-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e8f0fe;
+  transition: background-color 0.2s;
+}
+
+.git-link:hover {
+  background: #d2e3fc;
+  text-decoration: underline;
+}
