@@ -152,7 +152,7 @@ npm run test:e2e
 ```bash
 # For complete development stack (alternative to separate commands)
 make dev-all
- 
+```
+
 ## Troubleshooting
 If you encounter issues during setup or usage, please check the make file for detailed commands and options.
-```
