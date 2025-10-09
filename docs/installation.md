@@ -64,6 +64,16 @@ make serve
 
 After running this command, the application should be available at http://localhost:8080.
 
+
+## Quick Start
+For new users who want to get started quickly, you can use a single command to set up everything:
+```bash
+make dev-all
+```
+
+
+
+
 ## Configuration Options
 
 ### Room-Based Collaboration
