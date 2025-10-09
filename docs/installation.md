@@ -17,7 +17,7 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/collab-editor.git
+git clone https://github.com/computerscienceiscool/collab-editor.git
 cd collab-editor
 ```
 
@@ -33,9 +33,7 @@ The text editor uses Rust-based WebAssembly for text processing, formatting, and
 
 ```bash
 # Build the WebAssembly module
-cd rust-wasm
 make wasm
-cd ..
 ```
 
 ### 4. Start the Yjs WebSocket Server
@@ -43,11 +41,9 @@ cd ..
 For real-time collaboration, the project uses a WebSocket server to sync changes between clients:
 
 ```bash
-# Install the y-websocket server globally
-npm install -g y-websocket-server
+# Install the y-websocket server globally and start it
+make ws
 
-# Start the server on port 1234
-y-websocket-server --port 1234
 ```
 
 ### 5. Start the Go Server (Optional)
@@ -56,7 +52,7 @@ The project includes a Go server for additional functionality:
 
 ```bash
 # Build and run the Go server
-go run main.go
+make run
 ```
 
 ### 6. Start the Development Server
@@ -152,4 +148,11 @@ npm run test:unit
 npm run test:e2e
 ```
 
+# Comprehensive Setup
+```bash
+# For complete development stack (alternative to separate commands)
+make dev-all
  
+## Troubleshooting
+If you encounter issues during setup or usage, please check the make file for detailed commands and options.
+```
