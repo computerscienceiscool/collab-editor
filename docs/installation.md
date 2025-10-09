@@ -17,8 +17,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/collaborative-text-editor.git
-cd collaborative-text-editor
+git clone https://github.com/yourusername/collab-editor.git
+cd collab-editor
 ```
 
 ### 2. Install JavaScript Dependencies
@@ -34,7 +34,7 @@ The text editor uses Rust-based WebAssembly for text processing, formatting, and
 ```bash
 # Build the WebAssembly module
 cd rust-wasm
-wasm-pack build --target web --out-dir pkg
+make wasm
 cd ..
 ```
 
@@ -63,7 +63,7 @@ go run main.go
 
 ```bash
 # Start the Vite development server
-npm run serve
+make serve
 ```
 
 After running this command, the application should be available at http://localhost:8080.
