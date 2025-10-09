@@ -43,7 +43,6 @@ For real-time collaboration, the project uses a WebSocket server to sync changes
 ```bash
 # Install the y-websocket server globally and start it
 make ws
-
 ```
 
 ### 5. Start the Go Server (Optional)
@@ -67,10 +66,12 @@ After running this command, the application should be available at http://localh
 
 ## Quick Start
 For new users who want to get started quickly, you can use a single command to set up everything:
+
 ```bash
 make dev-all
 ```
-
+ 
+This will build the WebAssembly module, start the WebSocket server, and launch the development server all in one go. After running this, access the application at http://localhost:8080.
 
 
 
@@ -119,7 +120,7 @@ The editor uses:
 
 If you encounter WebSocket connection issues:
 
-1. Ensure the y-websocket-server is running on port 1234
+1. Ensure the y-websocket-server is running (started with `make ws`). It uses port 1234 by default.
 2. Check for any network/firewall restrictions
 3. Verify that your browser supports WebSockets
 
@@ -158,11 +159,6 @@ npm run test:unit
 npm run test:e2e
 ```
 
-# Comprehensive Setup
-```bash
-# For complete development stack (alternative to separate commands)
-make dev-all
-```
 
 ## Troubleshooting
 If you encounter issues during setup or usage, please check the make file for detailed commands and options.
