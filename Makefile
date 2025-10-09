@@ -45,7 +45,7 @@ serve:
 	@echo "Ensuring frontend port $(PORT) is free..."
 	@-fuser -k $(PORT)/tcp 2>/dev/null || true
 	@echo "Starting Vite dev server at http://localhost:$(PORT)"
-	npx vite --port $(PORT) --strictPort 
+	npx vite --port $(PORT) --strictPort --no-open
 
 ws:
 	@echo "Starting y-websocket server on ws://localhost:$(WS_PORT)"
