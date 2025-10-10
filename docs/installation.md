@@ -10,7 +10,8 @@ Before you begin, ensure you have the following installed:
 - [Node.js](https://nodejs.org/) (v14 or later)
 - [npm](https://www.npmjs.com/) (v6 or later)
 - [Go](https://golang.org/) (v1.16 or later, for the Go server)
-- [Rust](https://www.rust-lang.org/) and [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) (for WebAssembly features)
+- [Rust](https://www.rust-lang.org/) (v1.56.0 or later, Rust 2021 edition required) 
+- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) (v0.10.0 or later)
 
 
 ## Quick Start Installation
