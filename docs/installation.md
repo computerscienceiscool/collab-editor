@@ -36,42 +36,19 @@ The text editor uses Rust-based WebAssembly for text processing, formatting, and
 make wasm
 ```
 
-### 4. Start the Yjs WebSocket Server
 
-For real-time collaboration, the project uses a WebSocket server to sync changes between clients:
-
+### 4. Build with Vite
 ```bash
-# Install the y-websocket server globally and start it
-make ws
+# Build the Vite project
+make build
 ```
 
-### 5. Start the Go Server (Optional)
-
-The project includes a Go server for additional functionality:
-
-```bash
-# Build and run the Go server
-make run
-```
-
-### 6. Start the Development Server
-
-```bash
-# Start the Vite development server
-make serve
-```
-
-After running this command, the application should be available at http://localhost:8080.
-
-
-## Quick Start
-For new users who want to get started quickly, you can use a single command to set up everything:
-
+### 5. Starts Services including Yjs WebSocket Server, Dev Server and opens a new room in the browser
 ```bash
 make dev-all
 ```
- 
-This will build the WebAssembly module, start the WebSocket server, and launch the development server all in one go. After running this, access the application at http://localhost:8080.
+
+After running this command, the application should be available at http://localhost:8080/NEWROOM. Where the NEWROOM is a randomly generated room name.
 
 
 
