@@ -12,7 +12,18 @@ Before you begin, ensure you have the following installed:
 - [Go](https://golang.org/) (v1.16 or later, for the Go server)
 - [Rust](https://www.rust-lang.org/) and [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) (for WebAssembly features)
 
-## Installation Steps
+
+## Quick Start Installation
+```bash
+git clone https://github.com/computerscienceiscool/collab-editor.git
+cd collab-editor
+npm install
+make wasm
+make dev-all
+```
+
+
+## Installation Steps (alternative detailed steps)
 
 ### 1. Clone the Repository
 
@@ -36,19 +47,11 @@ The text editor uses Rust-based WebAssembly for text processing, formatting, and
 make wasm
 ```
 
-
-### 4. Build with Vite
-```bash
-# Build the Vite project
-make build
-```
-
-### 5. Starts Services including Yjs WebSocket Server, Dev Server and opens a new room in the browser
+### 4. Starts Services including Yjs WebSocket Server, Dev Server and opens a new room in the browser
 ```bash
 make dev-all
 ```
-
-After running this command, the application should be available at http://localhost:8080/NEWROOM. Where the NEWROOM is a randomly generated room name.
+After running make dev-all, the application will be available at http://localhost:8080/?room=[generated-room-id].
 
 
 
