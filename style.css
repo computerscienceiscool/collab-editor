@@ -1483,3 +1483,16 @@ textarea.settings-input {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+/*  grok checkbox */
+   .checkbox-group {
+     display: flex;
+     align-items: center;
+     margin-top: 8px;
+     margin-bottom: 12px;
+   }
+   
+   .settings-checkbox {
+     margin-right: 8px;
+   }

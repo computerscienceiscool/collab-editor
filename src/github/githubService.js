@@ -31,7 +31,8 @@ export class GitHubService {
       defaultPath: '',
       commitMessage: 'Update from collaborative editor',
       enabled: false,
-      lastCommit: null
+      lastCommit: null,
+      useAICommitMessage: false // Add this field for AI checkbox state
     };
   }
 

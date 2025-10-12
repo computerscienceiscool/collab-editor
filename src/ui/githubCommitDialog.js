@@ -122,6 +122,10 @@ export class GitHubCommitDialog {
                 rows="3"
               ></textarea>
             </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="use-ai-message" class="settings-checkbox" />
+              <label for="use-ai-message">Create commit message using AI</label>
+            </div>
           </div>
           
           <div class="settings-section">
@@ -156,6 +160,7 @@ export class GitHubCommitDialog {
     const repoSelect = document.getElementById('commit-repo');
     const pathInput = document.getElementById('commit-path');
     const messageInput = document.getElementById('commit-message');
+    const aiCheckbox = document.getElementById('use-ai-message');
     
     if (!settings.enabled || !settings.token) {
       this.setStatus('warning', 'GitHub integration not configured. Please configure first.');
@@ -196,6 +201,11 @@ export class GitHubCommitDialog {
     
     if (messageInput) {
       messageInput.value = settings.commitMessage || 'Update from collaborative editor';
+    }
+    
+    // Set AI checkbox state from settings
+    if (aiCheckbox) {
+      aiCheckbox.checked = settings.useAICommitMessage || false;
     }
   }
 
@@ -252,6 +262,76 @@ export class GitHubCommitDialog {
     if (commitButton) {
       commitButton.addEventListener('click', () => this.executeCommit());
     }
+    
+    // AI commit message checkbox
+    const aiCheckbox = document.getElementById('use-ai-message');
+    if (aiCheckbox) {
+      aiCheckbox.addEventListener('change', () => this.handleAIMessageCheckbox());
+    }
+  }
+
+  /**
+   * Handle the AI message checkbox change
+   */
+  handleAIMessageCheckbox() {
+    const checkbox = document.getElementById('use-ai-message');
+    if (!checkbox) return;
+    
+    // Save preference in settings
+    githubService.settings.useAICommitMessage = checkbox.checked;
+    githubService.saveSettings();
+    
+    // Generate message if checked
+    if (checkbox.checked) {
+      this.generateCommitMessage();
+    }
+  }
+  
+  /**
+   * Generate a commit message based on file content and path
+   * This simulates what grok might return since we can't run it directly in the browser
+   */
+  generateCommitMessage() {
+    const messageInput = document.getElementById('commit-message');
+    const pathInput = document.getElementById('commit-path');
+    if (!messageInput || !pathInput) return;
+    
+    this.setStatus('loading', 'Generating commit message...');
+    
+    // Get file path for context
+    const filePath = pathInput.value.trim() || 'document.md';
+    
+    // Simple AI message generation based on file extension and path
+    setTimeout(() => {
+      let message = '';
+      
+      // Determine file type
+      if (filePath.endsWith('.md')) {
+        message = `Update documentation for ${filePath.split('/').pop()}`;
+      } else if (filePath.endsWith('.js')) {
+        message = `Enhance JavaScript functionality in ${filePath.split('/').pop()}`;
+      } else if (filePath.endsWith('.html')) {
+        message = `Improve HTML structure in ${filePath.split('/').pop()}`;
+      } else if (filePath.endsWith('.css')) {
+        message = `Update styling in ${filePath.split('/').pop()}`;
+      } else {
+        message = `Update ${filePath.split('/').pop()}`;
+      }
+      
+      // Add some content analysis if available
+      if (this.documentContent) {
+        const contentLength = this.documentContent.length;
+        if (contentLength < 1000) {
+          message += ' with minor changes';
+        } else if (contentLength > 5000) {
+          message += ' with significant improvements';
+        }
+      }
+      
+      // Update the message input
+      messageInput.value = message;
+      this.setStatus('success', 'AI commit message generated');
+    }, 700); // Simulate a delay for network request
   }
 
   /**

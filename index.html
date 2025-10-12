@@ -872,39 +872,23 @@
         Tip: Live stats are always visible in the status bar!`);
         }
         
-
         toggleLineNumbers() {
-          // Use the proper CodeMirror extension API instead of manual DOM manipulation
-          if (window.editorLineNumberCompartment && window.editorView) {
-            try {
-              // Get current state
-              const currentlyEnabled = localStorage.getItem('line-numbers-enabled') !== 'false';
-              
-              // Toggle the line numbers using CodeMirror's compartment system
-              window.editorView.dispatch({
-                effects: window.editorLineNumberCompartment.reconfigure(
-                  currentlyEnabled ? [] : window.lineNumbersExtension
-                )
+          const view = this.getEditorView();
+          if (view) {
+            const lineNumbersEnabled = view.state.facet(window.lineNumbersFacet);
+            if (lineNumbersEnabled) {
+              view.dispatch({
+                effects: window.toggleLineNumbersEffect.of(false)
               });
-              
-              // Update state
-              localStorage.setItem('line-numbers-enabled', (!currentlyEnabled).toString());
-              
-              const statusMessage = currentlyEnabled ? 'Line numbers hidden' : 'Line numbers shown';
-              console.log(statusMessage);
-              
-              // Show brief notification
-              this.showNotification(statusMessage);
-              
-            } catch (error) {
-              console.error('Failed to toggle line numbers:', error);
-              alert('Failed to toggle line numbers. Please try again.');
+              this.showNotification('Line numbers disabled');
+            } else {
+              view.dispatch({
+                effects: window.toggleLineNumbersEffect.of(true)
+              });
+              this.showNotification('Line numbers enabled');
             }
-          } else {
-            console.warn('Line number compartment not available. Editor may not be fully initialized.');
-            alert('Editor not ready. Please wait a moment and try again.');
           }
-        }
+        }    
 
         showNotification(message) {
           // Create a temporary notification element

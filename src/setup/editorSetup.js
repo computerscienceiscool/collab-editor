@@ -74,6 +74,18 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
   window.editorLineNumberCompartment = lineNumberCompartment;
   window.lineNumbersExtension = lineNumbersExtension;
   window.editorView = view;
+  
+  // Add a direct toggle function that works independently of shortcuts
+  window.toggleLineNumbers = function() {
+    const currentlyEnabled = localStorage.getItem('line-numbers-enabled') !== 'false';
+    view.dispatch({
+      effects: lineNumberCompartment.reconfigure(
+        currentlyEnabled ? [] : lineNumbersExtension
+      )
+    });
+    localStorage.setItem('line-numbers-enabled', (!currentlyEnabled).toString());
+    return !currentlyEnabled;
+  };
 
   // Log setup completion
   console.log('CodeMirror editor initialized with compartmented line numbers');
