@@ -432,18 +432,19 @@ window.logPromiseGridMessage(messageBytes);
 
 ---
 
-### Using Markdown Preview
-The markdown preview feature allows you to see a rendered version of your document alongside the text editor:
+** Real-Time Preview Updates**
+The markdown preview now updates automatically in real-time as you type. This works with:
+- Regular keyboard input
+- Pasted content
+- Remote changes from collaborators
+- Any programmatic changes to the document
 
-1. **Enable preview**: Press **Ctrl+M** or use **View → Toggle Markdown Preview**
-2. **Side-by-side editing**: Text editor appears on left, rendered markdown on right
-3. **Update preview**: Press **Ctrl+R** or use **View → Update Preview** to refresh the rendered view
-4. **Toggle off**: Press **Ctrl+M** again to return to full-width text editing
+**Manual refresh option**: You can still press **Ctrl+R** or use **View → Update Preview** to manually refresh the preview if needed, but this is no longer necessary for most use cases.
 
 **Best Practices:**
 - Use markdown formatting (headers, lists, bold, italic) for best preview results
-- Update preview frequently to see changes: **Ctrl+R**
-- Preview shows how your document will look when exported as markdown
+- Watch the preview update in real-time as you edit
+- Preview shows exactly how your document will look when exported as markdown
 
 ---
 
