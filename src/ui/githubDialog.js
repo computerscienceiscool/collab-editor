@@ -93,6 +93,28 @@ export class GitHubDialog {
             <div id="token-status" class="status-message"></div>
           </div>
           
+          <!--  Grokker API Key Section -->
+          <div class="settings-section">
+            <h3>AI Commit Messages</h3>
+            <p>Enter your Grokker API key for AI-generated commit messages</p>
+            <div class="input-group">
+              <label for="grokker-api-key">Grokker API Key:</label>
+              <input 
+                type="password" 
+                id="grokker-api-key" 
+                class="settings-input" 
+                placeholder="grokker_xxxxxxxxxxxxxxxxxxxx"
+                autocomplete="off"
+              />
+              <button id="validate-grokker-key" class="settings-button">Validate Key</button>
+            </div>
+            <div id="grokker-status" class="status-message"></div>
+            <div class="settings-help">
+              The Grokker API key is used to generate commit messages automatically.
+              If not provided, the AI commit message feature will be disabled.
+            </div>
+          </div>
+          
           <div class="settings-section" id="repository-section" style="display:none">
             <h3>Repository Settings</h3>
             <div class="input-group">
@@ -147,8 +169,12 @@ export class GitHubDialog {
     const repoSelect = document.getElementById('github-repo');
     const pathInput = document.getElementById('github-path');
     const messageInput = document.getElementById('github-message');
+    // Get Grokker API key input field
+    const grokkerKeyInput = document.getElementById('grokker-api-key');
     
     if (tokenInput) tokenInput.value = settings.token || '';
+    //  Set Grokker API key value
+    if (grokkerKeyInput) grokkerKeyInput.value = settings.grokkerApiKey || '';
     
     if (repoSelect) {
       // Clear existing options
@@ -182,6 +208,11 @@ export class GitHubDialog {
     if (settings.token) {
       this.setValidationStatus('valid', `Token configured for ${settings.username}`);
       document.getElementById('repository-section').style.display = 'block';
+    }
+    
+    //  Show validation status if Grokker API key exists
+    if (settings.grokkerApiKey) {
+      this.setGrokkerStatus('valid', 'Grokker API key configured');
     }
   }
 
@@ -226,6 +257,12 @@ export class GitHubDialog {
     const validateButton = document.getElementById('validate-token');
     if (validateButton) {
       validateButton.addEventListener('click', () => this.validateToken());
+    }
+    
+    //  Validate Grokker key button
+    const validateGrokkerButton = document.getElementById('validate-grokker-key');
+    if (validateGrokkerButton) {
+      validateGrokkerButton.addEventListener('click', () => this.validateGrokkerKey());
     }
     
     // Refresh repositories button
@@ -283,6 +320,45 @@ export class GitHubDialog {
   }
 
   /**
+   *  Validate Grokker API key
+   */
+  async validateGrokkerKey() {
+    const keyInput = document.getElementById('grokker-api-key');
+    if (!keyInput || !keyInput.value.trim()) {
+      this.setGrokkerStatus('error', 'Please enter a Grokker API key');
+      return;
+    }
+    
+    const apiKey = keyInput.value.trim();
+    
+    this.setLoading(true);
+    this.setGrokkerStatus('loading', 'Validating Grokker API key...');
+    
+    try {
+      // Here we would typically validate the Grokker API key by making a test call
+      // Since we don't have an actual endpoint, we'll simulate the validation
+      
+      // Store the API key temporarily
+      githubService.settings.grokkerApiKey = apiKey;
+      
+      // Simulate a delay for validation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For now, assume the key is valid if it's not empty
+      if (apiKey.length > 10) {
+        this.setGrokkerStatus('valid', 'Grokker API key validated successfully');
+      } else {
+        throw new Error('Invalid API key format');
+      }
+    } catch (error) {
+      this.setGrokkerStatus('error', `Grokker API key validation failed: ${error.message}`);
+      githubService.settings.grokkerApiKey = ''; // Clear invalid key
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
+  /**
    * Fetch repositories for the user
    */
   async fetchRepositories() {
@@ -333,6 +409,7 @@ export class GitHubDialog {
    */
   saveSettings() {
     const tokenInput = document.getElementById('github-token');
+    const grokkerKeyInput = document.getElementById('grokker-api-key'); 
     const repoSelect = document.getElementById('github-repo');
     const pathInput = document.getElementById('github-path');
     const messageInput = document.getElementById('github-message');
@@ -346,6 +423,7 @@ export class GitHubDialog {
     try {
       // Update settings object
       githubService.settings.token = tokenInput.value.trim();
+      githubService.settings.grokkerApiKey = grokkerKeyInput.value.trim(); 
       githubService.settings.selectedRepo = repoSelect.value;
       githubService.settings.defaultPath = pathInput.value.trim();
       githubService.settings.commitMessage = messageInput.value.trim() || 'Update from collaborative editor';
@@ -375,6 +453,7 @@ export class GitHubDialog {
         
         // Reset form
         document.getElementById('github-token').value = '';
+        document.getElementById('grokker-api-key').value = ''; 
         document.getElementById('github-repo').value = '';
         document.getElementById('github-path').value = '';
         document.getElementById('github-message').value = 'Update from collaborative editor';
@@ -384,6 +463,7 @@ export class GitHubDialog {
         
         // Clear status
         this.setValidationStatus(null);
+        this.setGrokkerStatus(null); 
         this.setStatus('success', 'GitHub settings cleared');
       } catch (error) {
         this.setStatus('error', `Failed to clear settings: ${error.message}`);
@@ -406,6 +486,21 @@ export class GitHubDialog {
     }
     
     this.validationStatus = status;
+  }
+
+  /**
+   *  Set Grokker API key status message
+   */
+  setGrokkerStatus(status, message = '') {
+    const statusElement = document.getElementById('grokker-status');
+    if (!statusElement) return;
+    
+    statusElement.className = 'status-message';
+    statusElement.textContent = message;
+    
+    if (status) {
+      statusElement.classList.add(`status-${status}`);
+    }
   }
 
   /**

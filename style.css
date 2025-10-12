@@ -1496,3 +1496,107 @@ textarea.settings-input {
    .settings-checkbox {
      margin-right: 8px;
    }
+
+
+
+   
+/* Enhanced commit textarea styling */
+.commit-textarea {
+  resize: vertical !important;
+  min-height: 100px !important;
+  max-height: 300px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+  tab-size: 4 !important;
+}
+
+/* Improved status message styles */
+#ai-status {
+  margin-top: 8px !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Loading animation for Grokker status */
+.status-loading {
+  background-color: #e8f0fe !important;
+  color: #1a73e8 !important;
+  position: relative !important;
+  padding-right: 24px !important;
+}
+
+.status-loading::after {
+  content: "..." !important;
+  position: absolute !important;
+  right: 12px !important;
+  animation: loadingDots 1.5s infinite !important;
+}
+
+@keyframes loadingDots {
+  0% { content: "." !important; }
+  33% { content: ".." !important; }
+  66% { content: "..." !important; }
+}
+
+/* Password field styles for API keys */
+input[type="password"].settings-input {
+  font-family: monospace !important;
+  letter-spacing: 1px !important;
+}
+
+/* Toggle button for password visibility */
+.password-toggle {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  color: #5f6368 !important;
+  padding: 4px !important;
+}
+
+.password-toggle:hover {
+  color: #1a73e8 !important;
+}
+
+/* Improved checkbox styling */
+.settings-checkbox {
+  transform: scale(1.2) !important;
+  margin-right: 8px !important;
+}
+
+.checkbox-group {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 12px !important;
+}
+
+.checkbox-group label {
+  font-weight: 500 !important;
+  color: #3c4043 !important;
+}
+
+/* Disabled checkbox styling */
+.settings-checkbox:disabled + label {
+  color: #9aa0a6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+  .github-commit-dialog {
+    width: 95% !important;
+    max-width: 100% !important;
+  }
+  
+  .commit-textarea {
+    min-height: 80px !important;
+  }
+}
