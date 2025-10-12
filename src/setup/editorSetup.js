@@ -1,5 +1,5 @@
 // File: src/setup/editorSetup.js
-import { EditorView, basicSetup } from 'codemirror';
+import { EditorView, minimalSetup } from 'codemirror';
 import { EditorState, Compartment } from '@codemirror/state';
 import { yCollab } from 'y-codemirror.next';
 import { remoteCursorPlugin } from '../ui/remoteCursorPlugin.js';
@@ -41,7 +41,7 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
   const state = EditorState.create({
     doc: '',
     extensions: [
-      basicSetup,
+      minimalSetup,  // Changed from basicSetup - doesn't include line numbers by default
       markdown(),
       history(),
       keymap.of([
@@ -58,7 +58,7 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
           return redo(view);
         }}
       ]),
-      // Use compartment to manage line numbers
+      // Use compartment to manage line numbers - now the ONLY source of line numbers
       lineNumberCompartment.of(lineNumbersEnabled ? lineNumbersExtension : []),
       yCollab(ytext, awareness, { clientID: ydoc.clientID }),
       ...remoteCursorPlugin(awareness, ydoc.clientID)
@@ -78,13 +78,25 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
   // Add a direct toggle function that works independently of shortcuts
   window.toggleLineNumbers = function() {
     const currentlyEnabled = localStorage.getItem('line-numbers-enabled') !== 'false';
+    const newState = !currentlyEnabled;
+    
+    console.log('=== LINE NUMBERS TOGGLE ===');
+    console.log('Current state:', currentlyEnabled);
+    console.log('New state:', newState);
+    console.log('Compartment exists:', !!lineNumberCompartment);
+    console.log('Extension exists:', !!lineNumbersExtension);
+    
     view.dispatch({
       effects: lineNumberCompartment.reconfigure(
-        currentlyEnabled ? [] : lineNumbersExtension
+        newState ? lineNumbersExtension : []
       )
     });
-    localStorage.setItem('line-numbers-enabled', (!currentlyEnabled).toString());
-    return !currentlyEnabled;
+    localStorage.setItem('line-numbers-enabled', newState.toString());
+    
+    console.log('Toggle completed, returning:', newState);
+    console.log('=========================');
+    
+    return newState;
   };
 
   // Log setup completion

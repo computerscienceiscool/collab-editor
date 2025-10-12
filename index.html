@@ -872,23 +872,23 @@
         Tip: Live stats are always visible in the status bar!`);
         }
         
-        toggleLineNumbers() {
-          const view = this.getEditorView();
-          if (view) {
-            const lineNumbersEnabled = view.state.facet(window.lineNumbersFacet);
-            if (lineNumbersEnabled) {
-              view.dispatch({
-                effects: window.toggleLineNumbersEffect.of(false)
-              });
-              this.showNotification('Line numbers disabled');
-            } else {
-              view.dispatch({
-                effects: window.toggleLineNumbersEffect.of(true)
-              });
-              this.showNotification('Line numbers enabled');
-            }
-          }
-        }    
+
+
+       toggleLineNumbers() {
+         console.log('=== MENU TOGGLE CALLED ===');
+         console.log('window.toggleLineNumbers exists?', typeof window.toggleLineNumbers);
+       
+         if (window.toggleLineNumbers) {
+           console.log('Calling window.toggleLineNumbers...');
+           const newState = window.toggleLineNumbers();
+           console.log('Toggle returned:', newState);
+           this.showNotification(newState ? 'Line numbers enabled' : 'Line numbers disabled');
+         } else {
+           console.error('ERROR: window.toggleLineNumbers not available');
+           alert('Line numbers toggle function not available');
+         }
+       }
+
 
         showNotification(message) {
           // Create a temporary notification element
