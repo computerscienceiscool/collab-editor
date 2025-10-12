@@ -90,7 +90,6 @@
       </div>
 
       <!-- Tools Menu -->
-      <!-- Tools Menu -->
       <div class="menu-item">
         <button class="menu-button" data-menu="tools">Tools</button>
         <div class="dropdown-menu" id="tools-menu">
@@ -102,13 +101,11 @@
             </div>
             <div class="menu-section">
               <div class="dropdown-item" data-action="notification-settings">Notification settings</div>
-              <div class="dropdown-item" data-action="preferences">Preferences</div>
+              <div class="dropdown-item" data-action="keyboard-shortcuts">Keyboard Shortcuts</div>
               <div class="dropdown-item" data-action="accessibility">Accessibility</div>
             </div>
           </div>
         </div>
-
-      
 
 
       <!-- View Menu -->
@@ -318,6 +315,11 @@
           case 'save-yjs':
             this.triggerSave(action.replace('save-', ''));
             break;
+          case 'keyboard-shortcuts':
+            if (window.preferencesDialog) {
+              window.preferencesDialog.show();
+            }
+            break;
           case 'copy-url':
             navigator.clipboard.writeText(window.location.href).then(() => {
               alert('Room URL copied to clipboard!');
@@ -490,6 +492,11 @@
         if (window.preferencesDialog && window.preferencesDialog.isOpen) {
             return;
         }
+        if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
+            return; // Exit early if shortcuts are disabled
+        }
+
+
 
         if (e.ctrlKey || e.metaKey) {
           console.log('Ctrl/Meta key detected with', e);

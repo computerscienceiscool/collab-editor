@@ -45,9 +45,18 @@ export function setupEditor(ydoc, provider, ytext, awareness) {
       markdown(),
       history(),
       keymap.of([
-        { key: "Ctrl-z", run: undo },
-        { key: "Ctrl-y", run: redo },
-        { key: "Ctrl-Shift-z", run: redo }
+        { key: "Ctrl-z", run: (view) => {
+          if (window.shortcutManager && !window.shortcutManager.isEnabled()) return false;
+          return undo(view);
+        }},
+        { key: "Ctrl-y", run: (view) => {
+          if (window.shortcutManager && !window.shortcutManager.isEnabled()) return false;
+          return redo(view);
+        }},
+        { key: "Ctrl-Shift-z", run: (view) => {
+          if (window.shortcutManager && !window.shortcutManager.isEnabled()) return false;
+          return redo(view);
+        }}
       ]),
       // Use compartment to manage line numbers
       lineNumberCompartment.of(lineNumbersEnabled ? lineNumbersExtension : []),

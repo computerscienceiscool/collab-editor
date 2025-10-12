@@ -76,6 +76,12 @@ export class PreferencesDialog {
         </div>
         <div class="modal-content">
           <div class="preferences-actions">
+            <div class="enable-shortcuts-toggle">
+            <label for="enable-shortcuts" class="toggle-label">
+              <input type="checkbox" id="enable-shortcuts" ${window.shortcutManager.isEnabled() ? 'checked' : ''}>
+              <span>Enable keyboard shortcuts</span>
+            </label>
+          </div>
             <button id="reset-shortcuts" class="preferences-button" type="button">Reset to Defaults</button>
             <div class="preferences-info">
               Click any shortcut to edit it. Press Escape to cancel editing.
@@ -198,6 +204,16 @@ export class PreferencesDialog {
     const resetButton = document.getElementById('reset-shortcuts');
     if (resetButton) {
       resetButton.addEventListener('click', this.resetToDefaults.bind(this));
+    }
+    // toggle event handler
+    const shortcutsToggle = document.getElementById('enable-shortcuts');
+    if (shortcutsToggle) {
+      shortcutsToggle.addEventListener('change', () => {
+        if (window.shortcutManager) {
+          window.shortcutManager.setEnabled(shortcutsToggle.checked);
+          this.showTemporaryMessage(`Keyboard shortcuts ${shortcutsToggle.checked ? 'enabled' : 'disabled'}`);
+        }
+      });
     }
   }
 

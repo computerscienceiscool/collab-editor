@@ -5,12 +5,132 @@
  * Handles registration, storage, and conflict detection for all editor shortcuts
  */
 export class ShortcutManager {
-  constructor() {
-    this.shortcuts = new Map(); // action -> {key, category, description}
-    this.keyToAction = new Map(); // key -> action
-    this.loadDefaults();
-    this.loadUserCustomizations();
+// Modified constructor
+constructor() {
+  this.shortcuts = new Map(); // action -> {key, category, description}
+  this.keyToAction = new Map(); // key -> action
+  this.loadDefaults();
+  
+  // NEW: Check if shortcuts are enabled
+  this.enabled = this.loadShortcutEnabledSetting();
+  
+  this.loadUserCustomizations();
+  
+  // If it's the first visit, show a notification about shortcuts being disabled
+  if (this.isFirstVisit()) {
+    this.showFirstVisitNotification();
   }
+}
+
+// Modified getAction method
+getAction(key) {
+  // If shortcuts are disabled, always return null
+  if (!this.enabled) {
+    return null;
+  }
+  return this.keyToAction.get(key) || null;
+}
+
+// NEW: Methods to add to the class
+/**
+ * NEW: Check if keyboard shortcuts are enabled
+ * @returns {boolean} True if shortcuts are enabled
+ */
+isEnabled() {
+  return this.enabled;
+}
+
+/**
+ *  Load the setting for whether shortcuts are enabled
+ * @returns {boolean} True if shortcuts are enabled, false otherwise
+ */
+loadShortcutEnabledSetting() {
+  try {
+    // If the setting doesn't exist yet, shortcuts are disabled by default
+    const setting = localStorage.getItem('keyboard-shortcuts-enabled');
+    if (setting === null) {
+      // First time - set to disabled by default
+      localStorage.setItem('keyboard-shortcuts-enabled', 'false');
+      return false;
+    }
+    return setting === 'true';
+  } catch (error) {
+    console.error('ShortcutManager: Failed to load shortcuts enabled setting:', error);
+    return false; // Default to disabled on error
+  }
+}
+
+/**
+ * NEW: Enable or disable keyboard shortcuts
+ * @param {boolean} enabled - True to enable shortcuts, false to disable
+ */
+setEnabled(enabled) {
+  this.enabled = enabled;
+  localStorage.setItem('keyboard-shortcuts-enabled', enabled.toString());
+  console.log(`ShortcutManager: Keyboard shortcuts ${enabled ? 'enabled' : 'disabled'}`);
+  
+  // Dispatch event for other components to listen to
+  window.dispatchEvent(new CustomEvent('shortcuts-toggle', { detail: { enabled } }));
+}
+
+/**
+ * Check if this is the first visit
+ * @returns {boolean} True if this is the first visit
+ */
+isFirstVisit() {
+  return localStorage.getItem('keyboard-shortcuts-first-visit') === null;
+}
+
+/**
+ * NEW: Show notification for first visit
+ */
+showFirstVisitNotification() {
+  // Mark as visited
+  localStorage.setItem('keyboard-shortcuts-first-visit', 'true');
+  
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => this.createNotification());
+  } else {
+    this.createNotification();
+  }
+}
+
+/**
+ * NEW: Create the first visit notification
+ */
+createNotification() {
+  // Create and show notification
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.innerHTML = `
+    <strong>Keyboard shortcuts are disabled by default</strong>
+    <p>Enable them in Tools → Preferences → Keyboard Shortcuts</p>
+    <button id="enable-shortcuts-now" class="notification-button">Enable Now</button>
+    <button id="close-notification" class="notification-close">×</button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Add event listeners
+  notification.querySelector('#enable-shortcuts-now').addEventListener('click', () => {
+    this.setEnabled(true);
+    notification.remove();
+  });
+  
+  notification.querySelector('#close-notification').addEventListener('click', () => {
+    notification.remove();
+  });
+  
+  // Auto remove after 15 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.remove();
+    }
+  }, 15000);
+}
+
+
 
   /**
    * Load all default shortcuts from current codebase
@@ -158,14 +278,6 @@ export class ShortcutManager {
     return this.shortcuts.get(action) || null;
   }
 
-  /**
-   * Get action for a key combination
-   * @param {string} key - The key combination (e.g., "Ctrl+B")
-   * @returns {string|null} - Action name or null if not found
-   */
-  getAction(key) {
-    return this.keyToAction.get(key) || null;
-  }
 
   /**
    * Get all shortcuts grouped by category

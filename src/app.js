@@ -373,15 +373,20 @@ window.addEventListener('DOMContentLoaded', async() => {
     }, 1500);
 
   // 3h. Detect when *this* user types and tell the others
-  view.dom.addEventListener('keydown', () => {
-    awareness.setLocalStateField('typing', true);
+  view.dom.addEventListener('keydown', (e) => {
+    // Check if shortcuts are enabled - only block if it's a shortcut combination
+    if (window.shortcutManager && !window.shortcutManager.isEnabled() && 
+        (e.ctrlKey || e.metaKey)) {
+      return; // Exit early if shortcuts are disabled and it's likely a shortcut
+   }
+      
+  awareness.setLocalStateField('typing', true);
 
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-      awareness.setLocalStateField('typing', false);
-    }, 1500);
-  });
-
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    awareness.setLocalStateField('typing', false);
+  }, 1500);
+});
   //  3i. Hook up the Log toggle button *after* DOM is ready
   const toggleLogBtn = document.getElementById('toggle-log');
   const logPanel = document.getElementById('user-log');
