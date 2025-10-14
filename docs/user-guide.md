@@ -141,6 +141,8 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 
 ### Keyboard Shortcuts Summary
 
+**Note: By default, only Copy (Ctrl+C), Cut (Ctrl+X), and Paste (Ctrl+V) shortcuts are enabled. Other shortcuts need to be enabled through the Keyboard Shortcuts menu item.**
+
 **File Operations:**
 - Ctrl+N: New Document
 - Ctrl+P: Print
@@ -183,6 +185,17 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 3. **Click any shortcut**: Click on the key combination (like "Ctrl+B") to edit it
 4. **Press new keys**: The shortcut turns yellow - press your desired key combination
 5. **Automatic save**: Changes are saved immediately to your browser
+
+### Keyboard Shortcuts Opt-In
+
+**Important**: Most keyboard shortcuts are disabled by default except for the basic editing operations:
+- **Enabled by default**: Copy (Ctrl+C), Cut (Ctrl+X), Paste (Ctrl+V)
+- **Disabled by default**: All other shortcuts (formatting, navigation, etc.)
+
+To enable additional shortcuts:
+1. Access **Help → Keyboard Shortcuts** menu item
+2. Use the toggle switches to enable the shortcuts you want to use
+3. Changes are saved automatically to your browser
 
 ### Customization Features
 
@@ -432,19 +445,31 @@ window.logPromiseGridMessage(messageBytes);
 
 ---
 
-** Real-Time Preview Updates**
-The markdown preview now updates automatically in real-time as you type. This works with:
-- Regular keyboard input
-- Pasted content
-- Remote changes from collaborators
-- Any programmatic changes to the document
+## Real-Time Markdown Preview
 
-**Manual refresh option**: You can still press **Ctrl+R** or use **View → Update Preview** to manually refresh the preview if needed, but this is no longer necessary for most use cases.
+The editor now includes **real-time markdown preview updates** that automatically refresh as you type:
 
-**Best Practices:**
-- Use markdown formatting (headers, lists, bold, italic) for best preview results
-- Watch the preview update in real-time as you edit
-- Preview shows exactly how your document will look when exported as markdown
+### How It Works
+- **Automatic updates**: The markdown preview updates instantly as you type in the editor
+- **No manual refresh needed**: You no longer need to click "Update Preview" or press Ctrl+R
+- **Works with all input methods**: Keyboard typing, pasting, remote collaborative changes, and programmatic edits
+- **Live visualization**: See exactly how your markdown will render as you write it
+
+### Using the Markdown Preview
+1. **Open the preview pane**: Click View → Toggle Markdown Preview or press Ctrl+M
+2. **Start typing**: The preview updates automatically with each keystroke
+3. **Watch formatting**: See how headers, lists, bold text, etc. appear in real-time
+4. **Collaborate**: Preview updates with changes from all collaborators
+
+### Manual Refresh Option
+Although rarely needed, you can still manually refresh the preview:
+- **Menu**: View → Update Preview
+- **Keyboard**: Ctrl+R (if enabled)
+
+### Best Practices
+- Use markdown syntax (headers with #, lists with - or *, etc.) for optimal preview results
+- Watch the preview as you edit to ensure your formatting looks as expected
+- The preview shows exactly how your document will appear when exported as markdown
 
 ---
 
@@ -474,14 +499,16 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 ## Quick Tips
 
 ### Efficient Workflow
-1. **Customize shortcuts first**: Press `Ctrl+Comma` to set up shortcuts that work for you
-2. **Use keyboard shortcuts**: Whatever keys you set for undo, redo, formatting, etc.
-3. **Format entire documents**: Click Format button to clean up spacing and punctuation
-4. **Quick URL conversion**: Double-click URLs to select cleanly, then use your Link shortcut
-5. **Monitor your progress**: Watch live word count and reading time in toolbar
-6. **Check console output**: See PromiseGrid messages being generated in real-time
+1. **Enable needed shortcuts**: Access Help → Keyboard Shortcuts to activate shortcuts you use frequently
+2. **Customize shortcuts**: Press Ctrl+Comma to set up shortcuts that work for you
+3. **Use markdown preview**: Keep the preview pane open to see how your document renders in real-time
+4. **Format entire documents**: Click Format button to clean up spacing and punctuation
+5. **Quick URL conversion**: Double-click URLs to select cleanly, then use your Link shortcut
+6. **Monitor your progress**: Watch live word count and reading time in toolbar
+7. **Check console output**: See PromiseGrid messages being generated in real-time
 
 ### Best Practices
+- **Activate needed shortcuts**: Enable only the keyboard shortcuts you regularly use
 - **Personalize shortcuts**: Set up shortcuts that match your workflow and habits
 - **Select text precisely** for formatting - avoid selecting extra spaces or newlines
 - **Use Format button** before sharing documents for professional appearance  
@@ -504,6 +531,8 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - To reset your name/color, just refresh and retype in the User Settings section.
 - **If formatting buttons don't work**: Check console for WASM errors, try refreshing the page.
 - **If stats don't update**: Make sure you're typing in the editor area.
+- **If keyboard shortcuts don't work**: Check if they've been enabled in Help → Keyboard Shortcuts
+- **If markdown preview doesn't update**: Click View → Update Preview to force a refresh
 - **If PromiseGrid messages don't appear**: Ensure WASM module loaded successfully (check console on page load).
 - **If custom shortcuts don't work**: Check Preferences dialog to verify they saved correctly
 - **To reset shortcuts**: Use "Reset to Defaults" button in Tools → Preferences
@@ -522,6 +551,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **All text processing happens client-side** - no server required for formatting operations.
 - **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
 - **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
+- **Real-time markdown preview** updates automatically without requiring manual refresh.
 
 ---
 

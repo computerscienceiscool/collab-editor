@@ -11,6 +11,24 @@ The editor includes a comprehensive keyboard shortcut customization system that 
 - Reset to industry-standard defaults at any time
 - Import/export shortcut configurations
 
+## Keyboard Shortcut Availability
+
+**IMPORTANT**: By default, most keyboard shortcuts are disabled. The system uses an opt-in approach:
+- **Enabled by default**: Copy (Ctrl+C), Cut (Ctrl+X), and Paste (Ctrl+V)
+- **Disabled by default**: All other shortcuts (formatting, navigation, tools, etc.)
+
+Users need to explicitly enable additional shortcuts through the **Help → Keyboard Shortcuts** menu item.
+
+## Enabling Keyboard Shortcuts
+
+Before customizing shortcuts, you'll need to enable them:
+
+1. Access **Help → Keyboard Shortcuts** in the main menu
+2. The Keyboard Shortcuts panel will appear
+3. Use the toggle switches to enable shortcuts you want to use
+4. Changes are saved automatically to your browser
+5. Once enabled, shortcuts will work immediately
+
 ## Accessing Shortcut Configuration
 
 **Open the preferences dialog:**
@@ -71,59 +89,59 @@ These combinations are not allowed:
 ## Default Shortcuts
 
 ### File Operations
-| Action | Default Shortcut | Description |
-|--------|------------------|-------------|
-| New Document | `Ctrl+N` | Create new document with fresh room |
-| Open | `Ctrl+O` | Open document (planned feature) |
-| Make a Copy | `Ctrl+Shift+S` | Duplicate document in new tab |
-| Save as Text | `Ctrl+S` | Export as plain text |
-| Save as JSON | `Ctrl+Shift+J` | Export CodeMirror state |
-| Save as CBOR | `Ctrl+Shift+B` | Export in CBOR format |
-| Save as PromiseGrid | `Ctrl+Shift+P` | Export PromiseGrid CBOR |
-| Print | `Ctrl+P` | Browser print dialog |
-| Share Document | `Ctrl+Shift+H` | Share with others |
-| Email Document | `Ctrl+Shift+E` | Open email client |
-| Copy Room URL | `Ctrl+Shift+U` | Copy collaboration URL |
+| Action | Default Shortcut | Description | Enabled by Default |
+|--------|------------------|-------------|--------------------|
+| New Document | `Ctrl+N` | Create new document with fresh room | No |
+| Open | `Ctrl+O` | Open document (planned feature) | No |
+| Make a Copy | `Ctrl+Shift+S` | Duplicate document in new tab | No |
+| Save as Text | `Ctrl+S` | Export as plain text | No |
+| Save as JSON | `Ctrl+Shift+J` | Export CodeMirror state | No |
+| Save as CBOR | `Ctrl+Shift+B` | Export in CBOR format | No |
+| Save as PromiseGrid | `Ctrl+Shift+P` | Export PromiseGrid CBOR | No |
+| Print | `Ctrl+P` | Browser print dialog | No |
+| Share Document | `Ctrl+Shift+H` | Share with others | No |
+| Email Document | `Ctrl+Shift+E` | Open email client | No |
+| Copy Room URL | `Ctrl+Shift+U` | Copy collaboration URL | No |
 
 ### Edit Operations
-| Action | Default Shortcut | Description |
-|--------|------------------|-------------|
-| Undo | `Ctrl+Z` | Reverse last action |
-| Redo | `Ctrl+Y` | Restore undone action |
-| Cut | `Ctrl+X` | Cut selected text |
-| Copy | `Ctrl+C` | Copy selected text |
-| Paste | `Ctrl+V` | Paste from clipboard |
-| Select All | `Ctrl+A` | Select entire document |
-| Find | `Ctrl+F` | Focus search box |
-| Delete | `Delete` | Delete selected text |
+| Action | Default Shortcut | Description | Enabled by Default |
+|--------|------------------|-------------|--------------------|
+| Undo | `Ctrl+Z` | Reverse last action | No |
+| Redo | `Ctrl+Y` | Restore undone action | No |
+| Cut | `Ctrl+X` | Cut selected text | Yes |
+| Copy | `Ctrl+C` | Copy selected text | Yes |
+| Paste | `Ctrl+V` | Paste from clipboard | Yes |
+| Select All | `Ctrl+A` | Select entire document | No |
+| Find | `Ctrl+F` | Focus search box | No |
+| Delete | `Delete` | Delete selected text | No |
 
 ### Format Operations
-| Action | Default Shortcut | Description |
-|--------|------------------|-------------|
-| Bold | `Ctrl+B` | Toggle bold formatting |
-| Italic | `Ctrl+I` | Toggle italic formatting |
-| Underline | `Ctrl+U` | Toggle underline formatting |
-| Strikethrough | `Ctrl+Shift+X` | Toggle strikethrough |
-| Heading 1 | `Ctrl+Alt+1` | Toggle H1 formatting |
-| Heading 2 | `Ctrl+Alt+2` | Toggle H2 formatting |
-| Heading 3 | `Ctrl+Alt+3` | Toggle H3 formatting |
-| Bullet List | `Ctrl+Shift+8` | Toggle bullet list |
-| Numbered List | `Ctrl+Shift+7` | Toggle numbered list |
-| Insert Link | `Ctrl+K` | Convert URLs to links |
-| Format Document | `Ctrl+Shift+F` | Clean document formatting |
+| Action | Default Shortcut | Description | Enabled by Default |
+|--------|------------------|-------------|--------------------|
+| Bold | `Ctrl+B` | Toggle bold formatting | No |
+| Italic | `Ctrl+I` | Toggle italic formatting | No |
+| Underline | `Ctrl+U` | Toggle underline formatting | No |
+| Strikethrough | `Ctrl+Shift+X` | Toggle strikethrough | No |
+| Heading 1 | `Ctrl+Alt+1` | Toggle H1 formatting | No |
+| Heading 2 | `Ctrl+Alt+2` | Toggle H2 formatting | No |
+| Heading 3 | `Ctrl+Alt+3` | Toggle H3 formatting | No |
+| Bullet List | `Ctrl+Shift+8` | Toggle bullet list | No |
+| Numbered List | `Ctrl+Shift+7` | Toggle numbered list | No |
+| Insert Link | `Ctrl+K` | Convert URLs to links | No |
+| Format Document | `Ctrl+Shift+F` | Clean document formatting | No |
 
 ### Tools and Interface
-| Action | Default Shortcut | Description |
-|--------|------------------|-------------|
-| Word Count | `Ctrl+Shift+C` | Show document statistics |
-| Toggle Line Numbers | `Ctrl+Shift+L` | Show/hide line numbers |
-| Preferences | `Ctrl+Comma` | Open this preferences dialog |
-| Toggle Activity Log | `Ctrl+Alt+L` | Show/hide user activity |
-| Toggle Toolbar | `Ctrl+Alt+Y` | Show/hide formatting toolbar |
-| Toggle Markdown Preview | `Ctrl+M` | Show/hide preview pane |
-| Update Preview | `Ctrl+R` | Refresh markdown preview |
-| About | `F1` | Show about information |
-| Close Menus | `Escape` | Close any open menu |
+| Action | Default Shortcut | Description | Enabled by Default |
+|--------|------------------|-------------|--------------------|
+| Word Count | `Ctrl+Shift+C` | Show document statistics | No |
+| Toggle Line Numbers | `Ctrl+Shift+L` | Show/hide line numbers | No |
+| Preferences | `Ctrl+Comma` | Open this preferences dialog | No |
+| Toggle Activity Log | `Ctrl+Alt+L` | Show/hide user activity | No |
+| Toggle Toolbar | `Ctrl+Alt+Y` | Show/hide formatting toolbar | No |
+| Toggle Markdown Preview | `Ctrl+M` | Show/hide preview pane | No |
+| Update Preview | `Ctrl+R` | Refresh markdown preview | No |
+| About | `F1` | Show about information | No |
+| Close Menus | `Escape` | Close any open menu | No |
 
 ## Conflict Detection
 
@@ -185,6 +203,9 @@ window.shortcutManager.getAction('Ctrl+B')
 
 // List all shortcuts by category
 window.shortcutManager.getShortcutsByCategory()
+
+// Check if a shortcut is enabled
+window.shortcutManager.isShortcutEnabled('bold')
 ```
 
 ### Integration with Editor
@@ -222,10 +243,11 @@ Shortcuts work seamlessly with:
 
 ### Shortcuts Not Working
 **Check these common issues:**
-1. **Editor focus** - Click in document area before using shortcuts
-2. **Input field focus** - Shortcuts don't work in name/search inputs
-3. **Menu open** - Close any open dropdown menus
-4. **Browser override** - Some shortcuts may be reserved by browser
+1. **Not enabled**: Verify shortcut is enabled in Help → Keyboard Shortcuts
+2. **Editor focus** - Click in document area before using shortcuts
+3. **Input field focus** - Shortcuts don't work in name/search inputs
+4. **Menu open** - Close any open dropdown menus
+5. **Browser override** - Some shortcuts may be reserved by browser
 
 ### Customization Problems
 **If changes don't save:**
@@ -256,6 +278,7 @@ Shortcuts work seamlessly with:
 - **Function keys** - Reserve for help and special functions
 
 ### Workflow Integration
+- **Start with essential shortcuts**: Enable only the shortcuts you use regularly
 - **Learn gradually** - Master a few shortcuts before adding more
 - **Use tooltips** - Hover over toolbar buttons to see current shortcuts
 - **Print reference** - Use browser print on this page for offline reference
@@ -297,12 +320,14 @@ Ctrl+N         → New Room
 - **PreferencesDialog component** - User interface for customization  
 - **MenuSystem integration** - Dynamic shortcut handling
 - **localStorage persistence** - Automatic saving and loading
+- **EnabledShortcuts registry** - Tracks which shortcuts are enabled
 
 ### Key Detection
 - **Event parsing** - Converts keyboard events to shortcut strings
 - **Modifier detection** - Handles Ctrl, Alt, Shift combinations
 - **Cross-platform mapping** - Works on Windows, Mac, and Linux
 - **Conflict prevention** - Real-time validation during assignment
+- **Enabled check** - Verifies shortcut is enabled before executing
 
 ### Performance Optimizations
 - **Efficient lookups** - HashMap-based shortcut resolution
@@ -317,6 +342,7 @@ Ctrl+N         → New Room
 - **Import/export configurations** - Share shortcuts between browsers
 - **Advanced conflict resolution** - Automatic suggestions for conflicts
 - **Shortcut analytics** - Track most-used shortcuts for optimization
+- **Custom profile presets** - "Writer", "Developer", "Minimalist" profiles
 
 ### Integration Opportunities
 - **Team synchronization** - Share shortcuts across collaboration rooms
@@ -343,3 +369,4 @@ Ctrl+N         → New Room
 **Total Shortcuts**: 51 configurable shortcuts across 8 categories  
 **Browser Support**: Chrome, Firefox, Safari, Edge  
 **Platform Support**: Windows, macOS, Linux
+

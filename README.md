@@ -21,10 +21,10 @@ This demo has been extended with additional features that are useful to teams, i
 ### Document Style Menu System
 - **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
 - **Over 30 menu features**: Many implemented features and several planned for future releases. Much of this is a work-in-progress.
-- **Comprehensive keyboard shortcuts**: 23+ shortcuts including standard (Ctrl+C, Ctrl+V), formatting (Ctrl+B, Ctrl+I, Ctrl+U), and advanced (Ctrl+Alt+1/2/3 for headings, Ctrl+Shift+S for copy, Ctrl+M for markdown preview)
-- **Keyboard shortcut customization**: Full preferences system allowing users to customize any of 51 keyboard shortcuts with conflict detection and localStorage persistence
+- **Opt-in keyboard shortcuts**: Only basic editing shortcuts (Ctrl+C, Ctrl+V, Ctrl+X) enabled by default, with 20+ additional shortcuts available through Help → Keyboard Shortcuts menu
+- **Keyboard shortcut customization**: Full preferences system allowing users to enable/disable and customize any of 51 keyboard shortcuts with conflict detection and localStorage persistence
 - **Smart export options**: All exports use document title for filename generation
-- **Side-by-side markdown preview**: Real-time markdown rendering with Ctrl+M toggle and Ctrl+R refresh
+- **Side-by-side markdown preview**: Real-time markdown rendering that automatically updates as you type, with Ctrl+M toggle
 - **Professional interface**: Clean, modern design matching a traditional document editor aesthetic
 - **Menu integration**: Seamlessly connects to existing WASM and collaboration features
 
