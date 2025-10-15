@@ -37,7 +37,7 @@ help:
 install:
 	npm install --legacy-peer-deps
 
-build: wasm
+build: wasm grokker-wasm
 	@echo "Building with Vite..."
 	npx vite build
 
@@ -146,3 +146,12 @@ test-all:
 test-quick:
 	cd rust-server && cargo test
 	npm run test:unit
+
+grokker-wasm:
+	cd v3/wasm && GOOS=js GOARCH=wasm go build -o ../../dist/grokker.wasm .
+	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+
+grokker-wasm-prod:
+	cd v3/wasm && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o ../../dist/grokker.wasm .
+	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+	gzip -9 -k dist/grokker.wasm

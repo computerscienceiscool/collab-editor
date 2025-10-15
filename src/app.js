@@ -12,6 +12,24 @@ import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
+
+// Initialize Grokker WASM
+async function initGrokkerWasm() {
+  const go = new Go();
+  try {
+    const result = await WebAssembly.instantiateStreaming(
+      fetch('/grokker.wasm'),
+      go.importObject
+    );
+    go.run(result.instance);
+    console.log("Grokker WASM initialized");
+  } catch (error) {
+    console.error("Failed to load Grokker WASM:", error);
+  }
+}
+
+
+
 // 2. Declare a typingTimeout variable — it's needed across functions
 let typingTimeout = null;
 
@@ -105,7 +123,13 @@ window.addEventListener('DOMContentLoaded', async() => {
           .replace(/\n/g, '<br>');
       }
     };
-    
+   
+    // Call when document loads
+    document.addEventListener('DOMContentLoaded', async() => {
+      await initGrokkerWasm();
+      // existing code...
+    });
+
     // Function to update the preview
     const updatePreview = () => {
       // Check if the preview is currently visible

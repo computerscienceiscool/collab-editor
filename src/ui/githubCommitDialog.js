@@ -320,81 +320,102 @@ export class GitHubCommitDialog {
     }
   }
   
-  /**
+   /**
    * Generate a commit message using grokker
    */
-  async generateCommitMessage() {
-    if (this.grokkerGenerating) return; // Prevent multiple simultaneous generations
-    
-    const messageInput = document.getElementById('commit-message');
-    const pathInput = document.getElementById('commit-path');
-    const aiStatusEl = document.getElementById('ai-status');
-    
-    if (!messageInput || !pathInput) return;
-    
-    // Check if Grokker API key is configured
-    if (!githubService.settings.grokkerApiKey) {
-      if (aiStatusEl) {
-        aiStatusEl.className = 'status-message status-error';
-        aiStatusEl.textContent = 'Grokker API key not configured. Please configure in GitHub Settings.';
-      }
-      return;
-    }
-    
-    this.grokkerGenerating = true;
-    
-    if (aiStatusEl) {
-      aiStatusEl.className = 'status-message status-loading';
-      aiStatusEl.textContent = 'Generating commit message with Grokker...';
-    }
-    
-    // Disable UI while generating
-    this.setLoading(true);
-    
-    try {
-      // Get file path for context
-      const filePath = pathInput.value.trim() || 'document.md';
+    async generateCommitMessage() {
+      if (this.grokkerGenerating) return; // Prevent multiple simultaneous generations
       
-      // Try to execute grokker command via local shell
-      let commitMessage;
+      const messageInput = document.getElementById('commit-message');
+      const pathInput = document.getElementById('commit-path');
+      const aiStatusEl = document.getElementById('ai-status');
+      
+      if (!messageInput || !pathInput) return;
+      
+      // Check if Grokker API key is configured
+      if (!githubService.settings.grokkerApiKey) {
+        if (aiStatusEl) {
+          aiStatusEl.className = 'status-message status-error';
+          aiStatusEl.textContent = 'Grokker API key not configured. Please configure in GitHub Settings.';
+        }
+        return;
+      }
+      
+      this.grokkerGenerating = true;
+      
+      if (aiStatusEl) {
+        aiStatusEl.className = 'status-message status-loading';
+        aiStatusEl.textContent = 'Generating commit message with Grokker...';
+      }
+      
+      // Disable UI while generating
+      this.setLoading(true);
       
       try {
-        // First try to execute the command via a direct shell command
-        // This is simulated for now - in a real environment, you would implement
-        // a server endpoint to execute the command
-        commitMessage = await this.executeGrokCommand();
-      } catch (error) {
-        console.warn('Failed to execute local grok command:', error);
+        // Get file path for context
+        const filePath = pathInput.value.trim() || 'document.md';
         
-        // Fallback to server API approach
-        try {
-          commitMessage = await githubService.generateCommitMessage(this.documentContent);
-        } catch (apiError) {
-          console.error('Failed to generate commit message via API:', apiError);
-          throw apiError; // Rethrow the error
+        // Try to use WASM first if available
+        if (window.generateCommitMessage) {
+          try {
+            console.log("Using WASM commit message generator");
+            const result = await window.generateCommitMessage({
+              content: this.documentContent,
+              apiKey: githubService.settings.grokkerApiKey,
+              model: "gpt-3.5-turbo"
+            });
+            
+            // Update message input with the generated message
+            messageInput.value = result.fullMessage;
+            
+            if (aiStatusEl) {
+              aiStatusEl.className = 'status-message status-success';
+              aiStatusEl.textContent = 'Commit message generated successfully with Grokker WASM!';
+            }
+            return;
+          } catch (wasmError) {
+            console.error("WASM commit generation failed:", wasmError);
+            // Continue with fallback methods
+          }
         }
+        
+        // Fallback: Try local shell command or API
+        let commitMessage;
+        
+        try {
+          // First try to execute the command via a direct shell command
+          commitMessage = await this.executeGrokCommand();
+        } catch (error) {
+          console.warn('Failed to execute local grok command:', error);
+          
+          // Fallback to server API approach
+          try {
+            commitMessage = await githubService.generateCommitMessage(this.documentContent);
+          } catch (apiError) {
+            console.error('Failed to generate commit message via API:', apiError);
+            throw apiError; // Rethrow the error
+          }
+        }
+        
+        // Update the message input with the generated message
+        messageInput.value = commitMessage;
+        
+        if (aiStatusEl) {
+          aiStatusEl.className = 'status-message status-success';
+          aiStatusEl.textContent = 'Commit message generated successfully! You can edit it if needed.';
+        }
+      } catch (error) {
+        console.error('Failed to generate commit message:', error);
+        
+        if (aiStatusEl) {
+          aiStatusEl.className = 'status-message status-error';
+          aiStatusEl.textContent = `Failed to generate commit message: ${error.message}`;
+        }
+      } finally {
+        this.grokkerGenerating = false;
+        this.setLoading(false);
       }
-      
-      // Update the message input with the generated message
-      messageInput.value = commitMessage;
-      
-      if (aiStatusEl) {
-        aiStatusEl.className = 'status-message status-success';
-        aiStatusEl.textContent = 'Commit message generated successfully! You can edit it if needed.';
-      }
-    } catch (error) {
-      console.error('Failed to generate commit message:', error);
-      
-      if (aiStatusEl) {
-        aiStatusEl.className = 'status-message status-error';
-        aiStatusEl.textContent = `Failed to generate commit message: ${error.message}`;
-      }
-    } finally {
-      this.grokkerGenerating = false;
-      this.setLoading(false);
     }
-  }
-
   /**
    * Execute grok command to generate commit message
    */
