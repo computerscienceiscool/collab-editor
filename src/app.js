@@ -12,23 +12,23 @@ import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
-
-// Initialize Grokker WASM
+// 1. Initialize Grokker WASM
+//
 async function initGrokkerWasm() {
   const go = new Go();
   try {
+    console.log("Attempting to load Grokker WASM from dist/grokker.wasm");
     const result = await WebAssembly.instantiateStreaming(
-      fetch('/grokker.wasm'),
+      fetch('dist/grokker.wasm'),
       go.importObject
     );
     go.run(result.instance);
-    console.log("Grokker WASM initialized");
+    console.log("Grokker WASM initialized successfully");
+    console.log("generateCommitMessage function available:", typeof window.generateCommitMessage);
   } catch (error) {
     console.error("Failed to load Grokker WASM:", error);
   }
 }
-
-
 
 // 2. Declare a typingTimeout variable — it's needed across functions
 let typingTimeout = null;
@@ -44,7 +44,13 @@ window.addEventListener('DOMContentLoaded', async() => {
   await initWasm();
   console.log("WASM ready!");
 
-
+  // Then initialize Grokker WASM
+  console.log("Waiting for Grokker WASM initialization...");
+  await initGrokkerWasm();
+  
+  // Add a delay to ensure everything is ready
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log("All WASM modules should now be ready");  
     
   // 3a. Set up Yjs state: shared document, awareness, etc.
   const { ydoc, provider, ytext, awareness, room } = setupYjs();
@@ -124,11 +130,6 @@ window.addEventListener('DOMContentLoaded', async() => {
       }
     };
    
-    // Call when document loads
-    document.addEventListener('DOMContentLoaded', async() => {
-      await initGrokkerWasm();
-      // existing code...
-    });
 
     // Function to update the preview
     const updatePreview = () => {
