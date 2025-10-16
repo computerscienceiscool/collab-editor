@@ -258,7 +258,8 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 - [docs/promisegrid-integration.md](docs/promisegrid-integration.md) — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
 - [docs/editor-menu.md](docs/editor-menu.md) — Full list of menu features and keyboard shortcuts
 - [docs/keyboard-preferences.md](docs/keyboard-preferences.md) — Complete guide to customizing keyboard shortcuts
-- [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features:wq
+- [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
+- [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
 
 ---
 
