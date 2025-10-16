@@ -342,6 +342,10 @@ export class GitHubCommitDialog {
         this.setLoading(false);
         return;
       } 
+      console.log("Document content for analysis:", this.documentContent.substring(0, 100) + "...");
+
+
+        
       const messageInput = document.getElementById('commit-message');
       const pathInput = document.getElementById('commit-path');
       const aiStatusEl = document.getElementById('ai-status');
@@ -381,6 +385,14 @@ export class GitHubCommitDialog {
         if (typeof window.generateCommitMessage === 'function') {
           try {
             console.log("Using WASM commit message generator");
+              
+
+            console.log("WASM function exists:", typeof window.generateCommitMessage);
+            console.log("Document content length:", this.documentContent?.length);
+            console.log("Document content preview:", this.documentContent?.substring(0, 100));
+            console.log("API key configured:", !!githubService.settings.grokkerApiKey);
+            console.log("Model:", "gpt-3.5-turbo");
+
             const result = await window.generateCommitMessage({
               content: this.documentContent,
               apiKey: githubService.settings.grokkerApiKey,

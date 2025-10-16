@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 	"syscall/js"
+
+	"github.com/stevegt/collab-editor/v3/client"
+	"github.com/stevegt/collab-editor/v3/openai"
 )
 
 // CommitResult represents the structure returned from generateCommitMessage
@@ -48,8 +51,6 @@ func generateCommitMessage(this js.Value, args []js.Value) interface{} {
 
 		// Run in goroutine to avoid blocking
 		go func() {
-			// Use params from the outer function, not from promiseArgs
-
 			// Extract required fields
 			content := getStringParam(params, "content")
 			apiKey := getStringParam(params, "apiKey")
@@ -61,8 +62,8 @@ func generateCommitMessage(this js.Value, args []js.Value) interface{} {
 				return
 			}
 
-			// Generate commit message
-			result, err := generateGitCommitMessage(content, apiKey, model)
+			// Generate commit message using the actual openai client
+			result, err := generateGitCommitMessageWithGrokker(content, apiKey, model)
 			if err != nil {
 				rejectWithError(reject, "API_ERROR", "Failed to generate commit message", err.Error())
 				return
@@ -93,7 +94,6 @@ func validateInputs(content, apiKey, model string) error {
 	if content == "" {
 		return fmt.Errorf("content is required")
 	}
-
 	if apiKey == "" {
 		return fmt.Errorf("apiKey is required")
 	}
@@ -131,45 +131,80 @@ func mapToJSObject(m map[string]interface{}) js.Value {
 	return obj
 }
 
-// generateGitCommitMessage simulates generating a commit message
-func generateGitCommitMessage(content, apiKey, model string) (*CommitResult, error) {
+// generateGitCommitMessageWithGrokker uses the actual grokker functionality via the OpenAI client
+func generateGitCommitMessageWithGrokker(content, apiKey, model string) (*CommitResult, error) {
 	fmt.Printf("WASM: Generating commit message with model %s (content length: %d)\n",
 		model, len(content))
 
-	// Check for content patterns to generate appropriate messages
-	contentLower := strings.ToLower(content)
+	// Set the API key for the OpenAI client
+	openai.SetAPIKey(apiKey)
 
-	var title, body string
+	// Create a prompt for generating a commit message
+	prompt := fmt.Sprintf(
+		"Generate a git commit message for this content using conventional commit format. "+
+			"Provide a concise title line (type: description) and bullet point details. "+
+			"Content: %s", content)
 
-	// Determine commit type based on content
-	if strings.Contains(contentLower, "fix") || strings.Contains(contentLower, "bug") {
-		title = "fix: resolve issue with error handling"
-		body = "- Fixed bug in error handling logic\n- Added proper validation for edge cases\n- Improved error messages for clarity"
-	} else if strings.Contains(contentLower, "feature") || strings.Contains(contentLower, "add") {
-		title = "feat: implement new functionality"
-		body = "- Added new feature for improved user experience\n- Implemented optimized algorithm\n- Added unit tests for new functionality"
-	} else if strings.Contains(contentLower, "test") {
-		title = "test: enhance test coverage"
-		body = "- Added unit tests for core functionality\n- Improved test fixtures\n- Fixed flaky tests"
-	} else if strings.Contains(contentLower, "doc") {
-		title = "docs: update documentation"
-		body = "- Updated README with clear installation steps\n- Added API documentation\n- Fixed typos and improved clarity"
-	} else if strings.Contains(contentLower, "refactor") {
-		title = "refactor: improve code organization"
-		body = "- Restructured components for better maintainability\n- Simplified complex logic\n- Removed redundant code"
-	} else {
-		// Default for unrecognized content
-		title = "chore: update project configuration"
-		body = "- Updated dependencies\n- Improved build process\n- Enhanced project structure"
+	// Create messages for the API
+	messages := []client.ChatMsg{
+		{Role: client.RoleSystem, Content: "You are a helpful assistant that generates git commit messages."},
+		{Role: client.RoleUser, Content: prompt},
 	}
 
-	fullMessage := fmt.Sprintf("%s\n\n%s", title, body)
+	// Call the OpenAI client
+	result, err := openai.CompleteChat(model, messages)
+	if err != nil {
+		fmt.Printf("WASM: Error from OpenAI: %v\n", err)
+		return nil, fmt.Errorf("failed to generate commit message: %w", err)
+	}
 
-	fmt.Println("WASM: Generated commit message:", fullMessage)
+	// Get the commit message from the result.Body field
+	commitMessage := result.Body
+	fmt.Printf("WASM: Got commit message: %s\n", commitMessage)
+
+	// Extract title and body from the generated message
+	title, body := parseCommitMessage(commitMessage)
+
+	// Create full message
+	fullMessage := fmt.Sprintf("%s\n\n%s", title, body)
 
 	return &CommitResult{
 		Title:       title,
 		Body:        body,
 		FullMessage: fullMessage,
 	}, nil
+}
+
+// parseCommitMessage extracts title and body from a generated message
+func parseCommitMessage(message string) (string, string) {
+	lines := strings.Split(message, "\n")
+
+	// The first non-empty line should be the title
+	title := ""
+	bodyStartIndex := 0
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if title == "" && trimmed != "" {
+			title = trimmed
+			bodyStartIndex = i + 1
+			continue
+		}
+	}
+
+	// Skip empty lines between title and body
+	for bodyStartIndex < len(lines) && strings.TrimSpace(lines[bodyStartIndex]) == "" {
+		bodyStartIndex++
+	}
+
+	// The rest is the body
+	body := strings.TrimSpace(strings.Join(lines[bodyStartIndex:], "\n"))
+
+	// If no proper title/body structure was found, handle it
+	if title == "" {
+		title = "docs: update content"
+		body = message
+	}
+
+	return title, body
 }
