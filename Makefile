@@ -5,6 +5,7 @@ PORT=8080
 WS_PORT=1234  # for Yjs websocket server
 # Define the branch too use the branch already in use by the machine
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+export TAG = 0.$(shell date +%Y.%m.%d.%H%M)
 
 .PHONY: help install build serve ws run run-rust run-go restart clean all stop start open-room wasm wasm-clean wasm-rebuild dev-all rebuild commit test test-all test-quick
 
@@ -95,7 +96,7 @@ open-room:
 	@echo "Generating UUID room name..."
 	@uuid=$$(uuidgen); \
 	echo "Opening: http://localhost:$(PORT)/?room=$$uuid"; \
-	xdg-open "http://localhost:$(PORT)/?room=$$uuid" >/dev/null 2>&1 || open "http://localhost:$(PORT)/?room=$$uuid"
+	- xdg-open "http://localhost:$(PORT)/?room=$$uuid" >/dev/null 2>&1 || open "http://localhost:$(PORT)/?room=$$uuid"
 
 wasm:
 	@echo "Building WASM module..."
@@ -155,3 +156,18 @@ grokker-wasm-prod:
 	cd v3/wasm && GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o ../../dist/grokker.wasm .
 	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" dist/
 	gzip -9 -k dist/grokker.wasm
+
+
+deploy: build-container push-container restart-container
+
+build-container:
+	docker build -f Dockerfile -t promisewrite:$(TAG) .
+
+push-container:
+	docker push promisewrite:$(TAG)
+
+export PROMISEWRITE_HOST = europa.d4.t7a.org 
+export PROMISEWRITE_PORT = 23425
+restart-container:
+	docker-compose -H "ssh://$(USER)@$(PROMISEWRITE_HOST)" down
+	docker-compose -H "ssh://$(USER)@$(PROMISEWRITE_HOST)" up -d
