@@ -3,12 +3,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"syscall/js"
-
-	"github.com/stevegt/collab-editor/v3/client"
-	"github.com/stevegt/collab-editor/v3/openai"
+	"time"
 )
 
 // CommitResult represents the structure returned from generateCommitMessage
@@ -24,7 +25,7 @@ func main() {
 	// Register the JavaScript function
 	js.Global().Set("generateCommitMessage", js.FuncOf(generateCommitMessage))
 
-	fmt.Println("Grokker WASM initialized")
+	fmt.Println("Commit Message WASM initialized")
 	<-c // Keep running
 }
 
@@ -62,8 +63,8 @@ func generateCommitMessage(this js.Value, args []js.Value) interface{} {
 				return
 			}
 
-			// Generate commit message using the actual openai client
-			result, err := generateGitCommitMessageWithGrokker(content, apiKey, model)
+			// Generate commit message
+			result, err := generateGitCommitMessage(content, apiKey, model)
 			if err != nil {
 				rejectWithError(reject, "API_ERROR", "Failed to generate commit message", err.Error())
 				return
@@ -81,101 +82,122 @@ func generateCommitMessage(this js.Value, args []js.Value) interface{} {
 	return promiseConstructor.New(handler)
 }
 
-// Helper functions
-func getStringParam(obj js.Value, key string) string {
-	val := obj.Get(key)
-	if val.IsUndefined() || val.IsNull() {
-		return ""
-	}
-	return val.String()
-}
+// generateGitCommitMessage generates a commit message for the given content
+func generateGitCommitMessage(content, apiKey, model string) (*CommitResult, error) {
+	fmt.Printf("WASM: Generating commit message (content length: %d)\n", len(content))
 
-func validateInputs(content, apiKey, model string) error {
-	if content == "" {
-		return fmt.Errorf("content is required")
-	}
-	if apiKey == "" {
-		return fmt.Errorf("apiKey is required")
-	}
+	// Use a predefined API endpoint for commit message generation
+	apiEndpoint := "https://api.openai.com/v1/chat/completions"
 
-	if model == "" {
-		return fmt.Errorf("model is required")
-	}
-
-	return nil
-}
-
-func rejectWithError(reject js.Value, code, message, details string) {
-	errorObj := map[string]interface{}{
-		"error":   message,
-		"code":    code,
-		"details": details,
-	}
-	reject.Invoke(mapToJSObject(errorObj))
-}
-
-func resultToJSObject(result *CommitResult) js.Value {
-	obj := map[string]interface{}{
-		"title":       result.Title,
-		"body":        result.Body,
-		"fullMessage": result.FullMessage,
-	}
-	return mapToJSObject(obj)
-}
-
-func mapToJSObject(m map[string]interface{}) js.Value {
-	obj := js.Global().Get("Object").New()
-	for k, v := range m {
-		obj.Set(k, v)
-	}
-	return obj
-}
-
-// generateGitCommitMessageWithGrokker uses the actual grokker functionality via the OpenAI client
-func generateGitCommitMessageWithGrokker(content, apiKey, model string) (*CommitResult, error) {
-	fmt.Printf("WASM: Generating commit message with model %s (content length: %d)\n",
-		model, len(content))
-
-	// Set the API key for the OpenAI client
-	openai.SetAPIKey(apiKey)
-
-	// Create a prompt for generating a commit message
-	prompt := fmt.Sprintf(
-		"Generate a git commit message for this content using conventional commit format. "+
-			"Provide a concise title line (type: description) and bullet point details. "+
-			"Content: %s", content)
-
-	// Create messages for the API
-	messages := []client.ChatMsg{
-		{Role: client.RoleSystem, Content: "You are a helpful assistant that generates git commit messages."},
-		{Role: client.RoleUser, Content: prompt},
+	// Create a request body
+	requestBody := map[string]interface{}{
+		"model": getModelName(model),
+		"messages": []map[string]string{
+			{
+				"role": "system",
+				"content": `You are an expert at generating git commit messages in the Conventional Commits format.
+Analyze the code changes and generate a concise, descriptive commit message.
+First line should be a summary in format: type(scope): brief description
+Use types like feat, fix, docs, style, refactor, perf, test, build, ci, or chore.
+The body should contain bullet points explaining the changes in more detail.`,
+			},
+			{
+				"role":    "user",
+				"content": fmt.Sprintf("Generate a commit message for these changes:\n\n%s", content),
+			},
+		},
+		"temperature": 0.7,
+		"max_tokens":  500,
 	}
 
-	// Call the OpenAI client
-	result, err := openai.CompleteChat(model, messages)
+	// Convert request to JSON
+	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		fmt.Printf("WASM: Error from OpenAI: %v\n", err)
-		return nil, fmt.Errorf("failed to generate commit message: %w", err)
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// Get the commit message from the result.Body field
-	commitMessage := result.Body
-	fmt.Printf("WASM: Got commit message: %s\n", commitMessage)
+	// Create HTTP request
+	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
 
-	// Extract title and body from the generated message
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	// Send request
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check for errors
+	if resp.StatusCode != http.StatusOK {
+		var errorResponse map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&errorResponse); err != nil {
+			return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, "unknown error")
+		}
+		return nil, fmt.Errorf("API error (status %d): %v", resp.StatusCode, errorResponse)
+	}
+
+	// Parse response
+	var response struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Extract content
+	if len(response.Choices) == 0 {
+		return nil, fmt.Errorf("no response content")
+	}
+
+	commitMessage := response.Choices[0].Message.Content
+
+	// Extract title and body
 	title, body := parseCommitMessage(commitMessage)
-
-	// Create full message
-	fullMessage := fmt.Sprintf("%s\n\n%s", title, body)
 
 	return &CommitResult{
 		Title:       title,
 		Body:        body,
-		FullMessage: fullMessage,
+		FullMessage: commitMessage,
 	}, nil
 }
 
-// parseCommitMessage extracts title and body from a generated message
+// getModelName converts user-friendly model names to API model names
+func getModelName(model string) string {
+	// Default to GPT-4 if not specified or if "grokker" is specified
+	if model == "" || model == "grokker" {
+		return "gpt-4"
+	}
+
+	// Map of common model name aliases
+	modelMap := map[string]string{
+		"gpt-3.5": "gpt-3.5-turbo",
+		"gpt3":    "gpt-3.5-turbo",
+		"gpt4":    "gpt-4",
+		"4":       "gpt-4",
+		"3":       "gpt-3.5-turbo",
+	}
+
+	if apiModel, ok := modelMap[strings.ToLower(model)]; ok {
+		return apiModel
+	}
+
+	// If not in map, return as-is
+	return model
+}
+
+// parseCommitMessage extracts title and body from a git commit message
 func parseCommitMessage(message string) (string, string) {
 	lines := strings.Split(message, "\n")
 
@@ -207,4 +229,50 @@ func parseCommitMessage(message string) (string, string) {
 	}
 
 	return title, body
+}
+
+// Helper functions
+func getStringParam(obj js.Value, key string) string {
+	val := obj.Get(key)
+	if val.IsUndefined() || val.IsNull() {
+		return ""
+	}
+	return val.String()
+}
+
+func validateInputs(content, apiKey, model string) error {
+	if content == "" {
+		return fmt.Errorf("content is required")
+	}
+	if apiKey == "" {
+		return fmt.Errorf("apiKey is required")
+	}
+	// Model validation is optional, a default will be used
+	return nil
+}
+
+func rejectWithError(reject js.Value, code, message, details string) {
+	errorObj := map[string]interface{}{
+		"error":   message,
+		"code":    code,
+		"details": details,
+	}
+	reject.Invoke(mapToJSObject(errorObj))
+}
+
+func resultToJSObject(result *CommitResult) js.Value {
+	obj := map[string]interface{}{
+		"title":       result.Title,
+		"body":        result.Body,
+		"fullMessage": result.FullMessage,
+	}
+	return mapToJSObject(obj)
+}
+
+func mapToJSObject(m map[string]interface{}) js.Value {
+	obj := js.Global().Get("Object").New()
+	for k, v := range m {
+		obj.Set(k, v)
+	}
+	return obj
 }

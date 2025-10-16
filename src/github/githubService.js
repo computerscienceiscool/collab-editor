@@ -78,42 +78,36 @@ export class GitHubService {
     }
   }
 
-  /**
-   *  Generate commit message using Grokker
-   * @param {string} content - Document content to analyze
-   * @returns {Promise<string>} Generated commit message
-   */
-  async generateCommitMessage(content) {
-    if (!this.settings.grokkerApiKey) {
-      throw new Error('Grokker API key not configured');
-    }
-    
-    try {
-      // Call backend API to execute grok command
-      // This assumes you have a backend endpoint for executing grok
-      const response = await fetch('/api/grokker/commit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Grokker-API-Key': this.settings.grokkerApiKey
-        },
-        body: JSON.stringify({
-          content: content
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate commit message');
+    /**
+     * Generate commit message using Grokker
+     * @param {string} content - Document content to analyze
+     * @returns {Promise<string>} Generated commit message
+     */
+    async generateCommitMessage(content) {
+      if (!this.settings.grokkerApiKey) {
+        throw new Error('Grokker API key not configured');
       }
       
-      const data = await response.json();
-      return data.commitMessage;
-    } catch (error) {
-      console.error('Failed to generate commit message:', error);
-      throw new Error('Failed to generate commit message: ' + error.message);
+      try {
+        // Check if WASM function is available
+        if (typeof window.generateCommitMessage !== 'function') {
+          console.warn('Grokker WASM not available, falling back to simulation');
+          return this.executeGrokCommand(content);
+        }
+        
+        // Call the WASM implementation
+        const result = await window.generateCommitMessage({
+          content: content,
+          apiKey: this.settings.grokkerApiKey,
+          model: "grokker"
+        });
+        
+        return result.fullMessage || result.title + "\n\n" + result.body;
+      } catch (error) {
+        console.error('Failed to generate commit message:', error);
+        throw new Error('Failed to generate commit message: ' + error.message);
+      }
     }
-  }
 
   /**
    * Fetch user repositories

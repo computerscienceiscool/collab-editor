@@ -394,11 +394,10 @@ export class GitHubCommitDialog {
             console.log("Model:", "gpt-3.5-turbo");
 
             const result = await window.generateCommitMessage({
-              content: this.documentContent,
-              apiKey: githubService.settings.grokkerApiKey,
-              model: "gpt-3.5-turbo"
-            });
-            
+                content: this.documentContent,
+                apiKey: githubService.settings.grokkerApiKey,
+                model: "grokker" // Use Grokker's actual model identifier
+            }); 
             console.log("WASM generation result:", result);
             
             // Update message input with the generated message
