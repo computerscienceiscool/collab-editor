@@ -172,6 +172,8 @@ window.addEventListener('DOMContentLoaded', async() => {
         updatePreview();
       }, 300);
     };
+    // Expose the debounced update function globally
+    window.updateMarkdownPreview = debouncedUpdate;
     
     // Update when user types (keyup event)
     view.dom.addEventListener('keyup', debouncedUpdate);
@@ -186,15 +188,26 @@ window.addEventListener('DOMContentLoaded', async() => {
     view.dispatch = (() => {
       const originalDispatch = view.dispatch;
       return function(...args) {
+        // Apply original dispatch first to ensure changes are processed
         const result = originalDispatch.apply(this, args);
-        // Check if this update affects the document content
-        if (args[0] && args[0].changes && !args[0].changes.empty) {
-          debouncedUpdate();
+        
+        // Enhanced check for document changes
+        if (args[0]) {
+          if (
+            // Check for explicit content changes
+            (args[0].changes && !args[0].changes.empty) ||
+            // Check for state update that might affect content
+            (args[0].effects && args[0].effects.length > 0)
+          ) {
+            console.log('Document changed, updating markdown preview');
+            debouncedUpdate();
+          }
         }
+        
         return result;
       };
     })();
-    
+     
     // Update when the preview is toggled on
     const viewMenu = document.getElementById('view-menu');
     if (viewMenu) {
@@ -432,3 +445,7 @@ window.addEventListener('DOMContentLoaded', async() => {
   }
 });
 // initWasm();
+
+
+
+

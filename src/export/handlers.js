@@ -38,7 +38,6 @@ export function setupExportHandlers(ydoc, ytext, view) {
   const strikeButton = document.querySelector('#strike-button');
   const headingButton = document.querySelector('#heading-button');
   const listButton = document.querySelector('#list-button');
-  // Add these lines in your setupExportHandlers function
   const searchButton = document.querySelector('#search-button');
   const clearSearchButton = document.querySelector('#clear-search');
   const searchInput = document.querySelector('#search-input');
@@ -202,8 +201,13 @@ async function handleToggleFormatting(view, toggleFunction, formatName) {
     
     console.log(`WASM ${formatName} formatting applied successfully`);
 
-    // NEW: Send edit as PromiseGrid message
+    // Send edit as PromiseGrid message
     sendEditAsPromiseGridMessage(formatName.toLowerCase(), selection.from, formattedText, view);
+    
+    if (window.updateMarkdownPreview) {
+      console.log("Explicitly updating markdown preview after formatting");
+      window.updateMarkdownPreview();
+    }
     
   } catch (error) {
     console.error(`WASM ${formatName} formatting failed:`, error);
@@ -263,11 +267,20 @@ async function handleFormat(ytext, view) {
     // Send format action as PromiseGrid message
     sendEditAsPromiseGridMessage("format", 0, formattedText, view);
     
+    // Explicitly update markdown preview if available
+    if (window.updateMarkdownPreview) {
+      console.log("Explicitly updating markdown preview after formatting");
+      window.updateMarkdownPreview();
+    }
+    
   } catch (error) {
     console.error("JavaScript formatting failed:", error);
     alert("Failed to format text: " + error.message);
   }
 }
+
+
+
  // Strict filename sanitizer
 function sanitizeFilename(raw, fallback = 'document.txt') {
   if (!raw || typeof raw !== 'string') return fallback;
@@ -378,7 +391,7 @@ function handleSave(format, ydoc, ytext, view) {
   downloadBlob(blob, filename);
 }
 
-// NEW: PromiseGrid export handler
+// PromiseGrid export handler
 function handlePromiseGridExport(ydoc, ytext, view) {
   try {
     const content = ytext.toString();

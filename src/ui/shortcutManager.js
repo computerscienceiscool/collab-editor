@@ -11,7 +11,7 @@ constructor() {
   this.keyToAction = new Map(); // key -> action
   this.loadDefaults();
   
-  // NEW: Check if shortcuts are enabled
+  //Check if shortcuts are enabled
   this.enabled = this.loadShortcutEnabledSetting();
   
   this.loadUserCustomizations();
@@ -31,9 +31,9 @@ getAction(key) {
   return this.keyToAction.get(key) || null;
 }
 
-// NEW: Methods to add to the class
+//Methods to add to the class
 /**
- * NEW: Check if keyboard shortcuts are enabled
+ * Check if keyboard shortcuts are enabled
  * @returns {boolean} True if shortcuts are enabled
  */
 isEnabled() {
@@ -61,7 +61,7 @@ loadShortcutEnabledSetting() {
 }
 
 /**
- * NEW: Enable or disable keyboard shortcuts
+ * Enable or disable keyboard shortcuts
  * @param {boolean} enabled - True to enable shortcuts, false to disable
  */
 setEnabled(enabled) {
@@ -82,7 +82,7 @@ isFirstVisit() {
 }
 
 /**
- * NEW: Show notification for first visit
+ * Show notification for first visit
  */
 showFirstVisitNotification() {
   // Mark as visited
@@ -97,7 +97,7 @@ showFirstVisitNotification() {
 }
 
 /**
- * NEW: Create the first visit notification
+ * Create the first visit notification
  */
 createNotification() {
   // Create and show notification
