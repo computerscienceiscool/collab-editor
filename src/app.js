@@ -1,6 +1,7 @@
 // File: src/app.js
 //
 import { initWasm } from './wasm/initWasm.js';
+import { initDiffWasm } from './wasm/diffWasm.js';
 import { setupDocumentStats } from './ui/documentStats.js';
 import { setupYjs } from './setup/yjsSetup.js';
 import { setupEditor } from './setup/editorSetup.js';
@@ -13,7 +14,6 @@ import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
 // 1. Initialize Grokker WASM
-
 async function initGrokkerWasm() {
   // Check if Go is available
   if (typeof Go === 'undefined') {
@@ -41,20 +41,21 @@ async function initGrokkerWasm() {
 // 2. Declare a typingTimeout variable — it's needed across functions
 let typingTimeout = null;
 
-
-
-
 // 3. Wait for the page (DOM) to load before touching any HTML elements
 window.addEventListener('DOMContentLoaded', async() => {
 
   // Initialize WASM FIRST
-  console.log("Initializing WASM...");
+  console.log("Initializing Rust WASM...");
   await initWasm();
-  console.log("WASM ready!");
+  console.log("Rust WASM ready!");
 
   // Then initialize Grokker WASM
-  console.log("Waiting for Grokker WASM initialization...");
+  console.log("Initializing Grokker WASM...");
   await initGrokkerWasm();
+  
+  // Initialize Diff WASM
+  console.log("Initializing Diff WASM...");
+  await initDiffWasm();
   
   // Add a delay to ensure everything is ready
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -452,8 +453,3 @@ window.addEventListener('DOMContentLoaded', async() => {
     console.log("GitHub integration available");
   }
 });
-// initWasm();
-
-
-
-

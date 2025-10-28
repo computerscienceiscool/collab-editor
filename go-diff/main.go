@@ -21,6 +21,9 @@ func main() {
 	js.Global().Set("generateUnifiedDiff", js.FuncOf(generateUnifiedDiff))
 	js.Global().Set("generateDiffStats", js.FuncOf(generateDiffStats))
 
+	// Log that diff WASM is ready
+	js.Global().Get("console").Call("log", "Go Diff WASM loaded successfully")
+
 	// Keep the Go program running
 	<-make(chan bool)
 }
@@ -87,15 +90,17 @@ func generateDiffStats(this js.Value, inputs []js.Value) interface{} {
 	for _, diff := range diffs {
 		switch diff.Type {
 		case diffmatchpatch.DiffInsert:
-			additions += strings.Count(diff.Text, "\n")
-			if !strings.HasSuffix(diff.Text, "\n") {
-				additions++ // Count last line if no trailing newline
+			lines := strings.Count(diff.Text, "\n")
+			if !strings.HasSuffix(diff.Text, "\n") && len(diff.Text) > 0 {
+				lines++ // Count last line if no trailing newline
 			}
+			additions += lines
 		case diffmatchpatch.DiffDelete:
-			deletions += strings.Count(diff.Text, "\n")
-			if !strings.HasSuffix(diff.Text, "\n") {
-				deletions++ // Count last line if no trailing newline
+			lines := strings.Count(diff.Text, "\n")
+			if !strings.HasSuffix(diff.Text, "\n") && len(diff.Text) > 0 {
+				lines++ // Count last line if no trailing newline
 			}
+			deletions += lines
 		}
 	}
 
