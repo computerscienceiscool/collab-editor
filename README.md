@@ -260,6 +260,7 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 - [docs/keyboard-preferences.md](docs/keyboard-preferences.md) — Complete guide to customizing keyboard shortcuts
 - [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 - [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
+- [docs/diff-view.md](docs/diff-view.md) — How the diff view feature works 
 
 ---
 
