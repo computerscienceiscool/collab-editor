@@ -13,8 +13,14 @@ import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
 // 1. Initialize Grokker WASM
-//
+
 async function initGrokkerWasm() {
+  // Check if Go is available
+  if (typeof Go === 'undefined') {
+    console.error("Go WASM runtime not loaded. Make sure wasm_exec.js is loaded first.");
+    return;
+  }
+  
   const go = new Go();
   try {
     console.log("Attempting to load Grokker WASM from dist/grokker.wasm");
@@ -25,8 +31,10 @@ async function initGrokkerWasm() {
     go.run(result.instance);
     console.log("Grokker WASM initialized successfully");
     console.log("generateCommitMessage function available:", typeof window.generateCommitMessage);
+    console.log("generateSideBySideDiff function available:", typeof window.generateSideBySideDiff);
   } catch (error) {
     console.error("Failed to load Grokker WASM:", error);
+    console.log("Make sure to run: make grokker-wasm");
   }
 }
 

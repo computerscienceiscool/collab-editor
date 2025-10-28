@@ -38,7 +38,7 @@ help:
 install:
 	npm install --legacy-peer-deps
 
-build: wasm grokker-wasm
+build: wasm grokker-wasm diff-wasm
 	@echo "Building with Vite..."
 	npx vite build
 
@@ -171,3 +171,15 @@ export PROMISEWRITE_PORT = 23425
 restart-container:
 	docker-compose -H "ssh://$(USER)@$(PROMISEWRITE_HOST)" down
 	docker-compose -H "ssh://$(USER)@$(PROMISEWRITE_HOST)" up -d
+	
+
+
+diff-wasm:
+	cd go-diff && GOOS=js GOARCH=wasm go build -o ../dist/diff.wasm .
+
+diff-wasm-clean:
+	rm -f dist/diff.wasm
+
+diff-wasm-rebuild: diff-wasm-clean diff-wasm
+	@echo "Diff WASM module rebuilt successfully"
+

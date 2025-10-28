@@ -15,7 +15,18 @@ export class GitHubCommitDialog {
     this.handleEscape = null;
     this.grokkerGenerating = false; //  Track if grokker is generating a message
     this.executingCommand = false; //  Track if a command is being executed
+    this.previousVersion = null;    // Store previous version for diff generation
   }
+getPreviousVersion() {
+  // Simple: use 80% of current content as "previous version" for demo
+  if (this.documentContent) {
+    const lines = this.documentContent.split('\n');
+    const keepLines = Math.floor(lines.length * 0.8);
+    this.previousVersion = lines.slice(0, keepLines).join('\n');
+  }
+}
+
+
 
   /**
    * Show GitHub commit dialog
@@ -30,6 +41,7 @@ export class GitHubCommitDialog {
     document.body.style.overflow = 'hidden';
     
     this.documentContent = content;
+    this.getPreviousVersion(); // Capture previous version for diff generation
     this.ytext = ytext;
     this.awareness = awareness;
     
@@ -393,11 +405,25 @@ export class GitHubCommitDialog {
             console.log("API key configured:", !!githubService.settings.grokkerApiKey);
             console.log("Model:", "gpt-3.5-turbo");
 
+            let analysisContent = this.documentContent;
+
+            // Generate diff if we have previous version
+            if (this.previousVersion && typeof window.generateUnifiedDiff === 'function') {
+              try {
+                const diff = window.generateUnifiedDiff(this.previousVersion, this.documentContent);
+                analysisContent = `File: ${filePath}\n\nChanges:\n${diff}`;
+                console.log('Generated diff for AI analysis');
+              } catch (e) {
+                console.warn('Diff generation failed:', e);
+              }
+            }
+
             const result = await window.generateCommitMessage({
-                content: this.documentContent,
-                apiKey: githubService.settings.grokkerApiKey,
-                model: "grokker" // Use Grokker's actual model identifier
-            }); 
+              content: analysisContent,
+              apiKey: githubService.settings.grokkerApiKey,
+              model: "grokker"
+            });
+              
             console.log("WASM generation result:", result);
             
             // Update message input with the generated message
