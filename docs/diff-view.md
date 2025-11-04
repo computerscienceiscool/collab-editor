@@ -234,3 +234,5 @@ Calculates diff statistics.
 
 **Returns:** Object with `additions`, `deletions`, and `total` counts
 
+> **⚠️ This feature is a WIP and has not been fully tested**
+

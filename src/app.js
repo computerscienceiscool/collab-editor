@@ -13,6 +13,83 @@ import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
+
+// 0.  Version storage functions
+async function saveVersionToIndexedDB(content, timestamp, room) {
+  try {
+    const dbName = `versions-${room}`;
+    const request = indexedDB.open(dbName, 1);
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('versions')) {
+        const store = db.createObjectStore('versions', { keyPath: 'timestamp' });
+        store.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+    };
+    
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction(['versions'], 'readwrite');
+      const store = transaction.objectStore('versions');
+      
+      store.add({
+        timestamp,
+        content,
+        length: content.length
+      });
+      
+      // Keep only last 50 versions
+      const index = store.index('timestamp');
+      const getAllRequest = index.getAll();
+      getAllRequest.onsuccess = () => {
+        const versions = getAllRequest.result;
+        if (versions.length > 50) {
+          versions.sort((a, b) => a.timestamp - b.timestamp);
+          const toDelete = versions.slice(0, versions.length - 50);
+          toDelete.forEach(version => store.delete(version.timestamp));
+        }
+      };
+    };
+  } catch (error) {
+    console.error('Failed to save version:', error);
+  }
+}
+
+async function getLatestVersionFromIndexedDB(room) {
+  return new Promise((resolve) => {
+    const dbName = `versions-${room}`;
+    const request = indexedDB.open(dbName, 1);
+    
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('versions')) {
+        resolve('');
+        return;
+      }
+      
+      const transaction = db.transaction(['versions'], 'readonly');
+      const store = transaction.objectStore('versions');
+      const index = store.index('timestamp');
+      
+      // Get the second-to-last version (not the current one)
+      const getAllRequest = index.getAll();
+      getAllRequest.onsuccess = () => {
+        const versions = getAllRequest.result;
+        if (versions.length >= 2) {
+          versions.sort((a, b) => b.timestamp - a.timestamp);
+          resolve(versions[1].content); // Second most recent
+        } else {
+          resolve('');
+        }
+      };
+    };
+    
+    request.onerror = () => resolve('');
+  });
+}
+window.getLatestVersionFromIndexedDB = getLatestVersionFromIndexedDB;
+
 // 1. Initialize Grokker WASM
 async function initGrokkerWasm() {
   // Check if Go is available
@@ -62,9 +139,23 @@ window.addEventListener('DOMContentLoaded', async() => {
   console.log("All WASM modules should now be ready");  
     
   // 3a. Set up Yjs state: shared document, awareness, etc.
+
   const { ydoc, provider, ytext, awareness, room } = setupYjs();
-  
+
+  ydoc.on('update', (update, origin) => {
+  // Only save if this is a real user change (not initial sync)
+    if (origin !== null && origin !== 'IndexeddbPersistence') {
+      const content = ytext.toString();
+      const timestamp = Date.now();
+    
+      // Save to IndexedDB with versioning
+      saveVersionToIndexedDB(content, timestamp, room);
+    }
+  });
+
   document.querySelector('#room-name').textContent = room;
+
+
 
   // 3b. Set up the CodeMirror editor
   const view = setupEditor(ydoc, provider, ytext, awareness);
@@ -453,3 +544,4 @@ window.addEventListener('DOMContentLoaded', async() => {
     console.log("GitHub integration available");
   }
 });
+
