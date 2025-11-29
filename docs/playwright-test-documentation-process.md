@@ -58,7 +58,7 @@ Please generate Playwright tests for these test cases.
 
 ### Step 5: Run and Debug Tests
 
-1. Run the generated tests
+1. Run the generated tests.  Until they pass, run as headed.  This means we will see it run in the browser.  This helps understand why the test did not pass.
 2. If tests fail, paste the error back into Claude:
    ```
    This test failed with the following error:
