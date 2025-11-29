@@ -296,8 +296,8 @@ test.describe('Mobile: Rotation / Orientation Change', () => {
     expect(content).toContain('**');
   });
 
-  // SKIPPED: Menu doesn't reopen after rotation - real UI issue to fix
-  test.skip('menu system works after rotation', async ({ page }) => {
+  // Menu doesn't reopen after rotation - real UI issue to fix
+  test('menu system works after rotation', async ({ page }) => {
     // Open menu in portrait
     const fileMenuButton = page.locator('button[data-menu="file"]');
     await fileMenuButton.tap();
@@ -420,8 +420,8 @@ test.describe('Mobile: Keyboard Behavior', () => {
 // ============================================
 test.describe('Mobile: UI Issues', () => {
   
-  // SKIPPED: Page has horizontal overflow (567px vs 393px viewport) - real UI issue to fix
-  test.skip('no horizontal scroll on mobile viewport', async ({ page }) => {
+  // Page has horizontal overflow (567px vs 393px viewport) - real UI issue to fix
+  test('no horizontal scroll on mobile viewport', async ({ page }) => {
     await helpers.setEditorContent('Short content');
     
     // Check document width doesn't exceed viewport
@@ -461,8 +461,8 @@ test.describe('Mobile: UI Issues', () => {
     }
   });
 
-  // SKIPPED: Menu overflows viewport (480px vs 398px) - real UI issue to fix
-  test.skip('dropdowns do not overflow screen', async ({ page }) => {
+  // Menu overflows viewport (480px vs 398px) - real UI issue to fix
+  test('dropdowns do not overflow screen', async ({ page }) => {
     const fileMenuButton = page.locator('button[data-menu="file"]');
     await fileMenuButton.tap();
     await page.waitForTimeout(500);

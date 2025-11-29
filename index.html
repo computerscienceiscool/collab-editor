@@ -229,19 +229,42 @@
     });
 
     // Menu System Class
-    class MenuSystem {
-      constructor() {
-        this.activeMenu = null;
-        this.init();
-      }
+        class MenuSystem {
+          constructor() {
+            this.activeMenu = null;
+            this.init();
+          }
 
 
-      init() {
-        this.setupMenuToggling();
-        this.setupMenuActions();
-        this.setupKeyboardShortcuts();
-        this.setupClickOutside();
-      }
+          init() {
+            this.setupMenuToggling();
+            this.setupMenuActions();
+            this.setupKeyboardShortcuts();
+            this.setupClickOutside();
+            this.setupOrientationHandler();
+          }
+
+          // Close menus on orientation change / resize
+          setupOrientationHandler() {
+            // Close menus on resize (includes orientation change)
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+              // Debounce to avoid multiple calls during resize
+              clearTimeout(resizeTimeout);
+              resizeTimeout = setTimeout(() => {
+                if (this.activeMenu) {
+                  this.closeAllMenus();
+                  console.log('Menus closed due to viewport resize/rotation');
+                }
+              }, 100);
+            });
+            
+            // Also listen for orientation change event specifically
+            window.addEventListener('orientationchange', () => {
+              this.closeAllMenus();
+              console.log('Menus closed due to orientation change');
+            });
+          }
 
       setupMenuToggling() {
         const menuButtons = document.querySelectorAll('[data-menu]');
