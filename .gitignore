@@ -4,6 +4,7 @@ rust-wasm/target/
 
 # Node
 node_modules/
+node_modules/**
 
 # Vite & build outputs
 dist/
@@ -41,3 +42,6 @@ copilot.log
 # IDEs
 .vscode/
 .idea/
+
+# Embeddings database
+embeddings.db
