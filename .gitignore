@@ -1,5 +1,9 @@
 collab-editor
 
+# 
+.amrg/
+
+
 # Rust WASM build output
 rust-wasm/pkg/
 rust-wasm/target/
