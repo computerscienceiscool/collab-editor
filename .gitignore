@@ -1,3 +1,5 @@
+collab-editor
+
 # Rust WASM build output
 rust-wasm/pkg/
 rust-wasm/target/
