@@ -4,29 +4,49 @@ import { formatTime } from '../utils/timeUtils.js';
 /**
  * Sets up user join/leave logging in the activity sidebar.
  *
- * @param {awareness} awareness - Yjs awareness instance
+ * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
 export function setupUserLogging(awareness) {
   const logContainer = document.getElementById('log-entries');
 
   if (!logContainer) return;
 
-  const localClientID = awareness.clientID;
+  // Get local client ID
+  const localClientID = getClientID();
+  
+  // Track previous states to detect joins/leaves
+  let previousStates = new Map();
 
-  awareness.on('update', ({ added, removed }) => {
-    const states = awareness.getStates();
-
-    for (const id of added) {
-      if (id === localClientID) continue;
-      const user = states.get(id)?.user;
-      if (user) logEntry(`${user.name} joined: `, user.color);
+  awareness.on('change', (states) => {
+    const currentStates = new Map(states);
+    
+    // Detect new joins
+    currentStates.forEach((state, id) => {
+      if (id === localClientID) return;
       
-    }
-
-    for (const id of removed) {
-      const user = states.get(id)?.user;
-      if (user) logEntry(`${user.name} left: `, user.color);
-    }
+      if (!previousStates.has(id)) {
+        // User joined
+        const user = state.user;
+        if (user) {
+          logEntry(`${user.name} joined`, user.color);
+        }
+      }
+    });
+    
+    // Detect leaves
+    previousStates.forEach((state, id) => {
+      if (id === localClientID) return;
+      
+      if (!currentStates.has(id)) {
+        // User left
+        const user = state.user;
+        if (user) {
+          logEntry(`${user.name} left`, user.color);
+        }
+      }
+    });
+    
+    previousStates = currentStates;
   });
 
   function logEntry(message, color = '#000') {
@@ -53,4 +73,14 @@ export function setupUserLogging(awareness) {
   function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
+}
+
+// Helper function to get client ID
+function getClientID() {
+  let clientID = localStorage.getItem('automerge-client-id');
+  if (!clientID) {
+    clientID = crypto.randomUUID();
+    localStorage.setItem('automerge-client-id', clientID);
+  }
+  return clientID;
 }

@@ -1,7 +1,7 @@
 // File: src/export/handlers.js
 import { Decoration, ViewPlugin } from '@codemirror/view';
 import { search_document } from '../wasm/initWasm.js';
-import * as Y from 'yjs';
+import * as Automerge from '@automerge/automerge';
 import { encode, decode } from 'cbor-x'; 
 import {
   format_text,
@@ -21,11 +21,10 @@ import { undo, redo } from '@codemirror/commands';
 /**
  * Sets up handlers for the export buttons in the UI.
  * 
- * @param {Y.Doc} ydoc - The Yjs document
- * @param {Y.Text} ytext - The Yjs text field
+ * @param {DocHandle} handle - The Automerge document handle
  * @param {EditorView} view - The CodeMirror editor view
  */
-export function setupExportHandlers(ydoc, ytext, view) {
+export function setupExportHandlers(handle, view) {
   const saveButton = document.querySelector('#save-button');
   const formatButton = document.querySelector('#format-button');
   const boldButton = document.querySelector('#bold-button');
@@ -68,13 +67,13 @@ export function setupExportHandlers(ydoc, ytext, view) {
    
   saveButton.onclick = () => {
     const format = formatSelect.value;
-    handleSave(format, ydoc, ytext, view);
+    handleSave(format, handle, view);
   };
   
    // Format button handler
   if (formatButton) {
     formatButton.onclick = () => {
-      handleFormat(ytext, view);
+      handleFormat(handle, view);
     };
   }
 
@@ -217,12 +216,12 @@ async function handleToggleFormatting(view, toggleFunction, formatName) {
 /**
  * Formats the current document text using WASM.
  * 
- * @param {Y.Text} ytext - The Yjs text field
+ * @param {DocHandle} handle - The Automerge document handle
  * @param {EditorView} view - The CodeMirror editor view
  */
-async function handleFormat(ytext, view) {
+async function handleFormat(handle, view) {
   try {
-    const currentText = ytext.toString();
+    const currentText = view.state.doc.toString();
     
     console.log("JAVASCRIPT TEXT FORMATTING (WASM bypass):");
     console.log("Original length:", currentText.length, "characters");
@@ -258,9 +257,24 @@ async function handleFormat(ytext, view) {
 
     console.log("Formatted length:", formattedText.length, "characters");
     
-    // Replace the text in the Yjs document
-    ytext.delete(0, ytext.length);
-    ytext.insert(0, formattedText);
+    // Update Automerge document
+    handle.change(d => {
+      if (!d.content) {
+        d.content = new Automerge.Text();
+      }
+      
+      // Clear existing content
+      if (d.content.length > 0) {
+        for (let i = d.content.length - 1; i >= 0; i--) {
+          d.content.deleteAt(i);
+        }
+      }
+      
+      // Insert formatted text
+      if (formattedText.length > 0) {
+        d.content.insertAt(0, ...formattedText);
+      }
+    });
     
     console.log("JavaScript formatting applied successfully (WASM bypassed)");
 
@@ -331,16 +345,19 @@ function getPromiseGridFilename() {
  * Exports document based on selected format.
  * 
  * @param {string} format - The export format selected by user
- * @param {Y.Doc} ydoc
- * @param {Y.Text} ytext
+ * @param {DocHandle} handle - The Automerge document handle
  * @param {EditorView} view
  */
-function handleSave(format, ydoc, ytext, view) {
+async function handleSave(format, handle, view) {
   let content, blob, filename;
+  
+  // Get current document
+  const doc = await handle.doc();
+  const textContent = doc?.content?.toString() || '';
 
   switch (format) {
     case 'txt':
-      content = ytext.toString();
+      content = textContent;
       blob = new Blob([content], { type: 'text/plain' });
       filename = getDocumentFilename('txt');
       break;
@@ -348,12 +365,12 @@ function handleSave(format, ydoc, ytext, view) {
     case 'json':
       content = JSON.stringify(view.state.toJSON(), null, 2);
       blob = new Blob([content], { type: 'application/json' });
-      filename =  getDocumentFilename('json');
+      filename = getDocumentFilename('json');
       break;
 
     case 'cbor':
       const cborData = {
-        content: ytext.toString(),
+        content: textContent,
         metadata: {
           room_id: window.location.search.replace('?room=', '') || 'default',
           timestamp: Date.now(),
@@ -362,25 +379,25 @@ function handleSave(format, ydoc, ytext, view) {
       };
       const encodedCbor = encode(cborData);
       blob = new Blob([encodedCbor], { type: 'application/cbor' });
-      filename =  getDocumentFilename('cbor');
+      filename = getDocumentFilename('cbor');
       break;
 
     case 'promisegrid':
-      handlePromiseGridExport(ydoc, ytext, view);
+      handlePromiseGridExport(handle, view);
       return; 
 
-    case 'ysnap':
-      const snapshot = Y.encodeStateAsUpdate(ydoc);
-      blob = new Blob([snapshot], { type: 'application/octet-stream' });
-      filename =  getDocumentFilename('ysnap');
+    case 'automerge':
+      // Export Automerge binary (replaces ysnap)
+      const binary = Automerge.save(doc);
+      blob = new Blob([binary], { type: 'application/octet-stream' });
+      filename = getDocumentFilename('automerge');
       break;
 
-    case 'yjs':
-      const update = Y.encodeStateAsUpdate(ydoc);
-      const array = Array.from(update);
-      content = JSON.stringify(array, null, 2);
+    case 'automerge-json':
+      // Export Automerge as JSON (replaces yjs format)
+      content = JSON.stringify(doc, null, 2);
       blob = new Blob([content], { type: 'application/json' });
-      filename =  getDocumentFilename('json');
+      filename = getDocumentFilename('json');
       break;
 
     default:
@@ -392,9 +409,10 @@ function handleSave(format, ydoc, ytext, view) {
 }
 
 // PromiseGrid export handler
-function handlePromiseGridExport(ydoc, ytext, view) {
+async function handlePromiseGridExport(handle, view) {
   try {
-    const content = ytext.toString();
+    const doc = await handle.doc();
+    const content = doc?.content?.toString() || '';
     const { documentId, userId } = getCurrentSessionInfo();
     
     // Create PromiseGrid CBOR message
@@ -406,13 +424,12 @@ function handlePromiseGridExport(ydoc, ytext, view) {
     // Create download
     const blob = new Blob([cborBytes], { type: 'application/cbor' });
     const filename = getPromiseGridFilename();
-   // filename = `${documentId}_promisegrid.cbor`;
     downloadBlob(blob, filename);
     
-    console.log(' PromiseGrid CBOR export completed!');
+    console.log('✅ PromiseGrid CBOR export completed!');
     
   } catch (error) {
-    console.error(' PromiseGrid export failed:', error);
+    console.error('❌ PromiseGrid export failed:', error);
     alert('PromiseGrid export failed: ' + error.message);
   }
 }
@@ -440,7 +457,7 @@ function sendEditAsPromiseGridMessage(editType, position, content, view) {
     
     return cborBytes;
   } catch (error) {
-    console.error(' Failed to create PromiseGrid edit message:', error);
+    console.error('❌ Failed to create PromiseGrid edit message:', error);
   }
 }
 

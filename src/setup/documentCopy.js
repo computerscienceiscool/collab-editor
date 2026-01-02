@@ -9,9 +9,9 @@
  * Checks if this is a copied document and restores content
  * Should be called after the editor is initialized
  * @param {EditorView} view - The CodeMirror editor view
- * @param {Y.Text} ytext - The Yjs text field
+ * @param {DocHandle} handle - The Automerge document handle
  */
-export function handleDocumentCopy(view, ytext) {
+export function handleDocumentCopy(view, handle) {
   // Check if we have copy data in sessionStorage
   const copyDataStr = sessionStorage.getItem('documentCopyData');
   if (!copyDataStr) {
@@ -34,14 +34,25 @@ export function handleDocumentCopy(view, ytext) {
 
     // Wait a moment for the editor to be fully ready
     setTimeout(() => {
-      if (copyData.content && view && ytext) {
-        // Clear any existing content first
-        if (ytext.length > 0) {
-          ytext.delete(0, ytext.length);
-        }
-        
-        // Insert the copied content (this preserves all formatting and line breaks)
-        ytext.insert(0, copyData.content);
+      if (copyData.content && view && handle) {
+        // Update Automerge document with copied content
+        handle.change(d => {
+          if (!d.content) {
+            d.content = new Automerge.Text();
+          }
+          
+          // Clear existing content
+          if (d.content.length > 0) {
+            for (let i = d.content.length - 1; i >= 0; i--) {
+              d.content.deleteAt(i);
+            }
+          }
+          
+          // Insert the copied content
+          if (copyData.content.length > 0) {
+            d.content.insertAt(0, ...copyData.content);
+          }
+        });
         
         // Update document title if available
         if (copyData.title) {

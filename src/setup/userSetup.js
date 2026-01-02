@@ -1,59 +1,73 @@
 
-// File: src/setup/userSetup.js
+// File: src/ui/userList.js
 
 /**
- * Sets up user name/color input listeners and updates Yjs awareness state.
+ * Sets up the live user list display in the top toolbar.
  * 
- * @param {WebsocketProvider} provider - The Yjs WebSocket provider
+ * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
-export function setupUserControls(provider) {
-  const nameInput = document.querySelector('#name-input');
-  const colorInput = document.querySelector('#color-input');
-  const awareness = provider.awareness;
-
-  if (!nameInput || !colorInput) {
-    console.warn('Name or color input not found');
+export function setupUserList(awareness) {
+  const userList = document.getElementById('user-list');
+  const userCount = document.getElementById('user-count');
+  
+  if (!userList || !userCount) {
+    console.error("User list elements not found in DOM");
     return;
   }
-//TODO: artifacts in localStorage that MIGHT no longer be used.  usercolor
-  // Restore name/color from localStorage or use fallback
-  const storedName = localStorage.getItem('username') || getRandomName();
-  const storedColor = localStorage.getItem('usercolor') || getRandomColor();
 
-  nameInput.value = storedName;
-  colorInput.value = storedColor;
-
-  // Update awareness and UI display
-  updateAwarenessAndDisplay(storedName, storedColor);
-
-  // Listen for changes
-  nameInput.addEventListener('input', () => {
-    const name = nameInput.value;
-    localStorage.setItem('username', name);
-    updateAwarenessAndDisplay(name, colorInput.value);
-  });
-
-  colorInput.addEventListener('input', () => {
-    const color = colorInput.value;
-    localStorage.setItem('usercolor', color);
-    updateAwarenessAndDisplay(nameInput.value, color);
-  });
-
-  function updateAwarenessAndDisplay(name, color) {
-    awareness.setLocalStateField('user', { name, color });
-    const display = document.querySelector('#local-username');
-    if (display) {
-      display.textContent = `Current User: ${name}`;
+  function renderUserList() {
+    try {
+      // Clear existing user list
+      userList.innerHTML = '';
+      
+      // Get all user states from awareness
+      const states = awareness.getStates();
+      console.log(`[UserList] Rendering ${states.size} users`);
+      
+      let count = 0;
+      const userElements = [];
+      
+      // Process each user
+      states.forEach((state, id) => {
+        // Check if user data exists
+        if (state.user) {
+          count++;
+          
+          // Create user element
+          const span = document.createElement('span');
+          span.className = 'user';
+          span.textContent = state.user.name || `User ${id}`;
+          span.style.backgroundColor = state.user.color || '#ccc';
+          
+          userElements.push(span);
+          
+          console.log(`[UserList] Added user: ${state.user.name || `User ${id}`}`);
+        }
+      });
+      
+      // Update user count
+      userCount.textContent = count.toString();
+      
+      // Add user elements to list
+      userElements.forEach(el => userList.appendChild(el));
+      
+      console.log(`[UserList] Displayed ${count} users`);
+    } catch (error) {
+      console.error("[UserList] Error rendering user list:", error);
     }
   }
-}
 
-function getRandomName() {
-  const names = ['Explorer', 'Coder', 'Writer', 'Builder', 'User'];
-  return names[Math.floor(Math.random() * names.length)];
-}
-
-function getRandomColor() {
-  const colors = ['#ffb703', '#219ebc', '#8ecae6', '#ff006e', '#8338ec', '#06d6a0'];
-  return colors[Math.floor(Math.random() * colors.length)];
+  // Set up event listeners
+  awareness.on('change', (states) => {
+    console.log("[UserList] Awareness changed, updating user list");
+    renderUserList();
+  });
+  
+  // Initial render
+  renderUserList();
+  
+  // Re-render every 5 seconds as a backup (in case events are missed)
+  setInterval(renderUserList, 5000);
+  
+  console.log("[UserList] User list initialized");
 }

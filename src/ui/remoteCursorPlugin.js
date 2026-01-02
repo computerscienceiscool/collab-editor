@@ -1,4 +1,3 @@
-
 // File: src/ui/remoteCursorPlugin.js
 
 import { Decoration, ViewPlugin, EditorView } from '@codemirror/view';
@@ -8,8 +7,8 @@ import { CursorWidget } from './cursorWidget.js';
 /**
  * Creates a CodeMirror extension for displaying remote cursors.
  *
- * @param {awareness} awareness - Yjs awareness instance
- * @param {number} clientID - Local Y.Doc client ID
+ * @param {Object} awareness - Custom awareness instance (not Yjs)
+ * @param {string} clientID - Local client ID
  * @returns {Extension} - CodeMirror extension
  */
 export function remoteCursorPlugin(awareness, clientID) {
@@ -52,8 +51,9 @@ export function remoteCursorPlugin(awareness, clientID) {
 
       updateDecorations() {
         const decorations = [];
+        const states = awareness.getStates();
 
-        awareness.getStates().forEach((state, id) => {
+        states.forEach((state, id) => {
           if (id === clientID) return;
 
           const user = state.user;

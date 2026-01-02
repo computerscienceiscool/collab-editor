@@ -3,10 +3,10 @@ import { calculate_document_stats } from '../wasm/initWasm.js';
 
 /**
  * Sets up live document statistics that update as user types
- * @param {Y.Text} ytext - The Yjs text field
+ * @param {DocHandle} handle - The Automerge document handle
  * @param {EditorView} view - The CodeMirror editor view
  */
-export function setupDocumentStats(ytext, view) {
+export function setupDocumentStats(handle, view) {
   const wordCountEl = document.querySelector('#word-count');
   const charCountEl = document.querySelector('#char-count');
   const readingTimeEl = document.querySelector('#reading-time');
@@ -19,7 +19,8 @@ export function setupDocumentStats(ytext, view) {
   // Update stats function
   async function updateStats() {
     try {
-      const text = ytext.toString();
+      // Get text from view (most up-to-date)
+      const text = view.state.doc.toString();
       const statsJson = await calculate_document_stats(text);
       const stats = JSON.parse(statsJson);
       
@@ -32,8 +33,17 @@ export function setupDocumentStats(ytext, view) {
     }
   }
 
-  // Update stats on document changes
-  ytext.observe(updateStats);
+  // Update stats on Automerge document changes
+  handle.on('change', updateStats);
+  
+  // Also update on local edits (more responsive)
+  view.dom.addEventListener('input', () => {
+    // Debounce to avoid too many updates
+    if (window.statsUpdateTimeout) {
+      clearTimeout(window.statsUpdateTimeout);
+    }
+    window.statsUpdateTimeout = setTimeout(updateStats, 500);
+  });
   
   // Initial stats calculation
   updateStats();

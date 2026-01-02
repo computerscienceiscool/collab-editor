@@ -1,21 +1,18 @@
-
 // File: src/ui/typingIndicator.js
 
 /**
  * Sets up typing indicator for remote users.
  *
- * @param {awareness} awareness - Yjs awareness instance
+ * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
 export function setupTypingIndicator(awareness) {
   const indicator = document.getElementById('typing-indicator');
   if (!indicator) return;
 
-  const localID = awareness.clientID;
+  const localID = getClientID();
   const active = new Map();
 
-  awareness.on('change', () => {
-    const states = awareness.getStates();
-
+  awareness.on('change', (states) => {
     // Clear all previous typing timeouts
     active.forEach(clearTimeout);
     active.clear();
@@ -47,4 +44,14 @@ export function setupTypingIndicator(awareness) {
       indicator.textContent = messages.join(', ');
     }
   }
+}
+
+// Helper function to get client ID
+function getClientID() {
+  let clientID = localStorage.getItem('automerge-client-id');
+  if (!clientID) {
+    clientID = crypto.randomUUID();
+    localStorage.setItem('automerge-client-id', clientID);
+  }
+  return clientID;
 }

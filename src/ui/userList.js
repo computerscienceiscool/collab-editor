@@ -3,7 +3,7 @@
 /**
  * Sets up the live user list display in the top toolbar.
  * 
- * @param {awareness} awareness - Yjs awareness instance
+ * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
 export function setupUserList(awareness) {
   const userList = document.getElementById('user-list');
@@ -57,7 +57,7 @@ export function setupUserList(awareness) {
   }
 
   // Set up event listeners
-  awareness.on('change', () => {
+  awareness.on('change', (states) => {
     console.log("[UserList] Awareness changed, updating user list");
     renderUserList();
   });
