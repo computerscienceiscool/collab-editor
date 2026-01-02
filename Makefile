@@ -1,3 +1,4 @@
+AWARENESS_PORT=1235  # for awareness WebSocket
 SHELL := /bin/bash
 BACKEND_PORT=3000  # for Rust or Go backend
 PORT=8080
@@ -73,6 +74,10 @@ wasm-clean:
 wasm-rebuild: wasm-clean wasm
 	@echo "Rust WASM module rebuilt successfully"
 
+awareness-ws:
+	@echo "Starting awareness WebSocket server on ws://localhost:$(AWARENESS_PORT)"
+	npx ws --port $(AWARENESS_PORT)
+
 # Grokker WASM
 grokker-wasm:
 	@echo "Building Grokker WASM..."
@@ -147,9 +152,12 @@ serve:
 	npx vite --port $(PORT) --strictPort --no-open
 
 ws:
-	@echo "Starting y-websocket server on ws://localhost:$(WS_PORT)"
-	npx y-websocket --port $(WS_PORT)
+	@echo "Starting Automerge sync server on ws://localhost:$(WS_PORT)"
+	PORT=$(WS_PORT) npx @automerge/automerge-repo-sync-server
 
+awareness:
+	@echo "Starting awareness server on ws://localhost:$(AWARENESS_PORT)"
+	node awareness-server.js
 run:
 	@echo "Starting Rust backend at http://localhost:$(BACKEND_PORT)"
 	cd rust-server && PORT=$(BACKEND_PORT) cargo run
@@ -167,10 +175,10 @@ run-go:
 # =============================================================================
 
 dev-all:
-	@echo "Running full dev stack (ws, rust, vite, and room)..."
+	@echo "Running full dev stack (ws, awareness, rust, vite, and room)..."
 	@make stop 
 	@sleep 2
-	@make -j2 ws run &
+	@make -j3 ws awareness run &
 	@sleep 2
 	@make serve &
 	@sleep 3
@@ -194,9 +202,10 @@ restart:
 	sleep 2
 
 stop:
-	@echo "Killing anything on ports $(PORT),$(WS_PORT)and $(BACKEND_PORT)..."
+	@echo "Killing anything on ports $(PORT),$(WS_PORT),$(AWARENESS_PORT)and $(BACKEND_PORT)..."
 	@-fuser -k $(PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(AWARENESS_PORT)/tcp 2>/dev/null || true
 	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
 
 start:

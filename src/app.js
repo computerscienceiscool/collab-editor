@@ -1,4 +1,3 @@
-
 // File: src/app.js
 //
 import { initWasm } from './wasm/initWasm.js';
@@ -117,8 +116,8 @@ async function initGrokkerWasm() {
 // 2. Declare a typingTimeout variable — it's needed across functions
 let typingTimeout = null;
 
-// 3. Wait for the page (DOM) to load before touching any HTML elements
-window.addEventListener('DOMContentLoaded', async() => {
+// 3. Main initialization function
+async function initApp() {
 
   // Initialize WASM FIRST
   console.log("Initializing Rust WASM...");
@@ -138,7 +137,7 @@ window.addEventListener('DOMContentLoaded', async() => {
   console.log("All WASM modules should now be ready");  
     
   // 3a. Set up Automerge state: repository, document handle, awareness, etc.
-  const { repo, handle, doc, awareness, room } = setupAutomerge();
+  const { repo, handle, doc, awareness, room } = await setupAutomerge();
 
   // Listen for document changes and save versions
   handle.on('change', ({ doc }) => {
@@ -471,4 +470,12 @@ window.addEventListener('DOMContentLoaded', async() => {
   if (githubService.settings.token) {
     console.log("GitHub integration available");
   }
-});
+}
+
+// Run initialization immediately if DOM is ready, otherwise wait
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // DOM is already ready, run immediately
+  initApp();
+}

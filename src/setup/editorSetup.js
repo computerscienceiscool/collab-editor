@@ -1,4 +1,3 @@
-
 // File: src/setup/editorSetup.js
 import { EditorView, minimalSetup } from 'codemirror';
 import { EditorState, Compartment } from '@codemirror/state';
@@ -76,6 +75,7 @@ export function setupEditor(repo, handle, awareness) {
   view.dom.addEventListener('input', () => {
     if (isRemoteChange) return;
     
+    if (!handle.isReady()) return;
     const newText = view.state.doc.toString();
     
     // Update Automerge document

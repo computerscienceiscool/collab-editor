@@ -1,4 +1,3 @@
-
 // File: src/setup/automergeSetup.js
 
 import { Repo } from '@automerge/automerge-repo'
@@ -11,46 +10,44 @@ import * as Automerge from '@automerge/automerge'
  * 
  * @returns {Object} repo, handle, doc, awareness, room
  */
-export function setupAutomerge() {
+export async function setupAutomerge() {
   // Room ID from URL or fallback
   const urlParams = new URLSearchParams(window.location.search);
   const room = urlParams.get('room') || 'default-room';
 
   // Create Automerge repository with WebSocket and IndexedDB
   const repo = new Repo({
-    network: [new BrowserWebSocketClientAdapter('ws://localhost:1234')],
+    // TODO: Add network adapter later -     // network: [new BrowserWebSocketClientAdapter('ws://localhost:1234')],
     storage: new IndexedDBStorageAdapter(),
   });
 
   // Find or create document for this room
-  const handle = repo.find(room);
+  const handle = repo.create();
   
-  // Initialize document structure
-  let doc = null;
+  // Wait for handle to be ready before initializing
+  await handle.whenReady();
   
-  // Wait for document to load
-  handle.doc().then(loadedDoc => {
-    if (!loadedDoc) {
-      // Create new document
-      doc = Automerge.change(Automerge.init(), d => {
-        d.content = new Automerge.Text();
+  // Initialize document structure if needed
+  const doc = await handle.doc();
+  if (!doc || !doc.content) {
+    handle.change(d => {
+      if (!d.content) {
+        d.content = "";
+        // Convert to Automerge.Text by splicing
+        Automerge.splice(d, ["content"], 0, 0, "");
+      }
+      if (!d.metadata) {
         d.metadata = {};
-      });
-      handle.change(d => {
-        d.content = new Automerge.Text();
-        d.metadata = {};
-      });
-    } else {
-      doc = loadedDoc;
-    }
-  });
+      }
+    });
+  }
 
   // Custom awareness implementation (Automerge doesn't have built-in awareness)
   const awareness = createCustomAwareness(room);
 
   console.log('[Automerge] Repository initialized for room:', room);
 
-  return { repo, handle, doc, awareness, room };
+  return { repo, handle, doc: await handle.doc(), awareness, room };
 }
 
 /**
