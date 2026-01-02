@@ -45,3 +45,5 @@ copilot.log
 
 # Embeddings database
 embeddings.db
+
+.exe
