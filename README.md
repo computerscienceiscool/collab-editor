@@ -1,6 +1,6 @@
-# Collaborative Text Editor (Yjs-Based + PromiseGrid)
+# Collaborative Text Editor (Automerge-Based + PromiseGrid)
 
-This is a collaborative text editor demo based on the [Yjs collaborative editing framework](https://docs.yjs.dev/getting-started/a-collaborative-editor) with **PromiseGrid protocol integration**.  
+This is a collaborative text editor demo based on [Automerge CRDT](https://automerge.org/) with **PromiseGrid protocol integration**.  
 It enables multiple users to edit shared text documents in real-time using WebSocket and local IndexedDB persistence, while also generating real PromiseGrid CBOR messages for decentralized computing demonstration.
 
 This demo has been extended with additional features that are useful to teams, including user presence, logging, export options, document awareness, and **genuine PromiseGrid protocol messaging**.
@@ -12,8 +12,7 @@ This demo has been extended with additional features that are useful to teams, i
 - Real-time collaborative editing
 - Shared cursors and user awareness
 - Custom usernames and color indicators
-- Room-based collaboration via URL (e.g., `?room=my-team`)
-- UUID-based room creation (see `docs/guid-rooms.md`)
+- Document sharing via URL (e.g., `?doc=automerge:abc123...`)
 - Typing indicators and presence tracking
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
@@ -35,14 +34,6 @@ This demo has been extended with additional features that are useful to teams, i
 - **Live document statistics**: Real-time word count, character count, reading time
 - **Client-side processing**: All text operations run in browser with near-native speed
 - **Search**: Search functionality that highlights matches in the document
-
-### PromiseGrid Protocol Integration
-- **Real CBOR message generation**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)
-- **Live protocol demonstration**: Every formatting action generates PromiseGrid messages
-- **Decentralized messaging**: Protocol-compliant messages for distributed computing
-- **Content-addressable data**: Document edits as PromiseGrid promises and capabilities
-- **Export functionality**: Save documents as PromiseGrid CBOR files
-- **Console logging**: Real-time display of PromiseGrid message creation
 
 ### PromiseGrid Protocol Integration
 - **Real CBOR message generation**: Creates authentic PromiseGrid messages with official 'grid' tag (0x67726964)
@@ -107,20 +98,21 @@ See [docs/promisegrid-integration.md](docs/promisegrid-integration.md) for compl
 
 ## Getting Started
 
-To launch the editor, open the application in your browser. You can specify a custom room in the URL like this:
+To launch the editor, open the application in your browser:
 
 ```
-http://localhost:8080/?room=your-room-name
+http://localhost:8080/
 ```
 
-This creates or joins a shared editing space named `your-room-name`.
+This creates a new document and updates the URL with a shareable document ID:
 
-If no room is specified, a globally unique room name (UUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
+```
+http://localhost:8080/?doc=automerge:2VJnuVxuBCphkYpucWZKziogaFBb
+```
 
-Example:
-```
-http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
-```
+To collaborate, share the full URL with others. Anyone with the URL can edit the same document in real-time.
+
+To create a new document, visit `http://localhost:8080/` without any parameters.
 
 ---
 
@@ -129,7 +121,7 @@ http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-org/collab-editor.git
+   git clone <your-repo-url>
    cd collab-editor
    ```
 
@@ -166,10 +158,10 @@ http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 7. Open your browser and visit:
 
    ```
-   http://localhost:8080/?room=my-room
+   http://localhost:8080/
    ```
 
-   Replace `my-room` with any custom room name. If none is provided, a UUID will be generated.
+   A new document will be created automatically. Share the URL to collaborate.
 
 8. **Check browser console** to see PromiseGrid messages being generated in real-time!
 
@@ -209,17 +201,18 @@ Key commands:
 
 Please see the [User Guide](docs/user-guide.md) for detailed usage instructions, UI explanations, and feature descriptions.
 
-For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms.md).
+For information about document URLs and sharing, see [docs/user-docs.md](docs/user-docs.md).
 
 ---
 
 ## Tech Stack
 
 ### Core Technologies
-- Yjs - Collaborative editing with CRDTs
-- y-websocket - Real-time synchronization
-- y-indexeddb - Offline persistence
+- Automerge - Collaborative editing with CRDTs
+- Automerge Repo - Repository system with networking and storage adapters
 - CodeMirror 6 - Advanced text editing
+- WebSocket - Real-time synchronization
+- IndexedDB - Local document persistence
 - Vanilla JS / HTML / CSS - Frontend
 
 ### Advanced Features
@@ -234,10 +227,9 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 ## Folder Structure
 
 - `src/`: All core JavaScript logic
-- `src/setup/`: Initialization modules (Yjs, editor, user)
+- `src/setup/`: Initialization modules (Automerge, editor, user)
 - `src/export/`: Export handlers including PromiseGrid CBOR
 - `src/wasm/`: WebAssembly integration and initialization
-- `src/export/`: Export handlers including PromiseGrid CBOR
 - `rust-wasm/`: Rust code compiled to WebAssembly (includes PromiseGrid functions)
 - `rust-server/`: Rust backend server code
 - `docs/`: Markdown documentation (includes user guide and other files)
@@ -248,8 +240,8 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 
 ### Core Documentation
 - [User Guide](docs/user-guide.md) — How to use the editor and its features 
+- [Document URLs](docs/user-docs.md) — How document IDs work and how to share documents
 - [Github Integration](docs/github-integration.md) — How to connect to GitHub repositories
-- [UUID-Based Rooms](docs/uuid-rooms.md) — How room names are generated using UUIDs
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server
@@ -261,20 +253,6 @@ For information about UUID-based rooms, see [docs/uuid-rooms.md](docs/uuid-rooms
 - [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 - [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
 - [docs/diff-view.md](docs/diff-view.md) — How the diff view feature works 
-
----
-
-## PromiseGrid Protocol Status
-
-**Current Implementation**:  Functional CBOR message creation with official 'grid' tag  
-**Integration Level**: Live message generation during collaborative editing  
-**Protocol Compliance**: Authentic PromiseGrid message structure and encoding  
-**Next Steps**: Network communication and decentralized node messaging  
-
-This project demonstrates **real PromiseGrid protocol implementation** suitable for decentralized computing research and development.
-
-### PromiseGrid Integration
-- **[docs/promisegrid-integration.md](docs/promisegrid-integration.md)** — Complete PromiseGrid protocol implementation details, CBOR message structure, and integration guide
 
 ---
 

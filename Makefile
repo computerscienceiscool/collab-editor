@@ -218,10 +218,9 @@ all: install build restart
 	@make -j2 ws run
 
 open-room:
-	@echo "Generating UUID room name..."
-	@uuid=$$(uuidgen); \
-	echo "Opening: http://localhost:$(PORT)/?room=$$uuid"; \
-	- xdg-open "http://localhost:$(PORT)/?room=$$uuid" >/dev/null 2>&1 || open "http://localhost:$(PORT)/?room=$$uuid"
+	@echo "Opening editor (will create new document)..."
+	@echo "Opening: http://localhost:$(PORT)/"; \
+	xdg-open "http://localhost:$(PORT)/" >/dev/null 2>&1 || open "http://localhost:$(PORT)/"
 
 # =============================================================================
 # MAINTENANCE TARGETS
