@@ -1,3 +1,4 @@
+
 # Keyboard Shortcuts Reference
 
 Complete keyboard shortcut guide for the Collaborative Text Editor.
@@ -23,11 +24,11 @@ See [docs/keyboard-preferences.md](docs/keyboard-preferences.md) for complete cu
 
 | Shortcut | Action | Description | Enabled by Default |
 |----------|--------|-------------|--------------------|
-| **Ctrl+N** | New Document | Creates a new document with fresh UUID room | No |
+| **Ctrl+N** | New Document | Creates a new document with fresh document ID | No |
 | **Ctrl+P** | Print | Opens browser print dialog | No |
 | **Ctrl+Shift+S** | Make a Copy | Opens document copy in new tab | No |
 | **Ctrl+Shift+E** | Email Document | Opens email client with document and collaboration link | No |
-| **Ctrl+Shift+U** | Copy Room URL | Copies collaboration URL to clipboard | No |
+| **Ctrl+Shift+U** | Copy Document URL | Copies collaboration URL to clipboard | No |
 
 ## Text Editing
 
@@ -99,7 +100,7 @@ Esc           Close Menus
 ### Advanced Shortcuts
 ```
 Ctrl+Shift+S  Make Copy
-Ctrl+Shift+U  Copy Room URL
+Ctrl+Shift+U  Copy Document URL
 Ctrl+Shift+E  Email Document
 Ctrl+Alt+1/2/3 Headings
 Ctrl+Shift+7/8 Lists
@@ -208,7 +209,7 @@ Instead of opening menus, use these direct shortcuts:
    - **Ctrl+P** to print when finished
 
 ### Collaboration Tips
-- Share room URL for others to join
+- Share document URL for others to join
 - Use **Ctrl+F** to quickly find text others mention
 - **Ctrl+Z/Y** works with collaborative changes
 - Your formatting shortcuts work in real-time for all users
@@ -288,4 +289,3 @@ All formatting shortcuts (**Ctrl+B/I/U**) use:
 **Customize Your Shortcuts**: Press **Ctrl+Comma** to open the preferences dialog and make this editor truly yours!
 
 **Print this page**: Use **Ctrl+P** to print this reference guide for offline use.
-

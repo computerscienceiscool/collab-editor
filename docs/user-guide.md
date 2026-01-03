@@ -6,19 +6,19 @@ Welcome to the **Collaborative Text Editor**! This guide will help you understan
 
 ## Getting Started
 
-To launch the editor, open the application in your browser. You can specify a custom room in the URL like this:
+To launch the editor, open the application in your browser. You can specify a custom document in the URL like this:
 
 ```
-http://localhost:8080/?room=your-room-name
+http://localhost:8080/?doc=your-document-name
 ```
 
-This creates or joins a shared editing space named `your-room-name`.
+This creates or joins a shared editing space named `your-document-name`.
 
-If no room is specified, a globally unique room name (UUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
+If no document is specified, a globally unique document name (UUID) will be generated automatically. You can share the resulting URL with others to collaborate in the same document.
 
 Example:
 ```
-http://localhost:8080/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
+http://localhost:8080/?doc=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 ```
 
 ---
@@ -53,7 +53,7 @@ Beneath the menu bar is the **Toolbar**, which provides quick access to key feat
 |-------------------------|-------------|
 | **Name Input**          | Your display name for collaboration |
 | **Color Picker**        | Your cursor and user indicator color |
-| **Room Display**        | Current room name for sharing |
+| **Document Display**        | Current document name for sharing |
 
 ### Status Bar
 At the bottom of the screen:
@@ -71,7 +71,7 @@ The editor provides comprehensive functionality through its Google Docs-style me
 ### File Menu Features
 
 **Document Management:**
-- **New Document (Ctrl+N)**: Creates a fresh document with new room URL
+- **New Document (Ctrl+N)**: Creates a fresh document with new document URL
 - **Make a copy**: Opens your document in a new tab for independent editing
 - **Rename**: Click the document title or use this menu item to rename
 
@@ -81,13 +81,13 @@ All exports automatically use your document title for the filename:
 - **Download as CodeMirror State (.json)**: Complete editor state
 - **Download as CBOR (.cbor)**: Structured document with metadata
 - **Download as PromiseGrid CBOR**: Protocol-compliant decentralized computing format
-- **Download as Yjs Snapshot (.ysnap)**: Binary collaboration snapshot
-- **Download as Yjs Update (.json)**: Collaboration state as JSON
+- ~~**Download as Yjs Snapshot (.ysnap)**: Binary collaboration snapshot~~
+- ~~**Download as Yjs Update (.json)**: Collaboration state as JSON~~
 
 **Sharing:**
 - **Share**: Use native browser sharing or copy URL with message
 - **Email**: Opens your email client with document preview and collaboration link
-- **Copy Room URL**: Quick clipboard copy for sharing
+- **Copy Document URL**: Quick clipboard copy for sharing
 - **Print (Ctrl+P)**: Standard browser print dialog
 
 ### Edit Menu Features
@@ -148,7 +148,7 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 - Ctrl+P: Print
 - Ctrl+Shift+S: Make Copy
 - Ctrl+Shift+E: Email Document  
-- Ctrl+Shift+U: Copy Room URL
+- Ctrl+Shift+U: Copy Document URL
 
 **Editing:**
 - Ctrl+Z: Undo, Ctrl+Y: Redo
@@ -247,7 +247,7 @@ Apply formatting through toolbar buttons or Format menu (all operations use WASM
 | **Heading 3** | H3 button | Format → Heading 3 | Ctrl+Alt+3 | `hello` ↔ `### hello` |
 | **Bullet List** | • button | Format → Bullet List | Ctrl+Shift+8 | `item` ↔ `• item` |
 | **Numbered List** | 1. button | Format → Numbered List | Ctrl+Shift+7 | `item` ↔ `1. item` |
-| **Link Conversion** | 🔗 button | Format → Insert Link | Ctrl+K | `https://github.com` → `[https://github.com](https://github.com)` |
+| **Link Conversion** | Link button | Format → Insert Link | Ctrl+K | `https://github.com` → `[https://github.com](https://github.com)` |
 
 **Note**: All keyboard shortcuts above can be customized via **Tools → Preferences**!
 
@@ -362,17 +362,17 @@ Beneath the toolbar is a **User Settings** section:
 
 ---
 
-## Rooms and URLs
+## Documents and URLs
 
-Rooms allow you to isolate workspaces. The room name is taken from the `room` query in the URL.
+Documents allow you to isolate workspaces. The document name is taken from the `doc` query in the URL.
 
 **Examples:**
-- `/?room=math-101`
-- `/?room=demo-room`
-- `/?room=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4` (UUID)
-- If no room is specified, one will be generated for you.
+- `/?doc=math-101`
+- `/?doc=demo-document`
+- `/?doc=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4` (UUID)
+- If no document is specified, one will be generated for you.
 
-You can share your room URL with others so they can join and collaborate in the same document.
+You can share your document URL with others so they can join and collaborate in the same document.
 
 ---
 
@@ -384,7 +384,7 @@ When multiple users are connected:
 - You can **see their name and cursor** as they type or move.
 - When a user is typing, a **"User is typing..."** indicator appears briefly.
 
-This feature is powered by Yjs awareness and updates in real time.
+This feature is powered by Automerge awareness and updates in real time.
 
 ---
 
@@ -398,8 +398,8 @@ Click the **Save** button in the toolbar to export your work. Choose the format 
 | **.json**              | Saves the current CodeMirror editor state (can include styling info). |
 | **.cbor**             | Saves the document state in CBOR format. Useful for syncing or restoring later. |
 | **PromiseGrid CBOR**   | **NEW**: Saves document as authentic PromiseGrid protocol message with official 'grid' tag. |
-| **.ysnap**             | Binary format snapshot of the full Yjs document. Useful for restoring or syncing state later. |
-| **.json (Yjs Update)** | JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions. |
+| ~~**.ysnap**~~             | ~~Binary format snapshot of the full Yjs document. Useful for restoring or syncing state later.~~ |
+| ~~**.json (Yjs Update)**~~ | ~~JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions.~~ |
 | **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
 
 ---
@@ -512,7 +512,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **Personalize shortcuts**: Set up shortcuts that match your workflow and habits
 - **Select text precisely** for formatting - avoid selecting extra spaces or newlines
 - **Use Format button** before sharing documents for professional appearance  
-- **Share room URLs** with teammates for instant collaboration
+- **Share document URLs** with teammates for instant collaboration
 - **Check document stats** to track writing progress
 - **Export as PromiseGrid CBOR** to demonstrate decentralized computing capabilities
 
@@ -541,13 +541,13 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 
 ## Technical Notes
 
-- **Yjs** handles real-time synchronization and awareness.
+- **Automerge** handles real-time synchronization and awareness.
 - **CodeMirror 6** powers the rich text editing with undo/redo support.
 - **IndexedDB** is used for offline persistence.
 - **Rust WebAssembly (WASM)** powers all text processing features for near-native performance.
 - **PromiseGrid CBOR encoding** provides authentic decentralized computing protocol messaging.
-- The editor supports **live cursor awareness**, **room-based isolation**, and **multi-user document interaction** out of the box.
-- The backend may be powered by a **Rust** server instead of the default y-websocket server.
+- The editor supports **live cursor awareness**, **document-based isolation**, and **multi-user document interaction** out of the box.
+- ~~The backend may be powered by a **Rust** server instead of the default y-websocket server.~~
 - **All text processing happens client-side** - no server required for formatting operations.
 - **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
 - **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
@@ -555,17 +555,15 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 
 ---
 
-## Clean Room URL Example
-
+## Document URL Example
 ```text
-http://localhost:8080/?room=demo-room
+http://localhost:8080/?doc=automerge:2VJnuVxuBCphkYpucWZKziogaFBb
 ```
 
-or with auto-generated UUID:
-
+or visit the base URL to create a new document:
 ```text
-http://localhost:8080
+http://localhost:8080/
 ```
 
-Share this with others to collaborate!
+Share the full URL with others to collaborate!
 

@@ -1,7 +1,8 @@
+
 # Collab Editor (Decentralized, Rust+WASM + PromiseGrid)
 
 This is a decentralized collaborative editor built with:
-- Yjs for real-time peer-to-peer collaboration
+- Automerge for real-time peer-to-peer collaboration
 - Rust compiled to WebAssembly (WASM) for high-performance text processing
 - **PromiseGrid protocol integration** for decentralized computing messaging
 - CodeMirror 6 as the text editor with undo/redo support
@@ -12,10 +13,10 @@ No central server is required for collaboration or text processing. All operatio
 ## Key Features
 
 ### Real-time Collaboration
-- **Conflict-free collaborative editing** powered by Yjs CRDTs
+- **Conflict-free collaborative editing** powered by Automerge CRDTs
 - **Live cursor awareness** with user colors and names
 - **Offline-first** with automatic sync when reconnected
-- **Room-based isolation** via URL parameters
+- **Document-based isolation** via URL parameters
 
 ### Document-Style Menu System
 - **Professional interface** with File, Edit, Format, Tools, View, and Help menus
@@ -45,7 +46,7 @@ No central server is required for collaboration or text processing. All operatio
 
 ### Editor Features
 - **Undo/Redo** with buttons and keyboard shortcuts (Ctrl+Z/Ctrl+Y)
-- **Export options** (txt, json, cbor, PromiseGrid CBOR, and binary snapshots)
+- **Export options** (txt, json, cbor, PromiseGrid CBOR, and Automerge binary)
 - **User activity logging** and presence tracking
 - **Typing indicators** and real-time user awareness
 
@@ -62,10 +63,10 @@ collab-editor/
 │   └── index.html           # Main UI with toolbar and formatting buttons
 │
 ├── src/                     # Frontend code
-│   ├── app.js               # Main entrypoint: WASM init, Yjs, editor setup
+│   ├── app.js               # Main entrypoint: WASM init, Automerge, editor setup
 │   ├── wasm/initWasm.js     # WASM initialization and function exports (includes PromiseGrid)
-│   ├── setup/               # Yjs and editor initialization modules
-│   │   ├── yjsSetup.js      # Yjs document and WebSocket provider
+│   ├── setup/               # Automerge and editor initialization modules
+│   │   ├── automergeSetup.js # Automerge repository and document handling
 │   │   ├── editorSetup.js   # CodeMirror with history and keybindings
 │   │   └── userSetup.js     # User name/color management
 │   ├── ui/                  # UI components and interactions
@@ -107,14 +108,15 @@ make rebuild           # Clean rebuild everything
 
 ### Full Development Stack
 ```bash
-make dev-all           # Start everything: WebSocket + Rust backend + frontend
-make start             # Start WebSocket + frontend only
+make dev-all           # Start everything: Automerge sync + awareness + Rust backend + frontend
+make start             # Start sync + frontend only
 make stop              # Kill all development processes
 ```
 
-### WebSocket Sync
+### Automerge Sync Server
 ```bash
-make ws                # Start Yjs WebSocket server on port 1234
+make ws                # Start Automerge sync server on port 1234
+make awareness         # Start awareness server on port 1235
 ```
 
 ### Rust Backend (Optional)
@@ -125,7 +127,7 @@ make run-go            # Run Go backend (legacy support)
 
 ### Utilities
 ```bash
-make open-room         # Open browser with new UUID room
+make open-room         # Open browser with new document
 make restart           # Kill stuck processes on development ports
 ```
 
@@ -243,7 +245,7 @@ Documents can be exported as PromiseGrid CBOR files through the dropdown menu, d
 ## Technical Stack
 
 - **Frontend**: Vanilla JavaScript, CodeMirror 6, Vite
-- **Collaboration**: Yjs CRDTs, y-websocket, y-indexeddb  
+- **Collaboration**: Automerge CRDTs, WebSocket sync, IndexedDB persistence
 - **Text Processing**: Rust WebAssembly (flate2, regex)
 - **Protocol Integration**: Rust WebAssembly (serde, serde_cbor) for PromiseGrid CBOR
 - **Build Tools**: wasm-pack, Cargo, npm/Makefile

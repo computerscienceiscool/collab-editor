@@ -1,3 +1,4 @@
+
 # Keyboard Shortcut Configuration
 
 Complete guide to customizing keyboard shortcuts in the Collaborative Text Editor.
@@ -91,7 +92,7 @@ These combinations are not allowed:
 ### File Operations
 | Action | Default Shortcut | Description | Enabled by Default |
 |--------|------------------|-------------|--------------------|
-| New Document | `Ctrl+N` | Create new document with fresh room | No |
+| New Document | `Ctrl+N` | Create new document with fresh document ID | No |
 | Open | `Ctrl+O` | Open document (planned feature) | No |
 | Make a Copy | `Ctrl+Shift+S` | Duplicate document in new tab | No |
 | Save as Text | `Ctrl+S` | Export as plain text | No |
@@ -101,7 +102,7 @@ These combinations are not allowed:
 | Print | `Ctrl+P` | Browser print dialog | No |
 | Share Document | `Ctrl+Shift+H` | Share with others | No |
 | Email Document | `Ctrl+Shift+E` | Open email client | No |
-| Copy Room URL | `Ctrl+Shift+U` | Copy collaboration URL | No |
+| Copy Document URL | `Ctrl+Shift+U` | Copy collaboration URL | No |
 
 ### Edit Operations
 | Action | Default Shortcut | Description | Enabled by Default |
@@ -171,7 +172,7 @@ When conflicts occur, the system suggests:
 - **Customizations saved** automatically in browser localStorage
 - **Persistent across sessions** - your shortcuts remain after closing browser
 - **Per-browser settings** - each browser maintains separate shortcuts
-- **Room-independent** - shortcuts work across all collaboration rooms
+- **Document-independent** - shortcuts work across all documents
 
 ### Data Format
 Shortcuts are stored as:
@@ -310,7 +311,7 @@ Ctrl+U         → Copy URL
 Ctrl+Shift+S   → Share Document
 Ctrl+Alt+A     → Activity Log
 Ctrl+L         → User List
-Ctrl+N         → New Room
+Ctrl+N         → New Document
 ```
 
 ## Technical Implementation
@@ -345,7 +346,7 @@ Ctrl+N         → New Room
 - **Custom profile presets** - "Writer", "Developer", "Minimalist" profiles
 
 ### Integration Opportunities
-- **Team synchronization** - Share shortcuts across collaboration rooms
+- **Team synchronization** - Share shortcuts across collaboration sessions
 - **Cloud storage** - Sync shortcuts across devices
 - **Plugin system** - Allow extensions to register shortcuts
 - **Voice commands** - Alternative to keyboard shortcuts
@@ -369,4 +370,3 @@ Ctrl+N         → New Room
 **Total Shortcuts**: 51 configurable shortcuts across 8 categories  
 **Browser Support**: Chrome, Firefox, Safari, Edge  
 **Platform Support**: Windows, macOS, Linux
-

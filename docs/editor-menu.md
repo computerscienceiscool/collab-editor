@@ -1,3 +1,4 @@
+
 # Editor Menu System Documentation
 
 This document describes the Google Docs-style menu system implemented in the Collaborative Text Editor.
@@ -12,21 +13,20 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 
 | Feature | Keyboard Shortcut | Status | Description |
 |---------|-------------------|--------|-------------|
-| **New Document** | Ctrl+N | Implemented | Creates a new document with fresh UUID room |
+| **New Document** | Ctrl+N | Implemented | Creates a new document with fresh document ID |
 | **Open** | Ctrl+O | Not implemented | File upload/import functionality (Medium complexity) |
 | **Make a copy** | Ctrl+Shift+S | Implemented | Opens new tab with copied document content |
 | **Download as Text (.txt)** | - | Implemented | Exports plain text with custom filename based on document title |
 | **Download as CodeMirror State (.json)** | - | Implemented | Exports editor state as JSON |
 | **Download as CBOR (.cbor)** | - | Implemented | Exports document with metadata in CBOR format |
 | **Download as PromiseGrid CBOR** | - | Implemented | Exports protocol-compliant PromiseGrid CBOR messages |
-| **Download as Yjs Snapshot (.ysnap)** | - | Implemented | Binary Yjs document snapshot |
-| **Download as Yjs Update (.json)** | - | Implemented | JSON array of Yjs update bytes |
+| **Download as Automerge (.automerge)** | - | Implemented | Binary Automerge document |
 | **Share** | - | Implemented | Native sharing or URL copy with custom message |
 | **Email** | Ctrl+Shift+E | Implemented | Opens email client with document content and collaboration link |
-| **Copy Room URL** | Ctrl+Shift+U | Implemented | Copies collaboration URL to clipboard |
+| **Copy Document URL** | Ctrl+Shift+U | Implemented | Copies collaboration URL to clipboard |
 | **Print** | Ctrl+P | Implemented | Browser print dialog |
 | **Rename** | - | Implemented | Focuses document title input for editing |
-| **Version history** | - | Implemented | Shows basic document info (room, stats, users) |
+| **Version history** | - | Implemented | Shows basic document info (document ID, stats, users) |
 
 ### Edit Menu
 
@@ -61,7 +61,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 
 | Feature | Keyboard Shortcut | Status | Description |
 |---------|-------------------|--------|-------------|
-| **Word count** | Ctrl+Shift+C | Implemented | Enhanced popup with room info and document statistics |
+| **Word count** | Ctrl+Shift+C | Implemented | Enhanced popup with document info and statistics |
 | **Toggle line numbers** | Ctrl+Shift+L | Implemented | Show/hide line numbers in editor  |
 | **Document Statistics** | - | Implemented | Shows live word/char count and reading time |
 | **Test PromiseGrid Message** | - | Implemented | Creates and logs PromiseGrid CBOR messages |
@@ -104,7 +104,7 @@ The editor features a comprehensive menu bar with File, Edit, Format, Tools, Vie
 
 ### Collaborative Features
 - Real-time document title synchronization (planned)
-- Room-based collaboration with UUID generation
+- Document URL sharing with Automerge document IDs
 - User presence and activity tracking
 - Offline support with automatic sync
 
@@ -132,7 +132,7 @@ Comprehensive keyboard shortcut support for all major operations:
 
 ### Integration Points
 - **CodeMirror 6**: Editor operations and text manipulation
-- **Yjs**: Real-time collaboration and document synchronization
+- **Automerge**: Real-time collaboration and document synchronization
 - **WASM Module**: Text processing and PromiseGrid protocol
 - **Browser APIs**: Clipboard, sharing, print functionality
 
@@ -145,7 +145,7 @@ Comprehensive keyboard shortcut support for all major operations:
 ## Future Enhancements
 
 ### Planned Features
-- **Document title persistence** (room-based or client-only)
+- **Document title persistence** (document-based or client-only)
 - **Find and replace** functionality
 - **Line numbers** (full CodeMirror integration)
 - **Advanced theme support**
@@ -160,7 +160,7 @@ Comprehensive keyboard shortcut support for all major operations:
 
 ### For Users
 1. **Document Naming**: Click the document title to rename
-2. **Collaboration**: Share the room URL for real-time collaboration
+2. **Collaboration**: Share the document URL for real-time collaboration
 3. **Keyboard Efficiency**: Use Ctrl+Shift+C for quick word count
 4. **Shortcut Customization**: Use Tools → Preferences to customize keyboard shortcuts
 5. **Export Options**: Choose appropriate format based on use case

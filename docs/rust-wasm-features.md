@@ -1,3 +1,4 @@
+
 # Rust WebAssembly Features
 
 This document outlines the WASM-powered features in the collaborative editor, built with Rust and compiled to WebAssembly for client-side processing.
@@ -150,7 +151,7 @@ When you search, you'll see:
     "payload": {
       "message_type": "document_edit",
       "data": {
-        "document_id": "room-name",
+        "document_id": "automerge:abc123...",
         "edit_type": "bold", 
         "position": 5,
         "content": "**text**",

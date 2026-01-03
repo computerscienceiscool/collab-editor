@@ -1,4 +1,5 @@
 
+
 # Makefile Reference for Collaborative Editor
 
 This document explains how to use the Makefile to install dependencies, run development services, and manage the collaborative editor project.
@@ -12,7 +13,8 @@ This document explains how to use the Makefile to install dependencies, run deve
 | `make install`   | Install all frontend dependencies using npm                                 |
 | `make build`     | Build the frontend using Vite                                               |
 | `make serve`     | Start the Vite development server at `http://localhost:8080`                |
-| `make ws`        | Start the Yjs WebSocket server at `ws://localhost:1234`                     |
+| `make ws`        | Start the Automerge sync server at `ws://localhost:1234`                    |
+| `make awareness` | Start the awareness server at `ws://localhost:1235`                         |
 | `make run`       | Run the **Rust** backend (`cd rust-server && cargo run`)                   |
 | `make run-go`    | Run the **Go** backend (`go run main.go`)                                  |
 | `make run-rust`  | Same as `make run`, starts Rust backend                                     |
@@ -20,7 +22,7 @@ This document explains how to use the Makefile to install dependencies, run deve
 | `make all`       | Install, build, restart, and run WebSocket + Rust backend                   |
 | `make start`     | Restart and run frontend + websocket server (no backend)                    |
 | `make stop`      | Kill any process on frontend or WebSocket ports                             |
-| `make open-room` | Open a browser tab with a new UUID-based room (for testing)                 |
+| `make open-room` | Open a browser tab (creates new document automatically)                     |
 | `make clean`     | Delete `node_modules`, `dist`, and lockfiles                                |
 | `make rebuild`   | Clean, reinstall, and rebuild the frontend                                  |
 
@@ -44,7 +46,8 @@ The WASM module includes both text processing functions and PromiseGrid protocol
 
 ```bash
 make wasm       # Build WASM module with PromiseGrid functions
-make ws         # Start WebSocket server (Yjs sync)
+make ws         # Start Automerge sync server
+make awareness  # Start awareness server
 make run        # Start Rust backend (in rust-server/)
 make serve      # Start frontend at http://localhost:8080
 ```
@@ -55,7 +58,8 @@ You may run each in a separate terminal, or background processes with `&`.
 
 ```bash
 make wasm       # Build WASM module
-make ws         # Start WebSocket server
+make ws         # Start Automerge sync server
+make awareness  # Start awareness server
 make run-go     # Start Go backend (main.go)
 make serve      # Start frontend
 ```
@@ -63,14 +67,14 @@ make serve      # Start frontend
 ### ▶ Full Development Stack
 
 ```bash
-make dev-all    # Start everything: WebSocket + Rust backend + frontend + open browser
+make dev-all    # Start everything: Automerge sync + awareness + Rust backend + frontend + open browser
 ```
 
 This command automatically:
 1. Stops any existing processes on development ports
-2. Starts WebSocket server and Rust backend in background
+2. Starts Automerge sync server, awareness server, and Rust backend in background
 3. Starts frontend development server
-4. Opens a browser tab with a new UUID room
+4. Opens a browser tab (creates new document automatically)
 
 ---
 
@@ -100,9 +104,9 @@ After starting the development environment, you can verify PromiseGrid functiona
 
 ---
 
-## Open a Random Room
+## Open a New Document
 
-This opens a unique UUID-based room in your browser (useful for isolated sessions):
+This opens a new document in your browser:
 
 ```bash
 make open-room
@@ -111,7 +115,13 @@ make open-room
 It launches a tab like:
 
 ```
-http://localhost:8080/?room=3ec0ae92-189d-4ff5-8df3-c41ec1ff7dc7
+http://localhost:8080/
+```
+
+The URL will automatically update with the document ID after the document is created:
+
+```
+http://localhost:8080/?doc=automerge:2VJnuVxuBCphkYpucWZKziogaFBb
 ```
 
 ---
@@ -146,13 +156,13 @@ With PromiseGrid integration, console output now includes:
 ## Notes
 
 - `make run` and `make run-rust` are equivalent. Rust is now the preferred backend.
-- Ports `8080` and `1234` must be free; use `make restart` or `make stop` if needed.
+- Ports `8080`, `1234`, `1235`, and `3000` must be free; use `make restart` or `make stop` if needed.
 - **WASM module must be built** before starting development servers for full functionality.
 - This setup assumes:
   - Frontend is served by Vite
-  - WebSocket server is used for collaborative sync
+  - Automerge sync server is used for collaborative document sync (port 1234)
+  - Awareness server is used for user presence (port 1235)
   - Backend handles save/load/export
   - **WASM module provides text processing and PromiseGrid protocol functions**
 - The backend must run on `localhost:3000` by default for the frontend to work properly.
 - **PromiseGrid messages are visible in browser console** during all formatting operations.
-

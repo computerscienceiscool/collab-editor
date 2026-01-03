@@ -1,6 +1,7 @@
+
 # Collaborative Text Editor Installation Guide
 
-This guide will walk you through setting up and running the Collaborative Text Editor, a real-time collaborative document editor built with Yjs, CodeMirror 6, WebAssembly, and modern web technologies.
+This guide will walk you through setting up and running the Collaborative Text Editor, a real-time collaborative document editor built with Automerge, CodeMirror 6, WebAssembly, and modern web technologies.
 This needs to be tested
 
 ## Prerequisites
@@ -48,37 +49,37 @@ The text editor uses Rust-based WebAssembly for text processing, formatting, and
 make wasm
 ```
 
-### 4. Starts Services including Yjs WebSocket Server, Dev Server and opens a new room in the browser
+### 4. Starts Services including Automerge Sync Server, Awareness Server, Dev Server and opens a new document in the browser
 ```bash
 make dev-all
 ```
-After running make dev-all, the application will be available at http://localhost:8080/?room=[generated-room-id].
+After running make dev-all, the application will be available at http://localhost:8080/ and will automatically create a new document with a shareable URL.
 
 
 
 ## Configuration Options
 
-### Room-Based Collaboration
+### Document-Based Collaboration
 
-The editor uses room-based collaboration. You can create or join a room by using a URL parameter:
+The editor uses document URLs for collaboration. When you open the editor, a new document is created and the URL updates with the document ID:
 
 ```
-http://localhost:8080/?room=your-room-name
+http://localhost:8080/?doc=automerge:2VJnuVxuBCphkYpucWZKziogaFBb
 ```
 
-Each room is a separate collaborative space with its own document content.
+Share this URL with others to collaborate on the same document.
 
 ### Persistent Storage
 
 The editor uses:
 
-1. **IndexedDB**: For offline persistence of documents using `y-indexeddb`
-2. **WebSocket**: For real-time syncing of changes using `y-websocket`
+1. **IndexedDB**: For offline persistence of documents using Automerge's IndexedDB storage adapter
+2. **WebSocket**: For real-time syncing of changes using Automerge sync protocol
 
 ## Project Structure Overview
 
 - `src/`: JavaScript source code
-  - `setup/`: Setup modules for Yjs, CodeMirror, and user management
+  - `setup/`: Setup modules for Automerge, CodeMirror, and user management
   - `ui/`: User interface components
   - `wasm/`: WebAssembly integration
 - `rust-wasm/`: Rust code for WebAssembly features
@@ -87,7 +88,7 @@ The editor uses:
 
 ## Editor Features
 
-- Real-time collaboration with Yjs CRDTs
+- Real-time collaboration with Automerge CRDTs
 - WASM-powered text processing (Rust)
 - PromiseGrid protocol integration
 - Offline support with automatic sync
@@ -101,9 +102,10 @@ The editor uses:
 
 If you encounter WebSocket connection issues:
 
-1. Ensure the y-websocket-server is running (started with `make ws`). It uses port 1234 by default.
-2. Check for any network/firewall restrictions
-3. Verify that your browser supports WebSockets
+1. Ensure the Automerge sync server is running (started with `make ws`). It uses port 1234 by default.
+2. Ensure the awareness server is running (started with `make awareness`). It uses port 1235.
+3. Check for any network/firewall restrictions
+4. Verify that your browser supports WebSockets
 
 ### WebAssembly Not Loading
 

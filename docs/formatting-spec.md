@@ -1,3 +1,4 @@
+
 # Formatting Spec for Collaborative Editor
 
 ## Purpose
@@ -8,9 +9,9 @@ This document outlines current and future formatting plans for the collaborative
 
 ## Current State
 
-- Uses **Yjs** CRDT for collaborative editing.
+- Uses **Automerge** CRDT for collaborative editing.
 - Supports **rich text formatting** within the editor (e.g., bold, italics, cursors).
-- State is synchronized using y-websocket and optionally served or exported through the new Rust backend.
+- State is synchronized using Automerge sync protocol and optionally served or exported through the new Rust backend.
 - **PromiseGrid protocol integration** creates CBOR messages for all formatting operations.
 
 ---
@@ -29,9 +30,8 @@ This document outlines current and future formatting plans for the collaborative
 - Export document to:
   - `.txt`: plain text
   - `.json`: serialized Codemirror state
-  - `.ysnap`: Yjs binary snapshot
-  - `.cbor`: CBOR-encoded Yjs document
-  - `.snapshot.json`: JSON snapshot of Yjs document
+  - `.automerge`: Automerge binary document
+  - `.cbor`: CBOR-encoded document
   - `.md`: Git-compatible Markdown (WIP — implemented in Rust backend)
   - **PromiseGrid CBOR**: Protocol-compliant messages with official 'grid' tag
 
@@ -71,7 +71,7 @@ Every formatting action generates PromiseGrid messages:
 
 ## Import Requirements (Planned)
 
-- Parse `.md` documents into editable state (Markdown → Yjs-compatible JSON).
+- Parse `.md` documents into editable state (Markdown → Automerge-compatible text).
 - **Parse PromiseGrid CBOR** messages back into document state.
 - Preserve:
   - Headings
@@ -99,7 +99,7 @@ Document instances may eventually include unique identifiers as part of their fi
 
 ### Current Export Naming
 - **Standard exports**: `document.txt`, `document.json`, etc.
-- **PromiseGrid exports**: `{room-id}_promisegrid.cbor`
+- **PromiseGrid exports**: `{document-id}_promisegrid.cbor`
 - **Future considerations**: Support for content-addressable naming schemes
 
 ---

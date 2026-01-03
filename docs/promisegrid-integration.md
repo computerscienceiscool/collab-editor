@@ -1,11 +1,10 @@
-
 # PromiseGrid Integration Documentation
 
 This document describes the PromiseGrid protocol integration in the collaborative text editor project.
 
 ## Overview
 
-The collaborative editor now includes real PromiseGrid protocol support, creating and parsing CBOR messages with the official PromiseGrid tag (0x67726964 = 'grid'). This integration demonstrates genuine PromiseGrid messaging capabilities alongside the existing Yjs collaboration features.
+The collaborative editor now includes real PromiseGrid protocol support, creating and parsing CBOR messages with the official PromiseGrid tag (0x67726964 = 'grid'). This integration demonstrates genuine PromiseGrid messaging capabilities alongside the existing Automerge collaboration features.
 
 ## PromiseGrid Protocol Background
 
@@ -117,7 +116,8 @@ Documents can be exported as PromiseGrid CBOR messages:
 1. **Start the development environment:**
    ```bash
    make wasm     # Build Rust WASM module
-   make ws       # Start WebSocket server
+   make ws       # Start Automerge sync server
+   make awareness # Start awareness server
    make serve    # Start frontend
    ```
 
@@ -152,7 +152,7 @@ window.logPromiseGridMessage(msg);
   "payload": {
     "message_type": "document_edit",
     "data": {
-      "document_id": "room-name",
+      "document_id": "automerge:abc123...",
       "edit_type": "bold",
       "position": 5,
       "content": "**formatted text**",
@@ -170,7 +170,7 @@ window.logPromiseGridMessage(msg);
   "payload": {
     "message_type": "document_stats",
     "data": {
-      "document_id": "room-name",
+      "document_id": "automerge:abc123...",
       "word_count": 150,
       "char_count": 750,
       "line_count": 12,
@@ -189,7 +189,7 @@ window.logPromiseGridMessage(msg);
 - Messages are tagged CBOR values containing nested message structures
 
 ### Session Information
-- Document ID: Extracted from URL room parameter
+- Document ID: Extracted from URL doc parameter (Automerge document ID)
 - User ID: Retrieved from localStorage username
 - Timestamp: JavaScript `Date.now()` for message timing
 
@@ -205,11 +205,11 @@ window.logPromiseGridMessage(msg);
 - **Capability Tokens**: Implement permission-based document access
 - **Merge Conflict Resolution**: Use PromiseGrid consensus mechanisms
 - **Decentralized Storage**: Store documents in PromiseGrid cache
-- **Live Collaboration**: Replace/supplement Yjs with PromiseGrid sync
+- **Live Collaboration**: Supplement Automerge with PromiseGrid sync
 
 ### Integration Opportunities
 - **Real-time Messaging**: Send messages between collaborative users
-- **Document Synchronization**: Use PromiseGrid as sync layer
+- **Document Synchronization**: Use PromiseGrid as additional sync layer
 - **Access Control**: Capability-based document permissions
 - **Conflict Resolution**: PromiseGrid merge-as-consensus model
 
@@ -224,7 +224,7 @@ make wasm-rebuild # Clean rebuild
 
 ### Dependencies
 - **Rust**: serde, serde_cbor, wasm-bindgen, web-sys, js-sys
-- **JavaScript**: Existing Yjs and CodeMirror dependencies
+- **JavaScript**: Existing Automerge and CodeMirror dependencies
 - **Build Tools**: wasm-pack, Cargo
 
 ### File Structure
@@ -247,6 +247,3 @@ src/
 **Integration Level**: Proof of concept with working protocol implementation
 
 This integration demonstrates real PromiseGrid protocol compliance and provides a foundation for future decentralized collaboration features.
-
-
-
