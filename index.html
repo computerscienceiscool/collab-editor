@@ -39,7 +39,7 @@
           <div class="dropdown-item" data-action="save-yjs">Download as Yjs Update (.json)</div>
           <div class="dropdown-item" data-action="share">Share</div>
           <div class="dropdown-item" data-action="email">Email</div>
-          <div class="dropdown-item" data-action="copy-url">Copy Room URL</div>
+          <div class="dropdown-item" data-action="copy-url">Copy Document URL</div>
           <div class="dropdown-item" data-action="print">Print <span class="keyboard-shortcut">Ctrl+P</span></div>
           <div class="menu-section">
             <div class="dropdown-item" data-action="rename">Rename</div>
@@ -169,10 +169,10 @@
 
     <label for="color-input">Color:</label>
     <input type="color" id="color-input" />
-
     <div style="margin-left: auto;">
-      Room: <strong id="room-name">?</strong>
+      Doc: <strong id="room-name">?</strong>
     </div>
+
   </div>
 
   <!-- Status Bar -->
@@ -717,7 +717,7 @@ async handleViewDiffs() {
         sessionStorage.setItem('documentCopyData', JSON.stringify(copyData));
         
         // Generate new room URL
-        const newUrl = window.location.origin + window.location.pathname + '?room=' + this.generateUUID();
+        const newUrl = window.location.origin + window.location.pathname;
         
         // Open new window
         const newWindow = window.open(newUrl, '_blank');

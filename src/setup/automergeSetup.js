@@ -3,110 +3,138 @@
 import { Repo } from '@automerge/automerge-repo'
 import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
-import { next as Automerge } from '@automerge/automerge'
-import { initRegistry, getOrCreateRoomDocument, debugRegistry } from './registry.js'
 import { config } from '../config.js'
 
 /**
- * Initializes the Automerge repository, document, and custom awareness.
+ * Initializes the Automerge repository and document.
  * 
- * CRITICAL: Automerge 2.x text handling:
- * - Initialize text fields as regular strings: d.content = ""
- * - Use Automerge.splice() for ALL text modifications
- * - Do NOT use Automerge.Text() or .insertAt()/.deleteAt()
+ * URL modes:
+ * - No ?doc= param: Creates new document, updates URL
+ * - ?doc=automerge:xxx: Loads existing document
  * 
- * @returns {Object} repo, handle, doc, awareness, room
+ * @param {string|null} documentId - Document ID from URL, or null to create new
+ * @returns {Object} repo, handle, doc, awareness, documentId, isNew
  */
-export async function setupAutomerge() {
-  // Get room name from URL parameter or use default
-  const urlParams = new URLSearchParams(window.location.search);
-  const room = urlParams.get('room') || 'default-room';
-
-  console.log('[Automerge] Initializing for room:', room);
+export async function setupAutomerge(documentId = null) {
+  console.log('[Automerge] Initializing...');
+  
+  if (documentId) {
+    console.log('[Automerge] Loading document:', documentId);
+  } else {
+    console.log('[Automerge] No document ID provided, will create new');
+  }
 
   // Create Automerge repository with WebSocket sync and IndexedDB storage
-  // Port configured in src/config.js (default: 1234)
   const repo = new Repo({
     network: [new BrowserWebSocketClientAdapter(config.urls.automergeSync)],
     storage: new IndexedDBStorageAdapter(),
   });
 
-  // Initialize the registry document (shared mapping of room names to doc IDs)
-  console.log('[Automerge] Initializing registry...');
-  const registryHandle = await initRegistry(repo);
-  
-  // Get or create document for this room using the registry
-  console.log('[Automerge] Getting or creating document for room:', room);
-  const { documentId, isNew, handle } = await getOrCreateRoomDocument(repo, registryHandle, room);
-  
-  console.log('[Automerge] Room document:', isNew ? 'CREATED' : 'FOUND', documentId);
-  
-  // In API 2.x, handle returned from find/create is already ready
-  // Get current document state using doc() (synchronous in 2.x)
-  let doc = handle.doc();
-  
-  if (isNew) {
-    // NEW document - initialize it
-    if (!doc || doc.content === undefined) {
-      console.log('[Automerge] Initializing NEW document structure...');
-      handle.change(d => {
-        // CRITICAL: Initialize as empty string, not Automerge.Text()
-        // Automerge 2.x uses regular strings internally
-        d.content = "";
-        
-        // Initialize metadata
-        if (!d.metadata) {
-          d.metadata = {
-            created: Date.now(),
-            room: room,
-            version: 1
-          };
-        }
-      });
+  let handle;
+  let isNew = false;
+if (documentId) {
+    // Load existing document
+    try {
+      // Find returns a DocHandle - need to prepend automerge: if not present
+      const fullDocId = documentId.startsWith('automerge:') ? documentId : `automerge:${documentId}`;
+      handle = await repo.find(fullDocId);
       
-      // Get updated document after initialization
-      doc = handle.doc();
-      console.log('[Automerge] Document initialized with empty content');
-    }
-  } else {
-    // EXISTING document - wait for storage to load
-    console.log('[Automerge] Waiting for storage to load existing document...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    doc = handle.doc();
-    
-    const contentLength = typeof doc.content === 'string' ? doc.content.length : 0;
-    console.log('[Automerge] Loaded existing document, content:', contentLength, 'chars');
-    
-    // If content is still empty, something is wrong with storage
-    if (contentLength === 0) {
-      console.warn('[Automerge] WARNING: Document exists in registry but has no content in storage');
+      // Wait for document to be ready using whenReady()
+      await handle.whenReady();
+      
+      const doc = handle.doc();
+      if (!doc) {
+        throw new Error('Document loaded but has no content');
+      }
+      
+      const contentLength = typeof doc.content === 'string' ? doc.content.length : 0;
+      console.log('[Automerge] Document loaded, content:', contentLength, 'chars');
+      
+    } catch (err) {
+      console.error('[Automerge] Failed to load document:', err);
+      throw new Error(`Could not load document: ${documentId}`);
     }
   }
+   else {
+    // Create new document
+    handle = repo.create();
+    isNew = true;
+    
+    // Initialize document structure
+    handle.change(d => {
+      d.content = "";
+      d.metadata = {
+        created: Date.now(),
+        version: 1
+      };
+    });
+    
+    // Update URL with new document ID (without page reload)
+    const newUrl = `${window.location.pathname}?doc=${handle.documentId}`;
+    window.history.replaceState(null, '', newUrl);
+    
+    console.log('[Automerge] Created new document:', handle.documentId);
+  }
 
-  // Create custom awareness system
-  // Port 1235: Awareness server (JSON text protocol)
-  // MUST be separate from port 1234 (different protocol)
-  const awareness = createCustomAwareness(room);
-
-  // Make registry available for debugging
-  window.debugRegistry = () => debugRegistry(registryHandle);
+  // Get document reference
+  const doc = handle.doc();
+  
+  // Create custom awareness system (uses document ID for grouping)
+  const awareness = createCustomAwareness(handle.documentId);
 
   console.log('[Automerge] Setup complete');
-  console.log('[Automerge] Repository initialized for room:', room);
   console.log('[Automerge] Document ID:', handle.documentId);
-  console.log('[Automerge] Content type:', typeof doc?.content);
 
-  return { repo, handle, doc, awareness, room, registryHandle };
+  return { 
+    repo, 
+    handle, 
+    doc, 
+    awareness, 
+    documentId: handle.documentId,
+    isNew 
+  };
 }
 
 /**
- * Creates a custom awareness system to replace Yjs awareness
- * This handles user presence, cursors, and typing indicators
- * 
- * CRITICAL: Uses port 1235 (JSON protocol)
- * Do NOT use port 1234 (that's for Automerge CBOR sync)
+ * Wait for a document handle to be ready
+ * Handles the async loading from IndexedDB/network
  */
-function createCustomAwareness(room) {
+async function waitForDocumentReady(handle, timeoutMs = 10000) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Timeout waiting for document to be ready'));
+    }, timeoutMs);
+    
+    // Wait for the document to load via change event
+    const onReady = ({ doc }) => {
+      if (doc !== undefined) {
+        clearTimeout(timeout);
+        handle.off('change', onReady);
+        resolve(doc);
+      }
+    };
+    
+    handle.on('change', onReady);
+    
+    // Also check if it's already ready via doc() method
+    try {
+      const doc = handle.doc();
+      if (doc !== undefined) {
+        clearTimeout(timeout);
+        handle.off('change', onReady);
+        resolve(doc);
+      }
+    } catch (e) {
+      // Not ready yet, will wait for change event
+    }
+  });
+}
+
+/**
+ * Creates a custom awareness system for user presence
+ * Uses document ID to group users (replaces room-based grouping)
+ */
+function createCustomAwareness(documentId) {
   const localState = {
     user: { name: 'User', color: '#000000' },
     typing: false,
@@ -116,23 +144,20 @@ function createCustomAwareness(room) {
   const remoteStates = new Map();
   const listeners = new Set();
 
-  // Connect to awareness server on port 1235
-  // CRITICAL: This is separate from Automerge sync on port 1234
-  const awarenessWs = getOrCreateAwarenessWebSocket(room);
+  // Connect to awareness server using document ID as the "room"
+  const awarenessWs = getOrCreateAwarenessWebSocket(documentId);
 
-  // Broadcast local state changes via WebSocket
   const broadcastState = () => {
     if (awarenessWs && awarenessWs.readyState === WebSocket.OPEN) {
       awarenessWs.send(JSON.stringify({
         type: 'awareness',
         clientID: getClientID(),
         state: localState,
-        room: room
+        documentId: documentId
       }));
     }
   };
 
-  // Handle incoming awareness messages from other clients
   const handleAwarenessMessage = (data) => {
     if (data.type === 'awareness' && data.clientID !== getClientID()) {
       remoteStates.set(data.clientID, data.state);
@@ -140,7 +165,6 @@ function createCustomAwareness(room) {
     }
   };
 
-  // Notify all listeners of state changes
   const notifyListeners = () => {
     const states = getAllStates();
     listeners.forEach(callback => {
@@ -152,7 +176,6 @@ function createCustomAwareness(room) {
     });
   };
 
-  // Get all states (local + remote)
   const getAllStates = () => {
     const states = new Map();
     states.set(getClientID(), localState);
@@ -162,17 +185,15 @@ function createCustomAwareness(room) {
     return states;
   };
 
-  // Register message handler
   if (awarenessWs) {
     registerAwarenessHandler(handleAwarenessMessage);
   }
 
-  // Public API (mimics Yjs awareness API for compatibility)
   return {
     setLocalStateField(field, value) {
       localState[field] = value;
       broadcastState();
-      notifyListeners(); // Also notify local listeners
+      notifyListeners();
     },
 
     getLocalState() {
@@ -195,34 +216,27 @@ function createCustomAwareness(room) {
       }
     },
 
-    // Internal method for handling incoming messages
     _handleMessage: handleAwarenessMessage
   };
 }
 
 // Shared WebSocket connection for awareness
-// CRITICAL: Uses port 1235, NOT port 1234
 let awarenessWebSocket = null;
 let awarenessHandlers = [];
 
 /**
  * Get or create WebSocket connection to awareness server
- * 
- * CRITICAL: Port 1235 for awareness (JSON protocol)
- * Port 1234 is for Automerge sync (CBOR protocol)
- * DO NOT MIX THESE PORTS
+ * Now uses documentId instead of room name
  */
-function getOrCreateAwarenessWebSocket(room) {
+function getOrCreateAwarenessWebSocket(documentId) {
   if (!awarenessWebSocket || awarenessWebSocket.readyState === WebSocket.CLOSED) {
-    // Use port from config (default: 1235)
     awarenessWebSocket = new WebSocket(config.urls.awareness);
     
     awarenessWebSocket.onopen = () => {
       console.log('[Awareness] WebSocket connected to', config.urls.awareness);
-      // Send join message
       awarenessWebSocket.send(JSON.stringify({
         type: 'join',
-        room: room,
+        documentId: documentId,
         clientID: getClientID()
       }));
     };
@@ -251,7 +265,6 @@ function getOrCreateAwarenessWebSocket(room) {
 
 /**
  * Generate or retrieve persistent client ID
- * Used to identify this client in awareness system
  */
 function getClientID() {
   let clientID = localStorage.getItem('automerge-client-id');
@@ -264,7 +277,6 @@ function getClientID() {
 
 /**
  * Register a handler for awareness messages
- * Used by awareness object to receive messages from other clients
  */
 export function registerAwarenessHandler(handler) {
   awarenessHandlers.push(handler);

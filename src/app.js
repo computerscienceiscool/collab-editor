@@ -3,8 +3,8 @@
 import { initWasm } from './wasm/initWasm.js';
 import { initDiffWasm } from './wasm/diffWasm.js';
 import { setupDocumentStats } from './ui/documentStats.js';
-import { setupAutomerge } from './setup/automergeSetup.js';
 import { setupEditor } from './setup/editorSetup.js';
+import { setupAutomerge } from './setup/automergeSetup.js';
 import { setupExportHandlers } from './export/handlers.js';
 import { setupUserControls } from './setup/userSetup.js';
 import { setupUserLogging } from './ui/logging.js';
@@ -136,9 +136,18 @@ async function initApp() {
   await new Promise(resolve => setTimeout(resolve, 1000));
   console.log("All WASM modules should now be ready");  
     
-  // 3a. Set up Automerge state: repository, document handle, awareness, etc.
-  const { repo, handle, doc, awareness, room } = await setupAutomerge();
-
+// 3a. Parse document ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const docParam = urlParams.get('doc');
+  
+  // 3b. Set up Automerge state: repository, document handle, awareness, etc.
+  const { repo, handle, doc, awareness, documentId, isNew } = await setupAutomerge(docParam);
+  
+  // If new document, log the shareable URL
+  if (isNew) {
+    console.log('[App] New document created. Share this URL:', window.location.href);
+  }
+    
   // Listen for document changes and save versions
   handle.on('change', ({ doc }) => {
     if (doc && doc.content) {
@@ -146,11 +155,30 @@ async function initApp() {
       const timestamp = Date.now();
       
       // Save to IndexedDB with versioning
-      saveVersionToIndexedDB(content, timestamp, room);
+      saveVersionToIndexedDB(content, timestamp, documentId);
     }
   });
 
-  document.querySelector('#room-name').textContent = room;
+    // Display truncated document ID and setup copy functionality
+  const roomNameEl = document.querySelector('#room-name');
+  if (roomNameEl) {
+    // Show truncated ID (first 12 chars of the hash part)
+    const shortId = documentId.replace('automerge:', '').slice(0, 12) + '...';
+    roomNameEl.textContent = shortId;
+    roomNameEl.title = 'Click to copy share URL';
+    roomNameEl.style.cursor = 'pointer';
+    
+    roomNameEl.addEventListener('click', () => {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const original = roomNameEl.textContent;
+        roomNameEl.textContent = 'Copied!';
+        setTimeout(() => {
+          roomNameEl.textContent = original;
+        }, 1500);
+      });
+    });
+  }
+
 
   // 3b. Set up the CodeMirror editor
   const view = setupEditor(repo, handle, awareness);

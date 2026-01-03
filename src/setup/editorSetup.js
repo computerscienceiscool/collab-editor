@@ -11,10 +11,7 @@ import { next as Automerge } from '@automerge/automerge';
 /**
  * Initializes the CodeMirror editor with Automerge integration.
  * 
- * CRITICAL: Automerge 2.x requires Automerge.splice() for all text operations
- * - Do NOT use .insertAt() or .deleteAt() (these don't exist)
- * - Do NOT use direct assignment (breaks CRDT)
- * - ALWAYS use: Automerge.splice(doc, ['content'], index, deleteCount, ...insertChars)
+ * CRITICAL: Automerge 2.x requires Automerge.updateText() for text operations
  * 
  * @param {Repo} repo - The Automerge repository
  * @param {DocHandle} handle - The Automerge document handle  
@@ -43,6 +40,26 @@ export function setupEditor(repo, handle, awareness) {
   // Flag to prevent update loops between editor and Automerge
   let isRemoteChange = false;
   let currentDoc = null;
+  let lastSyncedContent = '';
+
+  // Create update listener for local changes BEFORE creating state
+  const updateListener = EditorView.updateListener.of((update) => {
+    if (isRemoteChange) return;
+    if (!update.docChanged) return;
+    
+    const newText = update.state.doc.toString();
+    
+    // Only update if content actually changed
+    if (newText === lastSyncedContent) return;
+    
+    // Update Automerge document
+    handle.change(d => {
+      Automerge.updateText(d, ['content'], newText);
+    });
+    
+    lastSyncedContent = newText;
+    console.log('[Editor] Synced to Automerge:', newText.length, 'chars');
+  });
 
   const state = EditorState.create({
     doc: '',
@@ -65,7 +82,8 @@ export function setupEditor(repo, handle, awareness) {
         }}
       ]),
       lineNumberCompartment.of(lineNumbersEnabled ? lineNumbersExtension : []),
-      ...remoteCursorPlugin(awareness, getClientID())
+      ...remoteCursorPlugin(awareness, getClientID()),
+      updateListener
     ]
   });
 
@@ -74,35 +92,7 @@ export function setupEditor(repo, handle, awareness) {
     parent: editorElement
   });
 
-  // Set up bidirectional sync between CodeMirror and Automerge
-  
-  // Track last known content to detect changes
-  let lastSyncedContent = '';
-  
-  // 1. Handle local changes (user typing) -> Update Automerge
-  view.dom.addEventListener('input', () => {
-    if (isRemoteChange) return;
-    
-    if (!handle.isReady()) {
-      console.warn('[Editor] Handle not ready, skipping update');
-      return;
-    }
-    
-    const newText = view.state.doc.toString();
-    
-    // Only update if content actually changed
-    if (newText === lastSyncedContent) return;
-    
-    // CRITICAL: Use Automerge.updateText() instead of splice
-    // updateText figures out the diff automatically
-    handle.change(d => {
-      Automerge.updateText(d, ['content'], newText);
-    });
-    
-    lastSyncedContent = newText;
-  });
-
-  // 2. Handle remote changes (from other users) -> Update CodeMirror
+  // Handle remote changes (from other users) -> Update CodeMirror
   handle.on('change', ({ doc }) => {
     if (!doc || doc.content === undefined) {
       console.warn('[Editor] Document or content is undefined');
@@ -142,9 +132,8 @@ export function setupEditor(repo, handle, awareness) {
   });
 
   // Load initial content when document is ready
-  // In API 2.x, doc() is synchronous
   try {
-    const doc = handle.doc();
+    const doc = handle.docSync();
     if (doc && doc.content !== undefined) {
       const initialText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
       if (initialText.length > 0) {
@@ -199,15 +188,14 @@ export function setupEditor(repo, handle, awareness) {
     return typeof content === 'string' ? content : (content?.toString() || '');
   };
 
-  console.log('CodeMirror editor initialized with Automerge');
-  console.log('Line numbers initially:', lineNumbersEnabled ? 'enabled' : 'disabled');
+  console.log('[Editor] CodeMirror initialized with Automerge');
+  console.log('[Editor] Line numbers initially:', lineNumbersEnabled ? 'enabled' : 'disabled');
 
   return view;
 }
 
 /**
  * Generate or retrieve persistent client ID
- * Used to identify this client in awareness and remote cursor systems
  */
 function getClientID() {
   let clientID = localStorage.getItem('automerge-client-id');
