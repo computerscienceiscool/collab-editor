@@ -6,10 +6,15 @@ import { history, undo, redo } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
 import { lineNumbers } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
-import * as Automerge from '@automerge/automerge';
+import { next as Automerge } from '@automerge/automerge';
 
 /**
  * Initializes the CodeMirror editor with Automerge integration.
+ * 
+ * CRITICAL: Automerge 2.x requires Automerge.splice() for all text operations
+ * - Do NOT use .insertAt() or .deleteAt() (these don't exist)
+ * - Do NOT use direct assignment (breaks CRDT)
+ * - ALWAYS use: Automerge.splice(doc, ['content'], index, deleteCount, ...insertChars)
  * 
  * @param {Repo} repo - The Automerge repository
  * @param {DocHandle} handle - The Automerge document handle  
@@ -35,7 +40,7 @@ export function setupEditor(repo, handle, awareness) {
     }
   });
 
-  // Flag to prevent update loops
+  // Flag to prevent update loops between editor and Automerge
   let isRemoteChange = false;
   let currentDoc = null;
 
@@ -71,45 +76,51 @@ export function setupEditor(repo, handle, awareness) {
 
   // Set up bidirectional sync between CodeMirror and Automerge
   
+  // Track last known content to detect changes
+  let lastSyncedContent = '';
+  
   // 1. Handle local changes (user typing) -> Update Automerge
   view.dom.addEventListener('input', () => {
     if (isRemoteChange) return;
     
-    if (!handle.isReady()) return;
+    if (!handle.isReady()) {
+      console.warn('[Editor] Handle not ready, skipping update');
+      return;
+    }
+    
     const newText = view.state.doc.toString();
     
-    // Update Automerge document
+    // Only update if content actually changed
+    if (newText === lastSyncedContent) return;
+    
+    // CRITICAL: Use Automerge.updateText() instead of splice
+    // updateText figures out the diff automatically
     handle.change(d => {
-      if (!d.content) {
-        d.content = new Automerge.Text();
-      }
-      
-      // Clear existing content
-      if (d.content.length > 0) {
-        for (let i = d.content.length - 1; i >= 0; i--) {
-          d.content.deleteAt(i);
-        }
-      }
-      
-      // Insert new content
-      if (newText.length > 0) {
-        d.content.insertAt(0, ...newText);
-      }
+      Automerge.updateText(d, ['content'], newText);
     });
+    
+    lastSyncedContent = newText;
   });
 
   // 2. Handle remote changes (from other users) -> Update CodeMirror
   handle.on('change', ({ doc }) => {
-    if (!doc || !doc.content) return;
+    if (!doc || doc.content === undefined) {
+      console.warn('[Editor] Document or content is undefined');
+      return;
+    }
     
-    const newText = doc.content.toString();
+    // Convert content to string (handles both string and Text types)
+    const newText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
     const oldText = view.state.doc.toString();
     
+    // Only update if content actually changed
     if (newText !== oldText) {
       isRemoteChange = true;
       
-      // Save cursor position
+      // Save cursor position and clamp to valid range
       const selection = view.state.selection.main;
+      const newAnchor = Math.min(selection.anchor, newText.length);
+      const newHead = Math.min(selection.head, newText.length);
       
       // Update editor content
       view.dispatch({
@@ -118,8 +129,11 @@ export function setupEditor(repo, handle, awareness) {
           to: oldText.length,
           insert: newText
         },
-        selection: { anchor: selection.anchor, head: selection.head }
+        selection: { anchor: newAnchor, head: newHead }
       });
+      
+      // Update last synced content
+      lastSyncedContent = newText;
       
       isRemoteChange = false;
     }
@@ -127,10 +141,12 @@ export function setupEditor(repo, handle, awareness) {
     currentDoc = doc;
   });
 
-  // Load initial content
-  handle.doc().then(doc => {
-    if (doc && doc.content) {
-      const initialText = doc.content.toString();
+  // Load initial content when document is ready
+  // In API 2.x, doc() is synchronous
+  try {
+    const doc = handle.doc();
+    if (doc && doc.content !== undefined) {
+      const initialText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
       if (initialText.length > 0) {
         isRemoteChange = true;
         view.dispatch({
@@ -140,11 +156,15 @@ export function setupEditor(repo, handle, awareness) {
             insert: initialText
           }
         });
+        lastSyncedContent = initialText;
         isRemoteChange = false;
+        console.log('[Editor] Loaded initial content:', initialText.length, 'chars');
       }
       currentDoc = doc;
     }
-  });
+  } catch (err) {
+    console.error('[Editor] Failed to load initial content:', err);
+  }
 
   // Make components globally available for menu system
   window.editorLineNumberCompartment = lineNumberCompartment;
@@ -153,7 +173,7 @@ export function setupEditor(repo, handle, awareness) {
   window.automergeHandle = handle;
   window.automergeDoc = currentDoc;
   
-  // Add a direct toggle function
+  // Add a direct toggle function for line numbers
   window.toggleLineNumbers = function() {
     const currentlyEnabled = localStorage.getItem('line-numbers-enabled') !== 'false';
     const newState = !currentlyEnabled;
@@ -175,7 +195,8 @@ export function setupEditor(repo, handle, awareness) {
 
   // Helper function to get current document content
   window.getAutomergeContent = function() {
-    return currentDoc?.content?.toString() || '';
+    const content = currentDoc?.content;
+    return typeof content === 'string' ? content : (content?.toString() || '');
   };
 
   console.log('CodeMirror editor initialized with Automerge');
@@ -184,7 +205,10 @@ export function setupEditor(repo, handle, awareness) {
   return view;
 }
 
-// Generate or retrieve persistent client ID
+/**
+ * Generate or retrieve persistent client ID
+ * Used to identify this client in awareness and remote cursor systems
+ */
 function getClientID() {
   let clientID = localStorage.getItem('automerge-client-id');
   if (!clientID) {

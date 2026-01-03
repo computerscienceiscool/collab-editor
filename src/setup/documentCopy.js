@@ -1,4 +1,5 @@
 // File: src/setup/documentCopy.js
+import { next as Automerge } from '@automerge/automerge';
 
 /**
  * Handles document copying functionality for the "Make a Copy" feature
@@ -8,6 +9,9 @@
 /**
  * Checks if this is a copied document and restores content
  * Should be called after the editor is initialized
+ * 
+ * CRITICAL: Uses Automerge.splice() to restore content
+ * 
  * @param {EditorView} view - The CodeMirror editor view
  * @param {DocHandle} handle - The Automerge document handle
  */
@@ -35,23 +39,15 @@ export function handleDocumentCopy(view, handle) {
     // Wait a moment for the editor to be fully ready
     setTimeout(() => {
       if (copyData.content && view && handle) {
-        // Update Automerge document with copied content
+        // CRITICAL: Use Automerge.splice() to restore content
+        // This is the ONLY valid way to modify text in Automerge 2.x
         handle.change(d => {
-          if (!d.content) {
-            d.content = new Automerge.Text();
-          }
+          // Get current content length
+          const oldLength = typeof d.content === 'string' ? d.content.length : 0;
           
-          // Clear existing content
-          if (d.content.length > 0) {
-            for (let i = d.content.length - 1; i >= 0; i--) {
-              d.content.deleteAt(i);
-            }
-          }
-          
-          // Insert the copied content
-          if (copyData.content.length > 0) {
-            d.content.insertAt(0, ...copyData.content);
-          }
+          // Replace entire content using splice
+          // Automerge.splice(doc, path, index, deleteCount, ...insertItems)
+          Automerge.splice(d, ['content'], 0, oldLength, ...copyData.content);
         });
         
         // Update document title if available

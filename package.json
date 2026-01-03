@@ -30,9 +30,9 @@
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
-    "@automerge/automerge-repo": "^1.2.1",
-    "@automerge/automerge-repo-network-websocket": "^1.2.1",
-    "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
+    "@automerge/automerge-repo": "^2.5.1",
+    "@automerge/automerge-repo-network-websocket": "^2.5.1",
+    "@automerge/automerge-repo-storage-indexeddb": "^2.5.1",
     "@codemirror/lang-markdown": "^6.3.4",
     "@codemirror/rangeset": "^0.19.9",
     "@codemirror/state": "^6.5.2",
