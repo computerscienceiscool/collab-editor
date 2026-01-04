@@ -207,11 +207,11 @@ restart:
 	sleep 2
 
 stop:
-	@echo "Killing anything on ports $(PORT),$(WS_PORT),$(AWARENESS_PORT)and $(BACKEND_PORT)..."
-	@-fuser -k $(PORT)/tcp 2>/dev/null || true
-	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
-	@-fuser -k $(AWARENESS_PORT)/tcp 2>/dev/null || true
-	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	@echo "Killing anything on ports $(PORT),$(WS_PORT),$(AWARENESS_PORT) and $(BACKEND_PORT)..."
+	@-lsof -ti :$(PORT) | xargs -r kill 2>/dev/null || true
+	@-lsof -ti :$(WS_PORT) | xargs -r kill 2>/dev/null || true
+	@-lsof -ti :$(AWARENESS_PORT) | xargs -r kill 2>/dev/null || true
+	@-lsof -ti :$(BACKEND_PORT) | xargs -r kill 2>/dev/null || true
 
 start:
 	@echo "Restarting ports and running websocket + frontend..."
