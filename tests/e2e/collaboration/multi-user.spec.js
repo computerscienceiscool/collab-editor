@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test';
 import { CollabEditorHelpers } from '../../utils/testHelpers.js';
 
 test.describe('Real-time Collaboration', () => {
-  let roomId;
+  let docId;
 
   test.beforeEach(async ({ page }, testInfo) => {
-    roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    docId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   });
 
   test('two users can edit simultaneously', async ({ browser }, testInfo) => {
@@ -23,8 +23,8 @@ test.describe('Real-time Collaboration', () => {
     user2.setTestName(testInfo.title + ' - User2');
 
     // Both users join the same room
-    await user1.navigateToRoom(roomId);
-    await user2.navigateToRoom(roomId);
+    await user1.navigateToDocument(docId);
+    await user2.navigateToDocument(docId);
 
     // Set up user identities
     await user1.setUser('Alice', '#ff0000');
@@ -75,8 +75,8 @@ test.describe('Real-time Collaboration', () => {
     user2.setTestName(testInfo.title + ' - User2');
 
   // Join room
-    await user1.navigateToRoom(roomId);
-    await user2.navigateToRoom(roomId); 
+    await user1.navigateToDocument(docId);
+    await user2.navigateToDocument(docId); 
 
     await user1.setUser('Alice', '#ff0000');
     await user2.setUser('Bob', '#0000ff');

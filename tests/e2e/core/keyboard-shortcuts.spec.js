@@ -492,18 +492,18 @@ test.describe('Keyboard Shortcuts', () => {
       
       // Wait for navigation with longer timeout
       try {
-        await page.waitForURL(url => url.includes('room='), { timeout: 15000 });
+        await page.waitForURL(url => url.includes('doc='), { timeout: 15000 });
         expect(dialogAccepted).toBe(true);
         
         const finalUrl = page.url();
-        expect(finalUrl).toContain('room=');
+        expect(finalUrl).toContain('doc=');
       } catch (error) {
         // Navigation might be blocked in test environment
         expect(dialogAccepted).toBe(true);
       }
     });
 
-    test('Ctrl+Shift+U copies room URL', async ({ page, browserName }) => {
+    test('Ctrl+Shift+U copies document URL', async ({ page, browserName }) => {
       // Set up alert handler
       let alertShown = false;
       page.on('dialog', dialog => {

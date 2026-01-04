@@ -353,13 +353,13 @@ test.describe('GitHub Integration Tests', () => {
       
       // Open commit dialog
        await page.evaluate((content) => {
-           if (window.githubCommitDialog && window.ydoc) {
-             const ytext = window.ydoc.getText('codemirror');
+           if (window.githubCommitDialog && window.automergeHandle) {
+             const handle = window.automergeHandle;
              const mockAwareness = {
                clientID: 123,
                getStates: () => new Map([[123, { user: { name: 'Test User', color: '#ff0000' } }]])
              };
-             window.githubCommitDialog.show(content, ytext, mockAwareness);
+             window.githubCommitDialog.show(content, handle, mockAwareness);
            }
          }, testContent);
 
@@ -398,9 +398,9 @@ test.describe('GitHub Integration Tests', () => {
       
       // Step 4: Pull the committed content back
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -495,9 +495,9 @@ test.describe('GitHub Integration Tests', () => {
       
       // Commit operation that should update settings
       await page.evaluate((repo, path) => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('test content', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('test content', handle, null);
         }
       }, initialRepo, initialPath);
       
@@ -515,9 +515,9 @@ test.describe('GitHub Integration Tests', () => {
       
       // Open pull dialog and verify settings were persisted
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -565,10 +565,10 @@ test.describe('GitHub Integration Tests', () => {
           }
         };
         
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
           const content = 'Multi-user collaboration test\n\nThis document was edited by multiple users:\n- Content from Lead Editor\n- Contributions from Alice\n- Input from Bob\n- Ideas from Charlie\n- Review by Diana';
-          window.githubCommitDialog.show(content, ytext, mockAwareness);
+          window.githubCommitDialog.show(content, handle, mockAwareness);
         }
       });
       
@@ -637,9 +637,9 @@ test.describe('GitHub Integration Tests', () => {
           }
         };
         
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('test content', ytext, mockAwareness);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('test content', handle, mockAwareness);
         }
       });
       
@@ -708,9 +708,9 @@ test.describe('GitHub Integration Tests', () => {
           }
         };
         
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('test content', ytext, mockAwareness);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('test content', handle, mockAwareness);
         }
       });
       
@@ -745,9 +745,9 @@ test.describe('GitHub Integration Tests', () => {
       helpers.log('Testing XSS prevention in commit messages');
       
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('test content', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('test content', handle, null);
         }
       });
       
@@ -808,9 +808,9 @@ test.describe('GitHub Integration Tests', () => {
       helpers.log('Testing file path security');
       
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('test content', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('test content', handle, null);
         }
       });
       
@@ -892,9 +892,9 @@ This content should be safely displayed as text.`;
       }, maliciousContent);
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -957,8 +957,8 @@ This content should be safely displayed as text.`;
       helpers.log('Testing input validation and injection prevention');
       
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
           const mockAwareness = {
             clientID: 123,
             getStates() {
@@ -969,7 +969,7 @@ This content should be safely displayed as text.`;
               ]);
             }
           };
-          window.githubCommitDialog.show('test content', ytext, mockAwareness);
+          window.githubCommitDialog.show('test content', handle, mockAwareness);
         }
       });
       
@@ -1036,9 +1036,9 @@ This large document tests the performance of the GitHub integration with substan
       const startTime = Date.now();
       
       await page.evaluate((content) => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show(content, ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show(content, handle, null);
         }
       }, largeContent);
       
@@ -1083,9 +1083,9 @@ This large document tests the performance of the GitHub integration with substan
       helpers.log('Testing pull performance with large documents');
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1138,9 +1138,9 @@ This large document tests the performance of the GitHub integration with substan
       const massiveContent = 'Large content for responsiveness testing. '.repeat(10000);
       
       await page.evaluate((content) => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show(content, ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show(content, handle, null);
         }
       }, massiveContent);
       
@@ -1199,9 +1199,9 @@ This large document tests the performance of the GitHub integration with substan
         
         // Commit operation
         await page.evaluate((testContent) => {
-          if (window.githubCommitDialog && window.ydoc) {
-            const ytext = window.ydoc.getText('codemirror');
-            window.githubCommitDialog.show(testContent, ytext, null);
+          if (window.githubCommitDialog && window.automergeHandle) {
+            const handle = window.automergeHandle;
+            window.githubCommitDialog.show(testContent, handle, null);
           }
         }, content);
         

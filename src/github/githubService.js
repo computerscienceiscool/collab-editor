@@ -310,7 +310,7 @@ export class GitHubService {
       // For now, simulate a response for development purposes
       const simulatedResponse = `feat(editor): implement collaborative editing
 
-Added real-time collaboration features using Yjs and WebSockets.
+Added real-time collaboration features using Automerge CRDTs.
 - Added user presence indicators
 - Implemented conflict resolution
 - Added offline support with IndexedDB`;

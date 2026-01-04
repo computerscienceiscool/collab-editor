@@ -254,30 +254,29 @@ function handleGitHubCommit() {
     return;
   }
   
-  // Get the Yjs text and awareness instances
-  // Try several ways to get the awareness object
-  const ytext = window.ydoc ? window.ydoc.getText('codemirror') : null;
+  // Get the Automerge handle and awareness instances
+  const handle = window.automergeHandle || null;
   let awareness = null;
   
   // Try different ways to access awareness (based on your app structure)
   if (window.awareness) {
     awareness = window.awareness;
-  } else if (window.provider && window.provider.awareness) {
-    awareness = window.provider.awareness;
   }
   
   // Debug log the awareness object
   console.log("Awareness object for commit:", awareness);
   if (awareness) {
-    console.log("Current users in room:", Array.from(awareness.getStates().entries()));
+    console.log("Current users in document:", Array.from(awareness.getStates().entries()));
   }
   
   // Get document content
   const content = view.state.doc.toString();
   
   // Show commit dialog with awareness explicitly passed
-  githubCommitDialog.show(content, ytext, awareness);
+  // Note: handle replaces ytext - the dialog may need updating to use handle
+  githubCommitDialog.show(content, handle, awareness);
 }
+
 /**
  * Handle GitHub pull action
  */
@@ -297,12 +296,13 @@ function handleGitHubPull() {
     return;
   }
   
-  // Get the Yjs text instance
-  const ytext = window.ydoc ? window.ydoc.getText('codemirror') : null;
+  // Get the Automerge handle instance
+  const handle = window.automergeHandle || null;
   
   // Show pull dialog
   if (window.githubPullDialog) {
-    window.githubPullDialog.show(ytext, view);
+    // Note: handle replaces ytext - the dialog uses this to update document content
+    window.githubPullDialog.show(handle, view);
   } else {
     console.error('GitHub pull dialog not available');
     alert('GitHub pull functionality not available. Please check the console for errors.');

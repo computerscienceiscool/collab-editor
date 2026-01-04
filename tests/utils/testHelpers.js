@@ -117,10 +117,10 @@ export class CollabEditorHelpers {
 
 
   /**
-   * Navigate to a test room and initialize the application
+   * Navigate to a test document and initialize the application
    */
-  async navigateToRoom(roomId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`) {
-    this.log(`Navigating to room: ${roomId}`);
+  async navigateToDocument(docId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`) {
+    this.log(`Navigating to document: ${docId}`);
    
     // Check if page is still alive before trying to evaluate
     try {
@@ -150,7 +150,7 @@ export class CollabEditorHelpers {
     
     this.log(`Detected browser: ${this.browserName}, mobile: ${this.isMobile}`);
     
-    await this.page.goto(`http://localhost:8080/?room=${roomId}`, { 
+    await this.page.goto(`http://localhost:8080/?doc=${docId}`, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });

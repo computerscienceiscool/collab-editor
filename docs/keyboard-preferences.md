@@ -33,7 +33,7 @@ Before customizing shortcuts, you'll need to enable them:
 ## Accessing Shortcut Configuration
 
 **Open the preferences dialog:**
-- **Menu Path**: Tools → Preferences
+- **Menu Path**: Tools → Keyboard Shortcuts
 - **Keyboard Shortcut**: `Ctrl+Comma` (industry standard)
 - **Console Command**: `window.preferencesDialog.show()`
 
@@ -45,7 +45,7 @@ The dialog organizes shortcuts by category:
 - **File**: Document operations (New, Save, Print, Share)
 - **Edit**: Text manipulation (Cut, Copy, Paste, Undo, Redo)
 - **Format**: Text formatting (Bold, Italic, Headers, Lists)
-- **Tools**: Utilities (Word Count, Statistics, Preferences)
+- **Tools**: Utilities (Word Count, Statistics, Shortcuts, Preferences)
 - **View**: Interface control (Toggle panels, Preview)
 - **Help**: Information and assistance
 - **Search**: Document search operations

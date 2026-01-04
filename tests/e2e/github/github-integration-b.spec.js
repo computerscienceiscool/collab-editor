@@ -976,9 +976,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
       await helpers.setEditorContent('Content for network failure test');
       
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('Content for network failure test', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('Content for network failure test', handle, null);
         }
       });
       
@@ -1085,9 +1085,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
       
       // Open pull dialog
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1231,9 +1231,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
       
       // Try to open dialog with corrupted state
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('Recovery test content', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('Recovery test content', handle, null);
         }
       });
       
@@ -1300,9 +1300,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
       
       // Open commit dialog
       await page.evaluate(() => {
-        if (window.githubCommitDialog && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubCommitDialog.show('Conflict test content', ytext, null);
+        if (window.githubCommitDialog && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubCommitDialog.show('Conflict test content', handle, null);
         }
       });
       
@@ -1310,9 +1310,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
       
       // Try to open pull dialog while commit is open (should close commit)
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1410,9 +1410,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
         
         // Try to commit (should fail)
         await page.evaluate(() => {
-          if (window.githubCommitDialog && window.ydoc) {
-            const ytext = window.ydoc.getText('codemirror');
-            window.githubCommitDialog.show(window.editorView.state.doc.toString(), ytext, null);
+          if (window.githubCommitDialog && window.automergeHandle) {
+            const handle = window.automergeHandle;
+            window.githubCommitDialog.show(window.editorView.state.doc.toString(), handle, null);
           }
         });
         
@@ -1471,9 +1471,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
           name: 'empty-path',
           setup: async () => {
             await page.evaluate(() => {
-              if (window.githubCommitDialog && window.ydoc) {
-                const ytext = window.ydoc.getText('codemirror');
-                window.githubCommitDialog.show('test content', ytext, null);
+              if (window.githubCommitDialog && window.automergeHandle) {
+                const handle = window.automergeHandle;
+                window.githubCommitDialog.show('test content', handle, null);
               }
             });
             await expect(page.locator('#github-commit-modal')).toBeVisible({ timeout: 5000 });
@@ -1486,9 +1486,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
           name: 'empty-message',
           setup: async () => {
             await page.evaluate(() => {
-              if (window.githubCommitDialog && window.ydoc) {
-                const ytext = window.ydoc.getText('codemirror');
-                window.githubCommitDialog.show('test content', ytext, null);
+              if (window.githubCommitDialog && window.automergeHandle) {
+                const handle = window.automergeHandle;
+                window.githubCommitDialog.show('test content', handle, null);
               }
             });
             await expect(page.locator('#github-commit-modal')).toBeVisible({ timeout: 5000 });
@@ -1502,9 +1502,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
           name: 'no-repository',
           setup: async () => {
             await page.evaluate(() => {
-              if (window.githubCommitDialog && window.ydoc) {
-                const ytext = window.ydoc.getText('codemirror');
-                window.githubCommitDialog.show('test content', ytext, null);
+              if (window.githubCommitDialog && window.automergeHandle) {
+                const handle = window.automergeHandle;
+                window.githubCommitDialog.show('test content', handle, null);
               }
             });
             await expect(page.locator('#github-commit-modal')).toBeVisible({ timeout: 5000 });
@@ -1766,9 +1766,9 @@ test.describe('GitHub Integration Tests - Menu & Keyboard Shortcuts', () => {
         // Try to use GitHub functionality
         try {
           await page.evaluate(() => {
-            if (window.githubCommitDialog && window.ydoc) {
-              const ytext = window.ydoc.getText('codemirror');
-              window.githubCommitDialog.show('Error boundary test', ytext, null);
+            if (window.githubCommitDialog && window.automergeHandle) {
+              const handle = window.automergeHandle;
+              window.githubCommitDialog.show('Error boundary test', handle, null);
             }
           });
           

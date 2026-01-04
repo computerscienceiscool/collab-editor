@@ -213,9 +213,9 @@ test.describe('GitHub Pull Functionality', () => {
       
       // Open pull dialog programmatically
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -250,9 +250,9 @@ test.describe('GitHub Pull Functionality', () => {
       
       // Open pull dialog
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -283,9 +283,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -315,9 +315,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -354,9 +354,9 @@ test.describe('GitHub Pull Functionality', () => {
       
       // Open dialog first time
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -373,9 +373,9 @@ test.describe('GitHub Pull Functionality', () => {
 
       // Open dialog again
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
 
@@ -410,9 +410,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -437,9 +437,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -476,9 +476,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -512,9 +512,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -544,9 +544,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -574,9 +574,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -607,9 +607,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -638,9 +638,9 @@ test.describe('GitHub Pull Functionality', () => {
       await helpers.setEditorContent('Existing content that should be preserved');
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -685,9 +685,9 @@ test.describe('GitHub Pull Functionality', () => {
       await helpers.setEditorContent('Content to be replaced');
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -729,9 +729,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -766,9 +766,9 @@ test.describe('GitHub Pull Functionality', () => {
       await helpers.setEditorContent('Original content');
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -816,9 +816,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -889,9 +889,9 @@ test.describe('GitHub Pull Functionality', () => {
       });
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -932,9 +932,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -965,9 +965,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1017,9 +1017,9 @@ test.describe('GitHub Pull Functionality', () => {
       });
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1068,9 +1068,9 @@ test.describe('GitHub Pull Functionality', () => {
       });
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1116,9 +1116,9 @@ test.describe('GitHub Pull Functionality', () => {
       });
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1167,9 +1167,9 @@ test.describe('GitHub Pull Functionality', () => {
       await helpers.setEditorContent(initialContent);
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1203,9 +1203,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1245,9 +1245,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1289,9 +1289,9 @@ test.describe('GitHub Pull Functionality', () => {
       const initialCharCount = await helpers.getCharacterCount();
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1326,9 +1326,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1344,9 +1344,9 @@ test.describe('GitHub Pull Functionality', () => {
 
       // Reopen for next test
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       await expect(page.locator('#github-pull-modal')).toBeVisible({ timeout: 5000 });
@@ -1357,9 +1357,9 @@ test.describe('GitHub Pull Functionality', () => {
 
       // Reopen for escape key test
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       await expect(page.locator('#github-pull-modal')).toBeVisible({ timeout: 5000 });
@@ -1380,9 +1380,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       
@@ -1397,9 +1397,9 @@ test.describe('GitHub Pull Functionality', () => {
 
       // Reopen for next test
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       await expect(page.locator('#github-pull-modal')).toBeVisible({ timeout: 5000 });
@@ -1424,9 +1424,9 @@ test.describe('GitHub Pull Functionality', () => {
       }
       
       await page.evaluate(() => {
-        if (window.githubPullDialog && window.editorView && window.ydoc) {
-          const ytext = window.ydoc.getText('codemirror');
-          window.githubPullDialog.show(ytext, window.editorView);
+        if (window.githubPullDialog && window.editorView && window.automergeHandle) {
+          const handle = window.automergeHandle;
+          window.githubPullDialog.show(handle, window.editorView);
         }
       });
       

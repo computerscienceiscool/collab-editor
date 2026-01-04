@@ -1246,7 +1246,7 @@ test('validates export filename safety', async ({ page }) => {
   });
 
   test('protects against URL manipulation', async ({ page }) => {
-    const maliciousRooms = [
+    const maliciousDocs = [
       '<script>window.urlXSS=true;</script>',
       'javascript:void(window.urlXSS=true)',
       '"><script>window.urlXSS=true;</script>',
@@ -1262,8 +1262,8 @@ test('validates export filename safety', async ({ page }) => {
       '///evil.com/script.js'
     ];
     
-    for (const maliciousRoom of maliciousRooms) {
-      const maliciousUrl = `http://localhost:8080/?room=${encodeURIComponent(maliciousRoom)}`;
+    for (const maliciousDoc of maliciousDocs) {
+      const maliciousUrl = `http://localhost:8080/?doc=${encodeURIComponent(maliciousDoc)}`;
       
       try {
         await page.goto(maliciousUrl, { 
@@ -1279,26 +1279,26 @@ test('validates export filename safety', async ({ page }) => {
         expect(scriptExecuted).toBe(false);
         
         // Verify room display safety
-        const roomDisplayElement = await page.locator('#room-name');
-        if (await roomDisplayElement.isVisible()) {
-          const roomDisplay = await roomDisplayElement.textContent();
-          expect(roomDisplay).not.toContain('<script');
-          expect(roomDisplay).not.toContain('javascript:');
+        const docDisplayElement = await page.locator('#document-name');
+        if (await docDisplayElement.isVisible()) {
+          const docDisplay = await docDisplayElement.textContent();
+          expect(docDisplay).not.toContain('<script');
+          expect(docDisplay).not.toContain('javascript:');
         }
         
         // Comprehensive URL safety checks
         const urlSafety = await page.evaluate(() => {
-          const roomNameEl = document.querySelector('#room-name');
+          const docNameEl = document.querySelector('#document-name');
           return {
             locationSafe: !window.location.href.includes('<script'),
             noInjectedElements: document.querySelectorAll('script[src*="evil"], script[src*="malicious"]').length === 0,
-            roomDisplaySafe: !roomNameEl || !roomNameEl.innerHTML.includes('<script')
+            docDisplaySafe: !docNameEl || !docNameEl.innerHTML.includes('<script')
           };
         });
         
         expect(urlSafety.locationSafe).toBe(true);
         expect(urlSafety.noInjectedElements).toBe(true);
-        expect(urlSafety.roomDisplaySafe).toBe(true);
+        expect(urlSafety.docDisplaySafe).toBe(true);
         
         // Verify functionality
         await helpers.setEditorContent('Test after URL manipulation');
@@ -1307,7 +1307,7 @@ test('validates export filename safety', async ({ page }) => {
         
       } catch (error) {
         // Some malicious URLs should be rejected - this is acceptable
-        console.log(`URL navigation failed for: ${maliciousRoom.substring(0, 50)} (expected for malicious URLs)`);
+        console.log(`URL navigation failed for: ${maliciousDoc.substring(0, 50)} (expected for malicious URLs)`);
       }
     }
   });

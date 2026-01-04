@@ -118,7 +118,7 @@ export function prepareCopyData(view, currentTitle) {
 }
 
 /**
- * Generates a UUID for new room names
+ * Generates a UUID for new document IDs
  * @returns {string} UUID string
  */
 export function generateUUID() {

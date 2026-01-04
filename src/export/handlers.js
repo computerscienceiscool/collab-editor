@@ -372,7 +372,7 @@ async function handleSave(format, handle, view) {
       const cborData = {
         content: textContent,
         metadata: {
-          room_id: window.location.search.replace('?room=', '') || 'default',
+          document_id: new URLSearchParams(window.location.search).get('doc') || 'default',
           timestamp: Date.now(),
           format: 'cbor'
         }
@@ -387,14 +387,14 @@ async function handleSave(format, handle, view) {
       return; 
 
     case 'automerge':
-      // Export Automerge binary (replaces ysnap)
+      // Export Automerge binary
       const binary = Automerge.save(doc);
       blob = new Blob([binary], { type: 'application/octet-stream' });
       filename = getDocumentFilename('automerge');
       break;
 
     case 'automerge-json':
-      // Export Automerge as JSON (replaces yjs format)
+      // Export Automerge as JSON
       content = JSON.stringify(doc, null, 2);
       blob = new Blob([content], { type: 'application/json' });
       filename = getDocumentFilename('json');
@@ -426,10 +426,10 @@ async function handlePromiseGridExport(handle, view) {
     const filename = getPromiseGridFilename();
     downloadBlob(blob, filename);
     
-    console.log('✅ PromiseGrid CBOR export completed!');
+    console.log('PromiseGrid CBOR export completed!');
     
   } catch (error) {
-    console.error('❌ PromiseGrid export failed:', error);
+    console.error('PromiseGrid export failed:', error);
     alert('PromiseGrid export failed: ' + error.message);
   }
 }
@@ -457,7 +457,7 @@ function sendEditAsPromiseGridMessage(editType, position, content, view) {
     
     return cborBytes;
   } catch (error) {
-    console.error('❌ Failed to create PromiseGrid edit message:', error);
+    console.error('Failed to create PromiseGrid edit message:', error);
   }
 }
 
@@ -605,7 +605,7 @@ function clearHighlights(view) {
 
 
 // Robust clipboard copy with fallback & test signal
-async function copyRoomUrlToClipboard() {
+async function copyDocumentUrlToClipboard() {
   const url = window.location.href;
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -642,19 +642,19 @@ document.addEventListener('keydown', (e) => {
   if (mod && e.shiftKey && (e.key === 'u' || e.key === 'U' || e.code === 'KeyU')) {
     e.preventDefault();
     e.stopPropagation();
-    copyRoomUrlToClipboard();
+    copyDocumentUrlToClipboard();
   }
 });
 
-// === Ctrl/Cmd + Shift + U: copy room URL (deterministic for tests) ===
-(function attachCopyRoomShortcut() {
+// === Ctrl/Cmd + Shift + U: copy document URL (deterministic for tests) ===
+(function attachCopyDocumentShortcut() {
   // prevent double-binding if your app hot-reloads
-  if (window.__copyRoomShortcutAttached) return;
-  window.__copyRoomShortcutAttached = true;
+  if (window.__copyDocumentShortcutAttached) return;
+  window.__copyDocumentShortcutAttached = true;
 
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
 
-  async function copyRoomUrlToClipboard() {
+  async function copyDocumentUrlToClipboard() {
     const url = window.location.href;
     try {
       if (navigator.clipboard?.writeText) {
@@ -675,11 +675,11 @@ document.addEventListener('keydown', (e) => {
       window.__lastCopied = url;
 
       // Match the test's expectation
-      alert('Room URL copied to clipboard');
+      alert('Document URL copied to clipboard');
     } catch {
       // Even on failure, set probe so tests can still introspect
       window.__lastCopied = url;
-      alert('Room URL copied to clipboard');
+      alert('Document URL copied to clipboard');
     }
   }
 
@@ -694,163 +694,9 @@ document.addEventListener('keydown', (e) => {
     if (mod && e.shiftKey && isU) {
       e.preventDefault();
       e.stopPropagation();
-      copyRoomUrlToClipboard();
+      copyDocumentUrlToClipboard();
     }
   });
-})();
-
-// === Safe Text Export (install-once, non-navigating) =========================
-// Paste this at the very end of handlers.js
-
-(() => {
-  if (window.__safeTextExportInstalled) return;
-  window.__safeTextExportInstalled = true;
-
-  function sanitizeFilename(name, fallback = 'document.txt') {
-    try {
-      if (!name || typeof name !== 'string') return fallback;
-      // Strip dangerous/separator chars, collapse spaces, trim dots, cap length
-      let cleaned = name
-        .replace(/[/\\?%*:|"<>]/g, '_')
-        .replace(/\s+/g, ' ')
-        .replace(/^\.+|\.+$/g, '')
-        .trim();
-
-      if (!cleaned) cleaned = 'document';
-      // Ensure .txt extension for this action
-      if (!/\.[a-z0-9]{1,8}$/i.test(cleaned)) cleaned += '.txt';
-      if (cleaned.length > 120) cleaned = cleaned.slice(0, 120);
-      return cleaned;
-    } catch {
-      return fallback;
-    }
-  }
-
-  async function exportTextSafely() {
-    try {
-      const view = window.editorView;
-      const text = view?.state?.doc?.toString() ?? '';
-      const titleInput = document.getElementById('document-title');
-      const safeName = sanitizeFilename(titleInput?.value || 'document.txt');
-
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      a.rel = 'noopener';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-
-      // Real click to guarantee Chromium emits the "download" event
-      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-
-      // Cleanup after the browser hooks the download
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-        a.remove();
-      }, 0);
-    } catch (err) {
-      console.error('Export failed:', err);
-    }
-  }
-
-  // Override/wire menu action for "Download as Text (.txt)"
-  document.addEventListener('click', (e) => {
-    const el = e.target && e.target.closest?.('[data-action="save-txt"]');
-    if (!el) return;
-    e.preventDefault(); // prevent any old default that might navigate
-    exportTextSafely();
-  }, { capture: true });
-})();
-
-// === Keyboard Shortcuts  =======================================
-
-(() => {
-  if (window.__shortcutsInstalled) return;
-  window.__shortcutsInstalled = true;
-
-  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-  const primaryModPressed = e => (isMac ? e.metaKey : e.ctrlKey);
-
-  function toggleToolbar() {
-    const toolbar = document.getElementById('toolbar');
-    if (!toolbar) return;
-    toolbar.classList.toggle('hidden'); // requires .hidden { display:none !important; }
-  }
-
-  function focusSearch() {
-    const input = document.getElementById('search-input');
-    if (input) input.focus();
-  }
-
-  function createNewDocument() {
-    const ok = window.confirm('Create a new document?');
-    if (!ok) return;
-    const url = new URL(window.location.href);
-    const newRoom = `room-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    url.searchParams.set('room', newRoom);
-    window.location.href = url.toString();
-  }
-
-  async function copyRoomUrl() {
-    const text = window.location.href;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback for environments where clipboard API is restricted
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch {}
-      document.body.removeChild(ta);
-    }
-    // Playwright listens for this alert in tests
-    alert('Room URL copied to clipboard');
-  }
-
-  document.addEventListener('keydown', (e) => {
-    // Check if shortcuts are enabled
-    if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
-      return; // Exit early if shortcuts are disabled
-    }
-    
-    // Normalize key
-    const key = e.key?.toLowerCase();
-
-    // Document Navigation & Interface Shortcuts
-    // Ctrl/Meta + Shift + U => copy room URL (shows alert)
-    if (primaryModPressed(e) && e.shiftKey && !e.altKey && key === 'u') {
-      e.preventDefault();
-      copyRoomUrl();
-      return;
-    }
-
-    // Ctrl/Meta + Alt + y => toggle toolbar visibility
-    if (primaryModPressed(e) && e.shiftKey && !e.altKey && key === 't') {
-      e.preventDefault();
-      toggleToolbar();
-      return;
-    }
-
-    // Ctrl/Meta + F => focus search input
-    if (primaryModPressed(e) && !e.shiftKey && !e.altKey && key === 'f') {
-      e.preventDefault();
-      focusSearch();
-      return;
-    }
-
-    // Ctrl/Meta + N => new document (navigate to a new room)
-    if (primaryModPressed(e) && !e.shiftKey && !e.altKey && key === 'n') {
-      e.preventDefault();
-      createNewDocument();
-      return;
-    }
-  }, { capture: true });
 })();
 
 // === Safe TXT export patch ===
@@ -921,5 +767,155 @@ document.addEventListener('keydown', (e) => {
       // Keep the page alive and log for debugging
       console.error('TXT export failed:', err);
     }
+  }, { capture: true });
+})();
+
+// === Keyboard Shortcuts  =======================================
+
+(() => {
+  if (window.__shortcutsInstalled) return;
+  window.__shortcutsInstalled = true;
+
+  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  const primaryModPressed = e => (isMac ? e.metaKey : e.ctrlKey);
+
+  function toggleToolbar() {
+    const toolbar = document.getElementById('toolbar');
+    if (!toolbar) return;
+    toolbar.classList.toggle('hidden'); // requires .hidden { display:none !important; }
+  }
+
+  function focusSearch() {
+    const input = document.getElementById('search-input');
+    if (input) input.focus();
+  }
+
+  function createNewDocument() {
+    const ok = window.confirm('Create a new document?');
+    if (!ok) return;
+    window.location.href = window.location.origin + window.location.pathname;
+  }
+
+  async function copyDocumentUrl() {
+    const text = window.location.href;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for environments where clipboard API is restricted
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+    }
+    // Playwright listens for this alert in tests
+    alert('Document URL copied to clipboard');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    // Check if shortcuts are enabled
+    if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
+      return; // Exit early if shortcuts are disabled
+    }
+    
+    // Normalize key
+    const key = e.key?.toLowerCase();
+
+    // Document Navigation & Interface Shortcuts
+    // Ctrl/Meta + Shift + U => copy document URL (shows alert)
+    if (primaryModPressed(e) && e.shiftKey && !e.altKey && key === 'u') {
+      e.preventDefault();
+      copyDocumentUrl();
+      return;
+    }
+
+    // Ctrl/Meta + Alt + y => toggle toolbar visibility
+    if (primaryModPressed(e) && e.shiftKey && !e.altKey && key === 't') {
+      e.preventDefault();
+      toggleToolbar();
+      return;
+    }
+
+    // Ctrl/Meta + F => focus search input
+    if (primaryModPressed(e) && !e.shiftKey && !e.altKey && key === 'f') {
+      e.preventDefault();
+      focusSearch();
+      return;
+    }
+
+    // Ctrl/Meta + N => new document
+    if (primaryModPressed(e) && !e.shiftKey && !e.altKey && key === 'n') {
+      e.preventDefault();
+      createNewDocument();
+      return;
+    }
+  }, { capture: true });
+})();
+
+// === Safe Text Export (install-once, non-navigating) =========================
+
+(() => {
+  if (window.__safeTextExportInstalled) return;
+  window.__safeTextExportInstalled = true;
+
+  function sanitizeFilename(name, fallback = 'document.txt') {
+    try {
+      if (!name || typeof name !== 'string') return fallback;
+      // Strip dangerous/separator chars, collapse spaces, trim dots, cap length
+      let cleaned = name
+        .replace(/[/\\?%*:|"<>]/g, '_')
+        .replace(/\s+/g, ' ')
+        .replace(/^\.+|\.+$/g, '')
+        .trim();
+
+      if (!cleaned) cleaned = 'document';
+      // Ensure .txt extension for this action
+      if (!/\.[a-z0-9]{1,8}$/i.test(cleaned)) cleaned += '.txt';
+      if (cleaned.length > 120) cleaned = cleaned.slice(0, 120);
+      return cleaned;
+    } catch {
+      return fallback;
+    }
+  }
+
+  async function exportTextSafely() {
+    try {
+      const view = window.editorView;
+      const text = view?.state?.doc?.toString() ?? '';
+      const titleInput = document.getElementById('document-title');
+      const safeName = sanitizeFilename(titleInput?.value || 'document.txt');
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+
+      // Real click to guarantee Chromium emits the "download" event
+      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+
+      // Cleanup after the browser hooks the download
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 0);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  }
+
+  // Override/wire menu action for "Download as Text (.txt)"
+  document.addEventListener('click', (e) => {
+    const el = e.target && e.target.closest?.('[data-action="save-txt"]');
+    if (!el) return;
+    e.preventDefault(); // prevent any old default that might navigate
+    exportTextSafely();
   }, { capture: true });
 })();

@@ -14,9 +14,9 @@ import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 
 // 0. Version storage functions
-async function saveVersionToIndexedDB(content, timestamp, room) {
+async function saveVersionToIndexedDB(content, timestamp, docId) {
   try {
-    const dbName = `versions-${room}`;
+    const dbName = `versions-${docId}`;
     const request = indexedDB.open(dbName, 1);
     
     request.onupgradeneeded = (event) => {
@@ -55,9 +55,9 @@ async function saveVersionToIndexedDB(content, timestamp, room) {
   }
 }
 
-async function getLatestVersionFromIndexedDB(room) {
+async function getLatestVersionFromIndexedDB(docId) {
   return new Promise((resolve) => {
-    const dbName = `versions-${room}`;
+    const dbName = `versions-${docId}`;
     const request = indexedDB.open(dbName, 1);
     
     request.onsuccess = (event) => {
@@ -160,20 +160,20 @@ async function initApp() {
   });
 
     // Display truncated document ID and setup copy functionality
-  const roomNameEl = document.querySelector('#room-name');
-  if (roomNameEl) {
+  const docNameEl = document.querySelector('#document-name');
+  if (docNameEl) {
     // Show truncated ID (first 12 chars of the hash part)
     const shortId = documentId.replace('automerge:', '').slice(0, 12) + '...';
-    roomNameEl.textContent = shortId;
-    roomNameEl.title = 'Click to copy share URL';
-    roomNameEl.style.cursor = 'pointer';
+    docNameEl.textContent = shortId;
+    docNameEl.title = 'Click to copy share URL';
+    docNameEl.style.cursor = 'pointer';
     
-    roomNameEl.addEventListener('click', () => {
+    docNameEl.addEventListener('click', () => {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        const original = roomNameEl.textContent;
-        roomNameEl.textContent = 'Copied!';
+        const original = docNameEl.textContent;
+        docNameEl.textContent = 'Copied!';
         setTimeout(() => {
-          roomNameEl.textContent = original;
+          docNameEl.textContent = original;
         }, 1500);
       });
     });

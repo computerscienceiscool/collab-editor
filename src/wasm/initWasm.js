@@ -105,7 +105,7 @@ export const promiseGrid = {
 export function getCurrentSessionInfo() {
     const urlParams = new URLSearchParams(window.location.search);
     return {
-        documentId: urlParams.get('room') || 'default-room',
+        documentId: urlParams.get('doc') || 'default-document',
         userId: localStorage.getItem('username') || 'anonymous-user'
     };
 }

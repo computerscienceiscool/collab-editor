@@ -133,7 +133,7 @@ export function setupEditor(repo, handle, awareness) {
 
   // Load initial content when document is ready
   try {
-    const doc = handle.docSync();
+    const doc = handle.doc();
     if (doc && doc.content !== undefined) {
       const initialText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
       if (initialText.length > 0) {

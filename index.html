@@ -35,8 +35,7 @@
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
           <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
           <div class="dropdown-item" data-action="save-promisegrid">Download as PromiseGrid CBOR</div>
-          <div class="dropdown-item" data-action="save-ysnap">Download as Yjs Snapshot (.ysnap)</div>
-          <div class="dropdown-item" data-action="save-yjs">Download as Yjs Update (.json)</div>
+          <div class="dropdown-item" data-action="save-automerge">Download as Automerge (.automerge)</div>
           <div class="dropdown-item" data-action="share">Share</div>
           <div class="dropdown-item" data-action="email">Email</div>
           <div class="dropdown-item" data-action="copy-url">Copy Document URL</div>
@@ -170,7 +169,7 @@
     <label for="color-input">Color:</label>
     <input type="color" id="color-input" />
     <div style="margin-left: auto;">
-      Doc: <strong id="room-name">?</strong>
+      Doc: <strong id="document-name">?</strong>
     </div>
 
   </div>
@@ -199,8 +198,7 @@
       <option value="json">Export Codemirror State</option>
       <option value="cbor">Save as .cbor</option>
       <option value="promisegrid">PromiseGrid CBOR (.cbor)</option>
-      <option value="ysnap">Export Yjs Snapshot (.ysnap binary)</option>
-      <option value="yjs">Export Yjs Update (.json array)</option>
+      <option value="automerge">Export Automerge (.automerge)</option>
     </select>
     <button id="save-button">Save</button>
     <button id="toggle-log">Log</button>
@@ -292,8 +290,8 @@
       }
 
 async getLastSavedVersion() {
-  const room = document.getElementById('room-name').textContent;
-  return await window.getLatestVersionFromIndexedDB(room);
+  const docName = document.getElementById('document-name').textContent;
+  return await window.getLatestVersionFromIndexedDB(docName);
 }
 
 async handleViewDiffs() {
@@ -387,7 +385,7 @@ async handleViewDiffs() {
       handleAction(action) {
         switch (action) {
           case 'new':
-            if (confirm('Create a new document? This will generate a new room URL.')) {
+            if (confirm('Create a new document? This will generate a new document URL.')) {
               window.location.href = window.location.origin + window.location.pathname;
             }
             break;
@@ -395,10 +393,9 @@ async handleViewDiffs() {
           case 'save-json':
           case 'save-cbor':
           case 'save-promisegrid':
-          case 'save-ysnap':
-          case 'save-yjs':
-            this.triggerSave(action.replace('save-', ''));
-            break;
+          case 'save-automerge':
+              this.triggerSave(action.replace('save-', ''));
+              break;
           case 'keyboard-shortcuts':
             if (window.preferencesDialog) {
               window.preferencesDialog.show();
@@ -406,7 +403,7 @@ async handleViewDiffs() {
             break;
           case 'copy-url':
             navigator.clipboard.writeText(window.location.href).then(() => {
-              alert('Room URL copied to clipboard!');
+              alert('Document URL copied to clipboard!');
             });
             break;
           case 'undo':
@@ -716,7 +713,7 @@ async handleViewDiffs() {
         // Store in sessionStorage for transfer (will be cleaned up after use)
         sessionStorage.setItem('documentCopyData', JSON.stringify(copyData));
         
-        // Generate new room URL
+        // Generate new document URL
         const newUrl = window.location.origin + window.location.pathname;
         
         // Open new window
@@ -766,10 +763,10 @@ async handleViewDiffs() {
 
         showVersionHistory() {
           const stats = document.getElementById('document-stats').textContent;
-          const roomName = document.getElementById('room-name').textContent;
+          const docName = document.getElementById('document-name').textContent;
           const userCount = document.getElementById('user-count').textContent;
           
-          alert(`Document History:\n\nRoom: ${roomName}\nCurrent stats: ${stats}\nActive users: ${userCount}\n\nNote: Full version history coming in future update!`);
+          alert(`Document History:\n\nDocument: ${docName}\nCurrent stats: ${stats}\nActive users: ${userCount}\n\nNote: Full version history coming in future update!`);
         }
 
         emailDocument() {
@@ -946,11 +943,11 @@ async handleViewDiffs() {
       const wordCount = document.getElementById('word-count').textContent;
       const charCount = document.getElementById('char-count').textContent;
       const readingTime = document.getElementById('reading-time').textContent;
-      const roomName = document.getElementById('room-name').textContent;
+      const docName = document.getElementById('document-name').textContent;
       
       alert(`Document Statistics:
 
-        Room: ${roomName}
+        Document: ${docName}
         ${wordCount}
         ${charCount}
         ${readingTime}
@@ -1005,7 +1002,7 @@ async handleViewDiffs() {
           const settings = `Notification Settings:
 
         Current notifications you receive:
-        - User joins/leaves room: Visible in activity log
+        - User joins/leaves document: Visible in activity log
         - Document statistics: Live updates in status bar
         - PromiseGrid messages: Console logging enabled
 
@@ -1017,15 +1014,15 @@ async handleViewDiffs() {
         }
 
         showPreferences() {
-          const roomName = document.getElementById('room-name').textContent;
+          const docName = document.getElementById('document-name').textContent;
           const userName = document.getElementById('name-input').value || 'Anonymous';
           
           const preferences = `Preferences:
 
         Current settings:
-        - Room: ${roomName}
+        - Document: ${docName}
         - Your name: ${userName}
-        - Editor: CodeMirror 6 with Yjs collaboration
+        - Editor: CodeMirror 6 with Automerge collaboration
         - Storage: IndexedDB for offline sync
         - Features: WASM text processing, PromiseGrid protocol
 
@@ -1234,7 +1231,7 @@ async handleViewDiffs() {
         <h3>Collaborative Text Editor</h3>
         <p><strong>Features:</strong></p>
         <ul>
-          <li>Real-time collaboration with Yjs CRDTs</li>
+          <li>Real-time collaboration with Automerge CRDTs</li>
           <li>WASM-powered text processing (Rust)</li>
           <li>PromiseGrid protocol integration</li>
           <li>Offline support with automatic sync</li>

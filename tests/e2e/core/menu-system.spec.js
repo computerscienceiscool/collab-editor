@@ -110,7 +110,7 @@ test.describe('Menu System Functionality', () => {
     // Wait for either navigation or dialog
     try {
       await Promise.race([
-        page.waitForURL(url => url.includes('room='), { timeout: 15000 }),
+        page.waitForURL(url => url.includes('doc='), { timeout: 15000 }),
         page.waitForTimeout(3000) // Give time for dialog to appear
       ]);
     } catch (error) {

@@ -4,6 +4,7 @@
  * Handles the process of pulling a document from GitHub
  */
 import { githubService } from '../github/githubService.js';
+import { next as Automerge } from '@automerge/automerge';
 
 export class GitHubPullDialog {
   constructor() {
@@ -11,18 +12,20 @@ export class GitHubPullDialog {
     this.isLoading = false;
     this.repositories = [];
     this.handleEscape = null;
+    this.handle = null;  // Automerge handle (replaces ytext)
+    this.view = null;    // CodeMirror view
   }
 
   /**
    * Show GitHub pull dialog
-   * @param {Object} ytext - Yjs text instance to update with pulled content
+   * @param {Object} handle - Automerge document handle (replaces ytext)
    * @param {Object} view - CodeMirror editor view
    */
-  async show(ytext, view) {
+  async show(handle, view) {
     if (this.isOpen) return;
     
     this.isOpen = true;
-    this.ytext = ytext;
+    this.handle = handle;
     this.view = view;
     document.body.style.overflow = 'hidden';
     
@@ -66,7 +69,7 @@ export class GitHubPullDialog {
     
     // Reset state
     this.repositories = [];
-    this.ytext = null;
+    this.handle = null;
     this.view = null;
     
     console.log('GitHub pull dialog closed');
@@ -331,8 +334,8 @@ export class GitHubPullDialog {
       }
     }
     
-    if (!this.ytext) {
-      this.setStatus('error', 'Editor not available');
+    if (!this.handle) {
+      this.setStatus('error', 'Document handle not available');
       return;
     }
     
@@ -342,9 +345,14 @@ export class GitHubPullDialog {
     }
     
     try {
-      // Replace document content
-      this.ytext.delete(0, this.ytext.length);
-      this.ytext.insert(0, this.fileContent);
+      // Update document content using Automerge
+      this.handle.change(d => {
+        // Get current content length
+        const oldLength = typeof d.content === 'string' ? d.content.length : 0;
+        
+        // Replace entire content using Automerge.splice
+        Automerge.splice(d, ['content'], 0, oldLength, this.fileContent);
+      });
       
       // Update status
       this.setStatus('success', 'Document updated with content from GitHub');

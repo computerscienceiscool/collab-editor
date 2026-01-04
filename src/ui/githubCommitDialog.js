@@ -10,31 +10,30 @@ export class GitHubCommitDialog {
     this.isOpen = false;
     this.isLoading = false;
     this.documentContent = '';
-    this.ytext = null;
+    this.handle = null;  // Automerge handle (replaces ytext)
     this.awareness = null;
     this.handleEscape = null;
     this.grokkerGenerating = false; //  Track if grokker is generating a message
     this.executingCommand = false; //  Track if a command is being executed
     this.previousVersion = null;    // Store previous version for diff generation
   }
-getPreviousVersion() {
-  // Simple: use 80% of current content as "previous version" for demo
-  if (this.documentContent) {
-    const lines = this.documentContent.split('\n');
-    const keepLines = Math.floor(lines.length * 0.8);
-    this.previousVersion = lines.slice(0, keepLines).join('\n');
+
+  getPreviousVersion() {
+    // Simple: use 80% of current content as "previous version" for demo
+    if (this.documentContent) {
+      const lines = this.documentContent.split('\n');
+      const keepLines = Math.floor(lines.length * 0.8);
+      this.previousVersion = lines.slice(0, keepLines).join('\n');
+    }
   }
-}
-
-
 
   /**
    * Show GitHub commit dialog
    * @param {string} content - Document content to commit
-   * @param {Object} ytext - Yjs text instance
+   * @param {Object} handle - Automerge document handle (replaces ytext)
    * @param {Object} awareness - Awareness instance for co-authors
    */
-  show(content, ytext, awareness) {
+  show(content, handle, awareness) {
     if (this.isOpen) return;
     
     this.isOpen = true;
@@ -42,7 +41,7 @@ getPreviousVersion() {
     
     this.documentContent = content;
     this.getPreviousVersion(); // Capture previous version for diff generation
-    this.ytext = ytext;
+    this.handle = handle;  // Store Automerge handle
     this.awareness = awareness;
     
     // Create and show modal
@@ -83,7 +82,7 @@ getPreviousVersion() {
     
     // Reset state
     this.documentContent = '';
-    this.ytext = null;
+    this.handle = null;
     this.awareness = null;
     this.grokkerGenerating = false;
     this.executingCommand = false;
@@ -641,7 +640,7 @@ getPreviousVersion() {
       
       // Get all users from awareness
       const states = this.awareness.getStates();
-      console.log(`Found ${states.size} total users in room`);
+      console.log(`Found ${states.size} total users in document`);
       
       // Log all users for debugging
       states.forEach((state, id) => {
@@ -790,7 +789,7 @@ getPreviousVersion() {
     
     // Get all clients from awareness and log them for debugging
     const clients = Array.from(this.awareness.getStates().entries());
-    console.log(`Found ${clients.length} total users in the room (including self)`);
+    console.log(`Found ${clients.length} total users in the document (including self)`);
     
     // Get all user data for logging purposes
     const allUsers = clients.map(([id, state]) => {
@@ -800,7 +799,7 @@ getPreviousVersion() {
         isLocal: id === localClientID
       };
     });
-    console.log('All users in room:', allUsers);
+    console.log('All users in document:', allUsers);
     
     // Filter out local client and get user data for co-authors
     const collaborators = clients

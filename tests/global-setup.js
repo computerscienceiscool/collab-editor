@@ -61,9 +61,9 @@ export class CollabEditorHelpers {
   }
 
   // Navigation and setup - FIXED for WASM-first initialization
-  async navigateToRoom(roomId = 'test') {
-    console.log('Navigating to room:', roomId);
-    await this.page.goto(`http://localhost:8080/?room=${roomId}`);
+  async navigateToDocument(docId = 'test') {
+    console.log('Navigating to document:', docId);
+    await this.page.goto(`http://localhost:8080/?doc=${docId}`);
     console.log('Current URL:', this.page.url());
     
     // Wait for complete app initialization
@@ -92,13 +92,13 @@ export class CollabEditorHelpers {
     }, { timeout: 10000 });
     console.log('Editor view initialized');
     
-    // Step 4: Wait for Yjs connection (best effort)
+    // Step 4: Wait for Automerge connection (best effort)
     await this.page.waitForFunction(() => {
       const userCount = document.querySelector('#user-count');
       return userCount && userCount.textContent !== 'Users: 0';
     }, { timeout: 5000 }).catch(() => {
-      // Yjs connection might be slower, but don't fail the test
-      console.log('Yjs connection may still be establishing');
+      // Automerge connection might be slower, but don't fail the test
+      console.log('Automerge connection may still be establishing');
     });
     
     // Step 5: Additional stability wait

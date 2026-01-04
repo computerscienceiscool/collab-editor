@@ -221,7 +221,7 @@ To enable additional shortcuts:
 ### Accessing Customization
 - **Menu**: Tools → Preferences
 - **Keyboard**: Ctrl+Comma (can be customized too!)
-- **Documentation**: See [docs/keyboard-preferences.md](docs/keyboard-preferences.md) for complete guide
+- **Documentation**: See [keyboard-preferences.md](keyboard-preferences.md) for complete guide
 
 ## Text Formatting and WASM Features
 

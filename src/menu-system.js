@@ -87,17 +87,14 @@ class MenuSystem {
       case 'save-promisegrid':
         this.triggerSave('promisegrid');
         break;
-      case 'save-ysnap':
-        this.triggerSave('ysnap');
-        break;
-      case 'save-yjs':
-        this.triggerSave('yjs');
+      case 'save-automerge':
+        this.triggerSave('automerge');
         break;
       case 'share':
-        this.shareRoom();
+        this.shareDocument();
         break;
       case 'copy-url':
-        this.copyRoomURL();
+        this.copyDocumentURL();
         break;
 
       // Edit menu
@@ -192,7 +189,7 @@ class MenuSystem {
 
   // File menu methods
   newDocument() {
-    if (confirm('Create a new document? This will generate a new room URL.')) {
+    if (confirm('Create a new document? This will generate a new document URL.')) {
       window.location.href = window.location.origin + window.location.pathname;
     }
   }
@@ -206,7 +203,7 @@ class MenuSystem {
     }
   }
 
-  shareRoom() {
+  shareDocument() {
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({
@@ -215,13 +212,13 @@ class MenuSystem {
         url: url
       });
     } else {
-      this.copyRoomURL();
+      this.copyDocumentURL();
     }
   }
 
-  copyRoomURL() {
+  copyDocumentURL() {
     navigator.clipboard.writeText(window.location.href).then(() => {
-      alert('Room URL copied to clipboard!');
+      alert('Document URL copied to clipboard!');
     });
   }
 
@@ -342,7 +339,7 @@ WASM Features:
     alert(`Collaborative Text Editor
 
 Features:
-• Real-time collaboration with Yjs CRDTs
+• Real-time collaboration with Automerge CRDTs
 • WASM-powered text processing (Rust)
 • PromiseGrid protocol integration
 • Offline support with automatic sync
