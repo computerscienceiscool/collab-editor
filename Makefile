@@ -78,6 +78,11 @@ awareness-ws:
 	@echo "Starting awareness WebSocket server on ws://localhost:$(AWARENESS_PORT)"
 	npx ws --port $(AWARENESS_PORT)
 
+nvim-helper:
+	@echo "Starting Neovim helper..."
+	cd nvim/node-helper && node index.js
+
+
 # Grokker WASM
 grokker-wasm:
 	@echo "Building Grokker WASM..."

@@ -53,3 +53,4 @@ copilot.log
 embeddings.db
 
 .exe
+nvim/go-helper/go-helper
