@@ -1,400 +1,366 @@
 -- File: nvim/lua/collab-editor/init.lua
 -- Main entry point for collab-editor Neovim plugin
--- Works with Automerge-based collaboration server
+-- Works with Node.js helper for Automerge collaboration
 
 local M = {}
 
-local protocol = require('collab-editor.protocol')
-local buffer = require('collab-editor.buffer')
-local cursors = require('collab-editor.cursors')
-
 -- Plugin state
 M.state = {
-    connected = false,
-    room = nil,
-    server_url = nil,
-    job_id = nil,
-    open_documents = {}, -- uri -> { bufnr, editor_revision, daemon_revision }
+  connected = false,
+  doc_id = nil,
+  user_id = nil,
+  job_id = nil,
+  bufnr = nil,
+  ignore_changes = false,
 }
 
 -- Configuration defaults
 M.config = {
-    server_url = nil, -- Required: ws://your-server:port/ws
-    go_helper_path = nil, -- Will be auto-detected
-    cursor_update_interval = 100, -- ms
-    show_remote_cursors = true,
-    debug = false,
+  sync_url = 'ws://localhost:1234',
+  awareness_url = 'ws://localhost:1235',
+  node_helper_path = nil, -- Will be auto-detected
+  debug = false,
 }
 
 -- Setup function called by user in their init.lua
 function M.setup(opts)
-    opts = opts or {}
-    M.config = vim.tbl_deep_extend('force', M.config, opts)
+  opts = opts or {}
+  M.config = vim.tbl_deep_extend('force', M.config, opts)
 
-    -- Auto-detect go-helper binary if not specified
-    if not M.config.go_helper_path then
-        -- Try to find it relative to this plugin
-        local source = debug.getinfo(1).source
-        if source:sub(1, 1) == '@' then
-            local plugin_path = source:sub(2):gsub('/lua/collab%-editor/init%.lua$', '')
-            M.config.go_helper_path = plugin_path .. '/go-helper/go-helper'
-        end
+  -- Auto-detect node-helper path if not specified
+  if not M.config.node_helper_path then
+    local source = debug.getinfo(1).source
+    if source:sub(1, 1) == '@' then
+      local plugin_path = source:sub(2):gsub('/lua/collab%-editor/init%.lua$', '')
+      M.config.node_helper_path = plugin_path .. '/node-helper/index.js'
     end
+  end
 
-    -- Setup commands
-    M.setup_commands()
+  M.setup_commands()
 
-    if M.config.debug then
-        vim.notify('[collab-editor] Plugin loaded', vim.log.levels.DEBUG)
-    end
+  if M.config.debug then
+    vim.notify('[collab] Plugin loaded', vim.log.levels.DEBUG)
+  end
 end
 
 -- Setup user commands
 function M.setup_commands()
-    vim.api.nvim_create_user_command('CollabConnect', function(opts)
-        local args = vim.split(opts.args, ' ')
-        local server = args[1] or M.config.server_url
-        local room = args[2]
-        M.connect(server, room)
-    end, {
-        nargs = '*',
-        desc = 'Connect to collaboration server: CollabConnect [server_url] [room]'
-    })
+  vim.api.nvim_create_user_command('CollabConnect', function()
+    M.connect()
+  end, { desc = 'Connect to collaboration server' })
 
-    vim.api.nvim_create_user_command('CollabDisconnect', function()
-        M.disconnect()
-    end, { desc = 'Disconnect from collaboration server' })
+  vim.api.nvim_create_user_command('CollabDisconnect', function()
+    M.disconnect()
+  end, { desc = 'Disconnect from collaboration server' })
 
-    vim.api.nvim_create_user_command('CollabJoin', function(opts)
-        M.join_room(opts.args)
-    end, {
-        nargs = '?',
-        desc = 'Join a collaboration room: CollabJoin [room_id]'
-    })
+  vim.api.nvim_create_user_command('CollabCreate', function()
+    M.create_document()
+  end, { desc = 'Create new collaborative document' })
 
-    vim.api.nvim_create_user_command('CollabLeave', function()
-        M.leave_room()
-    end, { desc = 'Leave current collaboration room' })
+  vim.api.nvim_create_user_command('CollabOpen', function(opts)
+    M.open_document(opts.args)
+  end, { nargs = 1, desc = 'Open collaborative document by ID' })
 
-    vim.api.nvim_create_user_command('CollabOpen', function()
-        M.open_current_buffer()
-    end, { desc = 'Open current buffer for collaboration' })
+  vim.api.nvim_create_user_command('CollabClose', function()
+    M.close_document()
+  end, { desc = 'Close current collaborative document' })
 
-    vim.api.nvim_create_user_command('CollabClose', function()
-        M.close_current_buffer()
-    end, { desc = 'Close current buffer from collaboration' })
+  vim.api.nvim_create_user_command('CollabInfo', function()
+    M.show_info()
+  end, { desc = 'Show connection info' })
+end
 
-    vim.api.nvim_create_user_command('CollabInfo', function()
-        M.show_info()
-    end, { desc = 'Show collaboration status' })
+-- Send JSON message to helper
+function M.send(msg)
+  if M.state.job_id then
+    local json = vim.fn.json_encode(msg) .. '\n'
+    vim.fn.chansend(M.state.job_id, json)
+    if M.config.debug then
+      vim.notify('[collab] Sent: ' .. vim.fn.json_encode(msg), vim.log.levels.DEBUG)
+    end
+  end
 end
 
 -- Connect to collaboration server
-function M.connect(server_url, room)
-    if M.state.connected then
-        vim.notify('[collab-editor] Already connected. Disconnect first.', vim.log.levels.WARN)
-        return false
-    end
+function M.connect()
+  if M.state.connected then
+    vim.notify('[collab] Already connected', vim.log.levels.WARN)
+    return
+  end
 
-    server_url = server_url or M.config.server_url
-    if not server_url then
-        vim.notify('[collab-editor] Server URL required. Use :CollabConnect <url> <room>', vim.log.levels.ERROR)
-        return false
-    end
+  local helper_path = M.config.node_helper_path
+  if not helper_path or vim.fn.filereadable(helper_path) == 0 then
+    vim.notify('[collab] Node helper not found at: ' .. (helper_path or 'nil'), vim.log.levels.ERROR)
+    return
+  end
 
-    room = room or vim.fn.input('Room ID: ')
-    if room == '' then
-        vim.notify('[collab-editor] Room ID required', vim.log.levels.ERROR)
-        return false
-    end
+  -- Start node helper process
+  M.state.job_id = vim.fn.jobstart({ 'node', helper_path }, {
+    on_stdout = function(_, data, _)
+      M.on_stdout(data)
+    end,
+    on_stderr = function(_, data, _)
+      for _, line in ipairs(data) do
+        if line ~= '' then
+          if M.config.debug then
+            vim.notify('[collab] Helper: ' .. line, vim.log.levels.DEBUG)
+          end
+        end
+      end
+    end,
+    on_exit = function(_, code, _)
+      M.on_exit(code)
+    end,
+    stdout_buffered = false,
+    stderr_buffered = false,
+  })
 
-    -- Check if go-helper exists
-    local helper_path = M.config.go_helper_path
-    if vim.fn.executable(helper_path) == 0 then
-        vim.notify('[collab-editor] go-helper not found at: ' .. helper_path, vim.log.levels.ERROR)
-        vim.notify('[collab-editor] Build it with: cd nvim/go-helper && go build', vim.log.levels.INFO)
-        return false
-    end
+  if M.state.job_id <= 0 then
+    vim.notify('[collab] Failed to start helper', vim.log.levels.ERROR)
+    M.state.job_id = nil
+    return
+  end
 
-    -- Start go-helper process
-    local cmd = {
-        helper_path,
-        '--server', server_url,
-        '--room', room,
-    }
-
-    M.state.job_id = vim.fn.jobstart(cmd, {
-        on_stdout = function(_, data, _)
-            M.on_stdout(data)
-        end,
-        on_stderr = function(_, data, _)
-            for _, line in ipairs(data) do
-                if line ~= '' then
-                    vim.notify('[collab-editor] Error: ' .. line, vim.log.levels.ERROR)
-                end
-            end
-        end,
-        on_exit = function(_, code, _)
-            M.on_disconnect(code)
-        end,
-        stdout_buffered = false,
-        stderr_buffered = false,
-    })
-
-    if M.state.job_id <= 0 then
-        vim.notify('[collab-editor] Failed to start go-helper', vim.log.levels.ERROR)
-        M.state.job_id = nil
-        return false
-    end
-
-    M.state.server_url = server_url
-    M.state.room = room
-
-    return true
+  -- Send connect message
+  M.send({
+    type = 'connect',
+    syncUrl = M.config.sync_url,
+    awarenessUrl = M.config.awareness_url,
+  })
 end
 
 -- Disconnect from server
 function M.disconnect()
-    if not M.state.connected and not M.state.job_id then
-        vim.notify('[collab-editor] Not connected', vim.log.levels.WARN)
-        return
-    end
+  if not M.state.job_id then
+    vim.notify('[collab] Not connected', vim.log.levels.WARN)
+    return
+  end
 
-    -- Close all open documents
-    for uri, doc in pairs(M.state.open_documents) do
-        buffer.detach(doc.bufnr)
-        protocol.send_close(uri)
-    end
-    M.state.open_documents = {}
+  M.send({ type = 'disconnect' })
 
-    -- Send disconnect and stop job
-    if M.state.job_id then
-        protocol.send_disconnect()
-        vim.fn.jobstop(M.state.job_id)
-    end
+  vim.fn.jobstop(M.state.job_id)
+  M.state.job_id = nil
+  M.state.connected = false
+  M.state.doc_id = nil
+  M.state.user_id = nil
 
-    M.state.connected = false
-    M.state.job_id = nil
-    M.state.room = nil
+  if M.state.bufnr then
+    M.detach_buffer()
+  end
 
-    cursors.cleanup()
-
-    vim.notify('[collab-editor] Disconnected', vim.log.levels.INFO)
+  vim.notify('[collab] Disconnected', vim.log.levels.INFO)
 end
 
--- Join a room (alias for connect)
-function M.join_room(room)
-    M.connect(M.config.server_url, room)
+-- Create new document
+function M.create_document()
+  if not M.state.connected then
+    vim.notify('[collab] Not connected. Run :CollabConnect first', vim.log.levels.ERROR)
+    return
+  end
+
+  M.send({ type = 'create' })
 end
 
--- Leave room (alias for disconnect)
-function M.leave_room()
-    M.disconnect()
+-- Open existing document
+function M.open_document(doc_id)
+  if not M.state.connected then
+    vim.notify('[collab] Not connected. Run :CollabConnect first', vim.log.levels.ERROR)
+    return
+  end
+
+  if not doc_id or doc_id == '' then
+    vim.notify('[collab] Document ID required', vim.log.levels.ERROR)
+    return
+  end
+
+  M.send({ type = 'open', docId = doc_id })
 end
 
--- Open current buffer for collaboration
-function M.open_current_buffer()
-    if not M.state.connected then
-        vim.notify('[collab-editor] Not connected to server', vim.log.levels.ERROR)
-        return false
-    end
+-- Close current document
+function M.close_document()
+  if not M.state.doc_id then
+    vim.notify('[collab] No document open', vim.log.levels.WARN)
+    return
+  end
 
-    local bufnr = vim.api.nvim_get_current_buf()
-    local filepath = vim.api.nvim_buf_get_name(bufnr)
-
-    if filepath == '' then
-        vim.notify('[collab-editor] Buffer must have a filename', vim.log.levels.ERROR)
-        return false
-    end
-
-    -- Create URI from filepath
-    local uri = 'file://' .. filepath
-
-    if M.state.open_documents[uri] then
-        vim.notify('[collab-editor] Buffer already open for collaboration', vim.log.levels.WARN)
-        return false
-    end
-
-    -- Get buffer content
-    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-    local content = table.concat(lines, '\n')
-
-    -- Register document
-    M.state.open_documents[uri] = {
-        bufnr = bufnr,
-        editor_revision = 0,
-        daemon_revision = 0,
-    }
-
-    -- Send open request
-    protocol.send_open(uri, content)
-
-    -- Attach buffer for change tracking
-    buffer.attach(bufnr, uri)
-
-    vim.notify('[collab-editor] Opened buffer for collaboration: ' .. filepath, vim.log.levels.INFO)
-    return true
-end
-
--- Close current buffer from collaboration
-function M.close_current_buffer()
-    local bufnr = vim.api.nvim_get_current_buf()
-    local filepath = vim.api.nvim_buf_get_name(bufnr)
-    local uri = 'file://' .. filepath
-
-    local doc = M.state.open_documents[uri]
-    if not doc then
-        vim.notify('[collab-editor] Buffer not open for collaboration', vim.log.levels.WARN)
-        return
-    end
-
-    -- Detach buffer
-    buffer.detach(bufnr)
-
-    -- Send close request
-    protocol.send_close(uri)
-
-    -- Remove from tracking
-    M.state.open_documents[uri] = nil
-
-    vim.notify('[collab-editor] Closed buffer from collaboration', vim.log.levels.INFO)
+  M.send({ type = 'close' })
+  M.detach_buffer()
+  M.state.doc_id = nil
 end
 
 -- Show connection info
 function M.show_info()
-    if not M.state.connected then
-        vim.notify('[collab-editor] Not connected', vim.log.levels.INFO)
-        return
-    end
-
-    local doc_count = vim.tbl_count(M.state.open_documents)
-    vim.notify(string.format(
-        '[collab-editor] Connected to %s, Room: %s, Open documents: %d',
-        M.state.server_url or 'unknown',
-        M.state.room or 'unknown',
-        doc_count
-    ), vim.log.levels.INFO)
+  M.send({ type = 'info' })
 end
 
--- Handle stdout from go-helper
+-- Handle stdout from helper
 function M.on_stdout(data)
-    for _, line in ipairs(data) do
-        if line ~= '' then
-            local ok, msg = pcall(vim.fn.json_decode, line)
-            if ok then
-                M.handle_message(msg)
-            elseif M.config.debug then
-                vim.notify('[collab-editor] Invalid JSON: ' .. line, vim.log.levels.DEBUG)
-            end
-        end
+  for _, line in ipairs(data) do
+    if line ~= '' then
+      local ok, msg = pcall(vim.fn.json_decode, line)
+      if ok then
+        M.handle_message(msg)
+      elseif M.config.debug then
+        vim.notify('[collab] Invalid JSON: ' .. line, vim.log.levels.DEBUG)
+      end
     end
+  end
 end
 
--- Handle message from go-helper
+-- Handle message from helper
 function M.handle_message(msg)
-    if msg.method then
-        -- Notification from server
-        if msg.method == 'connected' then
-            M.state.connected = true
-            vim.notify('[collab-editor] Connected to room: ' .. (M.state.room or '?'), vim.log.levels.INFO)
+  if M.config.debug then
+    vim.notify('[collab] Received: ' .. vim.fn.json_encode(msg), vim.log.levels.DEBUG)
+  end
 
-        elseif msg.method == 'disconnected' then
-            M.state.connected = false
-            local reason = msg.params and msg.params.reason or 'unknown'
-            vim.notify('[collab-editor] Disconnected: ' .. reason, vim.log.levels.WARN)
+  if msg.type == 'connected' then
+    M.state.connected = true
+    M.state.user_id = msg.userId
+    vim.notify('[collab] Connected as ' .. msg.userId, vim.log.levels.INFO)
 
-        elseif msg.method == 'edit' then
-            -- Remote edit from another user
-            M.handle_remote_edit(msg.params)
-
-        elseif msg.method == 'cursor' then
-            -- Remote cursor update
-            if M.config.show_remote_cursors then
-                cursors.update(msg.params)
-            end
-
-        elseif msg.method == 'server_message' then
-            -- Raw server message (for debugging)
-            if M.config.debug then
-                vim.notify('[collab-editor] Server: ' .. vim.inspect(msg.params), vim.log.levels.DEBUG)
-            end
-
-        else
-            if M.config.debug then
-                vim.notify('[collab-editor] Unknown method: ' .. msg.method, vim.log.levels.DEBUG)
-            end
-        end
-
-    elseif msg.error then
-        -- Error response
-        vim.notify('[collab-editor] Error: ' .. msg.error.message, vim.log.levels.ERROR)
-    end
-end
-
--- Handle remote edit from another user
-function M.handle_remote_edit(params)
-    if not params or not params.uri then
-        return
-    end
-
-    local doc = M.state.open_documents[params.uri]
-    if not doc then
-        return -- Document not open
-    end
-
-    -- Check revision
-    if params.revision ~= doc.editor_revision then
-        -- Our state has diverged, ignore this edit (server will retry)
-        if M.config.debug then
-            vim.notify(string.format(
-                '[collab-editor] Ignoring edit: expected revision %d, got %d',
-                doc.editor_revision, params.revision
-            ), vim.log.levels.DEBUG)
-        end
-        return
-    end
-
-    -- Apply the edit to buffer
-    buffer.apply_remote_edit(doc.bufnr, params.delta)
-
-    -- Increment daemon revision
-    doc.daemon_revision = doc.daemon_revision + 1
-end
-
--- Handle disconnect
-function M.on_disconnect(exit_code)
+  elseif msg.type == 'disconnected' then
     M.state.connected = false
-    M.state.job_id = nil
+    M.state.doc_id = nil
+    vim.notify('[collab] Disconnected', vim.log.levels.INFO)
 
-    if exit_code ~= 0 then
-        vim.notify('[collab-editor] Connection lost (exit code: ' .. exit_code .. ')', vim.log.levels.WARN)
+  elseif msg.type == 'created' then
+    M.state.doc_id = msg.docId
+    vim.notify('[collab] Created document: ' .. msg.docId, vim.log.levels.INFO)
+    M.attach_buffer('')
+
+  elseif msg.type == 'opened' then
+    M.state.doc_id = msg.docId
+    vim.notify('[collab] Opened document: ' .. msg.docId, vim.log.levels.INFO)
+    M.attach_buffer(msg.content or '')
+
+  elseif msg.type == 'changed' then
+    M.apply_remote_change(msg.content or '')
+
+  elseif msg.type == 'closed' then
+    M.state.doc_id = nil
+    M.detach_buffer()
+    vim.notify('[collab] Document closed', vim.log.levels.INFO)
+
+  elseif msg.type == 'cursor' then
+    -- Remote cursor update (future: display in buffer)
+    if M.config.debug then
+      vim.notify('[collab] Cursor from ' .. (msg.name or msg.userId), vim.log.levels.DEBUG)
     end
 
-    cursors.cleanup()
+  elseif msg.type == 'info' then
+    local info = string.format(
+      '[collab] Connected: %s | Doc: %s | User: %s',
+      tostring(msg.connected),
+      msg.docId or 'none',
+      msg.userName or 'unknown'
+    )
+    vim.notify(info, vim.log.levels.INFO)
+
+  elseif msg.type == 'error' then
+    vim.notify('[collab] Error: ' .. (msg.message or 'unknown'), vim.log.levels.ERROR)
+  end
 end
 
--- Get document state (used by buffer module)
-function M.get_document(uri)
-    return M.state.open_documents[uri]
+-- Attach to current buffer for collaboration
+function M.attach_buffer(initial_content)
+  local bufnr = vim.api.nvim_get_current_buf()
+  M.state.bufnr = bufnr
+
+  -- Set buffer content
+  M.state.ignore_changes = true
+  local lines = vim.split(initial_content, '\n', { plain = true })
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  M.state.ignore_changes = false
+
+  -- Set buffer options
+  vim.bo[bufnr].modified = false
+  vim.bo[bufnr].buftype = 'nofile'
+
+  -- Attach to buffer changes
+  vim.api.nvim_buf_attach(bufnr, false, {
+    on_lines = function(_, buf, _, first, last_old, last_new, _)
+      if M.state.ignore_changes then
+        return
+      end
+      if buf ~= M.state.bufnr then
+        return
+      end
+
+      -- Get full buffer content and send to helper
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      local content = table.concat(lines, '\n')
+      M.send({ type = 'edit', content = content })
+    end,
+    on_detach = function()
+      if M.state.bufnr == bufnr then
+        M.state.bufnr = nil
+      end
+    end,
+  })
+
+  if M.config.debug then
+    vim.notify('[collab] Attached to buffer ' .. bufnr, vim.log.levels.DEBUG)
+  end
 end
 
--- Increment editor revision (called after local edit)
-function M.increment_editor_revision(uri)
-    local doc = M.state.open_documents[uri]
-    if doc then
-        doc.editor_revision = doc.editor_revision + 1
-    end
+-- Detach from current buffer
+function M.detach_buffer()
+  M.state.bufnr = nil
+  -- Note: nvim_buf_attach doesn't have a direct detach, 
+  -- but returning true from on_lines would detach
 end
 
--- Get daemon revision (needed for sending edits)
-function M.get_daemon_revision(uri)
-    local doc = M.state.open_documents[uri]
-    return doc and doc.daemon_revision or 0
+-- Apply remote change to buffer
+function M.apply_remote_change(content)
+  if not M.state.bufnr then
+    return
+  end
+
+  local bufnr = M.state.bufnr
+
+  -- Check if buffer still exists
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    M.state.bufnr = nil
+    return
+  end
+
+  -- Get current content
+  local current_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local current_content = table.concat(current_lines, '\n')
+
+  -- Only update if different
+  if content == current_content then
+    return
+  end
+
+  -- Apply change
+  M.state.ignore_changes = true
+  
+  -- Save cursor position
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  
+  local lines = vim.split(content, '\n', { plain = true })
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  
+  -- Restore cursor position (clamped to valid range)
+  local line_count = vim.api.nvim_buf_line_count(bufnr)
+  local new_row = math.min(cursor[1], line_count)
+  local new_line = vim.api.nvim_buf_get_lines(bufnr, new_row - 1, new_row, false)[1] or ''
+  local new_col = math.min(cursor[2], #new_line)
+  vim.api.nvim_win_set_cursor(0, { new_row, new_col })
+  
+  M.state.ignore_changes = false
 end
 
--- Get job_id for sending messages
-function M.get_job_id()
-    return M.state.job_id
+-- Handle helper exit
+function M.on_exit(code)
+  M.state.job_id = nil
+  M.state.connected = false
+  M.state.doc_id = nil
+  
+  if code ~= 0 then
+    vim.notify('[collab] Helper exited with code ' .. code, vim.log.levels.WARN)
+  end
 end
 
 return M

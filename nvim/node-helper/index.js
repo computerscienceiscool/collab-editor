@@ -26,6 +26,7 @@ let handle = null;
 let awarenessWs = null;
 let userId = null;
 let userName = 'nvim-user';
+let currentDocId = null;
 let isApplyingRemote = false;
 
 // Storage directory for Automerge data
@@ -113,10 +114,14 @@ function connectAwareness(url) {
 function sendAwareness(ranges = []) {
   if (awarenessWs && awarenessWs.readyState === WebSocket.OPEN) {
     awarenessWs.send(JSON.stringify({
-      type: 'awareness',
-      userId: userId,
-      name: userName,
-      ranges: ranges
+      type: "awareness",
+      clientID: userId,
+      state: {
+        user: { name: userName, color: "#88cc88" },
+        typing: false,
+        cursor: ranges.length > 0 ? ranges[0] : null
+      },
+      documentId: currentDocId
     }));
   }
 }
@@ -175,9 +180,11 @@ async function handleMessage(msg) {
         });
 
         const docId = handle.documentId;
+        currentDocId = docId;
         
         // Setup change listener
         setupChangeListener();
+        sendAwareness();
 
         send({ type: 'created', docId: docId });
         log(`Created document: ${docId}`);
@@ -205,6 +212,8 @@ async function handleMessage(msg) {
 
           // Setup change listener
           setupChangeListener();
+          currentDocId = docId;
+          sendAwareness();
 
           send({ type: 'opened', docId: docId, content: content });
           log(`Opened document: ${docId} (${content.length} chars)`);
