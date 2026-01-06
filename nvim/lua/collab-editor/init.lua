@@ -11,6 +11,8 @@ M.state = {
   user_id = nil,
   job_id = nil,
   bufnr = nil,
+  cursor_ns = nil,  -- namespace for remote cursors
+  remote_cursors = {},  -- track remote cursor extmarks
   ignore_changes = false,
 }
 
@@ -242,7 +244,10 @@ function M.handle_message(msg)
     vim.notify('[collab] Document closed', vim.log.levels.INFO)
 
   elseif msg.type == 'cursor' then
-    -- Remote cursor update (future: display in buffer)
+    -- Remote cursor update - display in buffer
+    if msg.anchor then
+      M.show_remote_cursor(msg.userId, msg.name, msg.color, msg.anchor)
+    end
     if M.config.debug then
       vim.notify('[collab] Cursor from ' .. (msg.name or msg.userId), vim.log.levels.DEBUG)
     end

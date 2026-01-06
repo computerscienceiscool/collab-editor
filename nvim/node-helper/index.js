@@ -85,13 +85,13 @@ function connectAwareness(url) {
     try {
       const msg = JSON.parse(data.toString());
       // Forward cursor updates to Neovim
-      if (msg.type === 'awareness' && msg.userId !== userId) {
+      if (msg.type === 'awareness' && msg.clientID !== userId) {
         send({
           type: 'cursor',
-          userId: msg.userId,
-          name: msg.name || 'unknown',
-          color: msg.color || '#888888',
-          ranges: msg.ranges || []
+          userId: msg.clientID,
+          name: msg.state?.user?.name || 'unknown',
+          color: msg.state?.user?.color || '#888888',
+          anchor: msg.state?.selection?.anchor ?? null
         });
       }
     } catch (e) {

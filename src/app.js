@@ -477,6 +477,23 @@ async function initApp() {
       awareness.setLocalStateField('typing', false);
     }, 1500);
   });
+
+  // 3h.1 Track cursor position and send to awareness
+  view.dom.addEventListener("selectionchange", () => {
+    const selection = view.state.selection.main;
+    awareness.setLocalStateField("selection", { anchor: selection.anchor });
+  });
+
+  // Also track on mouseup and keyup for more reliable updates
+  view.dom.addEventListener("mouseup", () => {
+    const selection = view.state.selection.main;
+    awareness.setLocalStateField("selection", { anchor: selection.anchor });
+  });
+
+  view.dom.addEventListener("keyup", () => {
+    const selection = view.state.selection.main;
+    awareness.setLocalStateField("selection", { anchor: selection.anchor });
+  });
   
   // 3i. Hook up the Log toggle button *after* DOM is ready
   const toggleLogBtn = document.getElementById('toggle-log');
