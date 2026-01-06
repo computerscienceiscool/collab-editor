@@ -14,6 +14,7 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     // Convert to string if it's a buffer
     const data = message.toString();
+    console.log(data);
     
     // Broadcast to all other clients
     clients.forEach(client => {

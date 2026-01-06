@@ -298,6 +298,42 @@ function M.attach_buffer(initial_content)
     end,
   })
 
+  -- Track cursor movements
+  vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI'}, {
+    buffer = bufnr,
+    callback = function()
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      local row = cursor[1] - 1  -- Convert to 0-indexed
+      local col = cursor[2]
+      
+      local all_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      
+      -- Calculate total document length
+      local total_len = 0
+      for i, line in ipairs(all_lines) do
+        total_len = total_len + #line
+        if i < #all_lines then
+          total_len = total_len + 1
+        end
+      end
+      
+      -- Calculate offset
+      local offset = 0
+      for i = 1, row do
+        offset = offset + #all_lines[i] + 1
+      end
+      offset = offset + col
+      
+      -- Clamp to document length
+      if offset > total_len then
+        offset = total_len
+      end
+      
+      M.send({ type = 'cursor', offset = offset })
+    end,
+  })
+
+
   if M.config.debug then
     vim.notify('[collab] Attached to buffer ' .. bufnr, vim.log.levels.DEBUG)
   end

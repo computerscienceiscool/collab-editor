@@ -111,7 +111,10 @@ function connectAwareness(url) {
 /**
  * Send awareness (presence/cursor) info
  */
+let currentCursorOffset = 0;
+
 function sendAwareness(ranges = []) {
+  log('sendAwareness called, offset=' + currentCursorOffset);
   if (awarenessWs && awarenessWs.readyState === WebSocket.OPEN) {
     awarenessWs.send(JSON.stringify({
       type: "awareness",
@@ -119,7 +122,7 @@ function sendAwareness(ranges = []) {
       state: {
         user: { name: userName, color: "#88cc88" },
         typing: false,
-        cursor: ranges.length > 0 ? ranges[0] : null
+        selection: { anchor: currentCursorOffset }
       },
       documentId: currentDocId
     }));
@@ -246,8 +249,10 @@ async function handleMessage(msg) {
       }
 
       case 'cursor': {
-        // Send cursor position to awareness server
-        sendAwareness(msg.ranges || []);
+        if (typeof msg.offset === 'number') {
+          currentCursorOffset = msg.offset;
+          sendAwareness();
+        }
         break;
       }
 
