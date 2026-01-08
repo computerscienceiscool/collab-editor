@@ -353,8 +353,8 @@ npx playwright test --timeout=90000 --retries=3
 
 #### WebSocket Connection Issues
 ```bash
-# Check if y-websocket server is running
-# Collaboration tests may fail without WebSocket server
+# Check if Automerge sync server is running
+# Collaboration tests may fail without sync server running on port 1234
 
 # Run tests that don't require collaboration
 ./run-tests.sh --mode=core

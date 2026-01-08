@@ -1,5 +1,7 @@
 # Playwright Test Information
 
+> **TODO: Update Playwright tests to include neovim-plugin and change from Yjs to Automerge CRDT.**
+
 Complete documentation for the Playwright testing setup in the Collaborative Text Editor project.
 
 ## Overview

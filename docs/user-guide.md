@@ -91,8 +91,6 @@ All exports automatically use your document title for the filename:
 - **Download as CodeMirror State (.json)**: Complete editor state
 - **Download as CBOR (.cbor)**: Structured document with metadata
 - **Download as PromiseGrid CBOR**: Protocol-compliant decentralized computing format
-- ~~**Download as Yjs Snapshot (.ysnap)**: Binary collaboration snapshot~~
-- ~~**Download as Yjs Update (.json)**: Collaboration state as JSON~~
 
 **Sharing:**
 - **Share**: Use native browser sharing or copy URL with message
