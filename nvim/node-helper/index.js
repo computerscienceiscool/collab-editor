@@ -205,13 +205,34 @@ async function handleMessage(msg) {
 
         try {
           // Find the document
-          handle = repo.find(docId);
-          
-          // Wait for it to be ready
+          const fullDocId = docId.startsWith('automerge:') ? docId : `automerge:${docId}`;
+          handle = repo.find(fullDocId);
+
+          // Wait for it to be ready (local storage)
           await handle.whenReady();
           
-          const doc = handle.doc();
-          const content = doc?.content || '';
+          // Check if we got content from local storage
+          let doc = handle.doc();
+          let content = doc?.content || '';
+          
+          // If empty, wait for sync server to send the real content
+          if (content === '') {
+            log('Local storage empty, waiting for sync...');
+            
+            content = await new Promise((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                resolve('');
+              }, 5000);
+              
+              handle.on('change', ({ doc }) => {
+                const c = doc?.content || '';
+                if (c !== '') {
+                  clearTimeout(timeout);
+                  resolve(c);
+                }
+              });
+            });
+          }
 
           // Setup change listener
           setupChangeListener();
@@ -233,7 +254,6 @@ async function handleMessage(msg) {
           break;
         }
 
-        // Don't send edits back if we're applying a remote change
         if (isApplyingRemote) {
           break;
         }
@@ -241,18 +261,10 @@ async function handleMessage(msg) {
         const newContent = msg.content;
         
         handle.change(d => {
-          Automerge.updateText(d, ['content'], newContent);
+          d.content = newContent;
         });
         
         log(`Edit applied (${newContent.length} chars)`);
-        break;
-      }
-
-      case 'cursor': {
-        if (typeof msg.offset === 'number') {
-          currentCursorOffset = msg.offset;
-          sendAwareness();
-        }
         break;
       }
 
@@ -300,7 +312,6 @@ function setupChangeListener() {
   handle.on('change', ({ doc }) => {
     const content = doc?.content || '';
     
-    // Send to Neovim
     isApplyingRemote = true;
     send({ type: 'changed', content: content });
     isApplyingRemote = false;
@@ -339,3 +350,4 @@ process.on('SIGTERM', () => {
 });
 
 log('Helper started, waiting for commands...');
+

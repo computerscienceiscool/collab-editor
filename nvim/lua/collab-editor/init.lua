@@ -45,6 +45,59 @@ function M.setup(opts)
   end
 end
 
+-- Show remote cursor in buffer using extmarks
+function M.show_remote_cursor(user_id, name, color, anchor)
+  if not M.state.bufnr or not vim.api.nvim_buf_is_valid(M.state.bufnr) then
+    return
+  end
+  
+  -- Create namespace if needed
+  if not M.state.cursor_ns then
+    M.state.cursor_ns = vim.api.nvim_create_namespace("collab_cursors")
+  end
+  
+  -- Clear previous cursor for this user
+  if M.state.remote_cursors[user_id] then
+    pcall(vim.api.nvim_buf_del_extmark, M.state.bufnr, M.state.cursor_ns, M.state.remote_cursors[user_id])
+  end
+  
+  -- Convert anchor (character offset) to row/col
+  local lines = vim.api.nvim_buf_get_lines(M.state.bufnr, 0, -1, false)
+  local offset = 0
+  local target_row = 0
+  local target_col = 0
+  
+  for i, line in ipairs(lines) do
+    local line_len = #line + 1  -- +1 for newline
+    if offset + line_len > anchor then
+      target_row = i - 1
+      target_col = anchor - offset
+      break
+    end
+    offset = offset + line_len
+  end
+  
+  -- Clamp to valid range
+  local line_count = vim.api.nvim_buf_line_count(M.state.bufnr)
+  if target_row >= line_count then
+    target_row = line_count - 1
+  end
+  local line = vim.api.nvim_buf_get_lines(M.state.bufnr, target_row, target_row + 1, false)[1] or ""
+  if target_col > #line then
+    target_col = #line
+  end
+  
+  -- Create extmark with virtual text
+  local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, target_row, target_col, {
+    virt_text = {{ " " .. (name or "user") .. " ", "Search" }},
+    virt_text_pos = "overlay",
+    priority = 100,
+  })
+  
+  M.state.remote_cursors[user_id] = mark_id
+end
+
+
 -- Setup user commands
 function M.setup_commands()
   vim.api.nvim_create_user_command('CollabConnect', function()
