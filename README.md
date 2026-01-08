@@ -55,8 +55,7 @@ This demo has been extended with additional features that are useful to teams, i
 - Plain text
 - CodeMirror state (JSON)
 - PromiseGrid CBOR (protocol-compliant messages)
-- Yjs snapshot (binary `.ysnap`)
-- Yjs update (JSON array)
+
 
 ### GitHub Integration
 - **Direct repository commits**: Commit documents directly from the editor
@@ -70,8 +69,15 @@ This demo has been extended with additional features that are useful to teams, i
 - **Menu integration**: Access via File menu or keyboard shortcuts (Ctrl+Alt+G)
 - **Multi-user workflow**: Real-time collaboration with GitHub version control
 
+### Neovim Plugin
+   - **Real-time collaboration**: Edit documents from Neovim alongside browser users
+   - **Bidirectional sync**: Changes flow instantly between Neovim and browser
+   - **Remote cursor indicators**: See where collaborators are editing
+   - **Simple commands**: Connect, open, and collaborate with a few vim commands
+   - **Same protocol**: Uses identical Automerge sync as web client
+   - **Cross-platform editing**: Collaborate between terminal and browser users
 
-## PromiseGrid Integration Highlights
+### PromiseGrid Integration Highlights
 
 This editor demonstrates **real PromiseGrid protocol implementation** through:
 
@@ -114,6 +120,14 @@ http://localhost:8080/?doc=automerge:2VJnuVxuBCphkYpucWZKziogaFBb
 To collaborate, share the full URL with others. Anyone with the URL can edit the same document in real-time.
 
 To create a new document, visit `http://localhost:8080/` without any parameters.
+
+
+### Collaborating from Neovim
+
+You can also edit documents from Neovim alongside browser users! The Neovim plugin provides real-time bidirectional sync, remote cursor indicators, and seamless collaboration.
+
+See [docs/neovim-plugin.md](docs/neovim-plugin.md) for complete installation and usage instructions.
+
 
 ---
 
@@ -254,6 +268,7 @@ For information about document URLs and sharing, see [docs/user-docs.md](docs/us
 - [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 - [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
 - [docs/diff-view.md](docs/diff-view.md) — How the diff view feature works 
+- [Neovim Plugin](docs/neovim-plugin.md) — Real-time collaborative editing from Neovim
 
 ---
 

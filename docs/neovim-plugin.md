@@ -14,9 +14,16 @@ A Neovim plugin that enables real-time collaborative editing with the web-based 
 | Real-time text sync (Neovim to Browser) | Working |
 | Real-time text sync (Browser to Neovim) | Working |
 | User presence (shows connected users) | Working |
-| Remote cursor display | Planned |
+| Remote cursor display | Working |
 | Typing indicators | Planned |
 | Offline support with auto-reconnect | Planned |
+
+## Known Issues
+
+- **nvim-user presence indicator**: Doesn't always appear in browser after page refresh
+- **Initial document load**: Occasionally returns empty buffer (wait 5-10 seconds for sync)
+- **Cursor error messages**: "Unknown message type: cursor" error appears (cosmetic, can be ignored)
+- **Browser offline editing**: Browser may freeze when attempting to edit while offline
 
 ## Quick Start
 
@@ -31,13 +38,17 @@ A Neovim plugin that enables real-time collaborative editing with the web-based 
 From the project root directory:
 
 ```bash
+# Start all servers at once
+make dev-all
+
+# Or start individually:
 # Terminal 1: Start the sync server
 make ws
 
 # Terminal 2: Start the awareness server
 make awareness
 
-# Terminal 3 (optional): Start the web frontend
+# Terminal 3: Start the web frontend
 make serve
 ```
 
@@ -47,14 +58,18 @@ In Neovim, add the plugin to your runtime path:
 
 ```vim
 :set runtimepath+=~/lab/collab-editor/nvim
-:lua require('collab-editor').setup()
+:lua require('collab-editor').setup({ debug = false })
 ```
+
+**Note:** `debug = false` is recommended to prevent message spam that interferes with normal vim usage.
 
 Or add to your `~/.config/nvim/init.lua` for permanent installation:
 
 ```lua
 vim.opt.runtimepath:append('~/lab/collab-editor/nvim')
-require('collab-editor').setup()
+require('collab-editor').setup({
+  debug = false,  -- Recommended: prevents message spam
+})
 ```
 
 ### Basic Usage
@@ -86,6 +101,8 @@ require('collab-editor').setup()
 3. Share the URL with collaborators: `http://localhost:8080/?doc=<document-id>`
 4. Both Neovim and browser users can now edit the same document in real-time
 
+**Tip:** Changes sync instantly - you'll see collaborators' edits appear in real-time, and your edits appear in their browsers!
+
 ## Available Commands
 
 | Command | Description |
@@ -112,7 +129,7 @@ require('collab-editor').setup({
   -- Path to Node.js helper (auto-detected by default)
   node_helper_path = nil,
   
-  -- Enable debug logging
+  -- Enable debug logging (NOT recommended - causes message spam)
   debug = false,
 })
 ```
@@ -170,9 +187,7 @@ The plugin uses a Node.js helper process instead of implementing the Automerge p
 ```
 nvim/
 ├── lua/collab-editor/
-│   ├── init.lua          # Main plugin code
-│   ├── buffer.lua        # Buffer management (future)
-│   └── cursors.lua       # Remote cursor display (future)
+│   └── init.lua          # Main plugin code
 ├── node-helper/
 │   ├── package.json      # Node.js dependencies
 │   └── index.js          # Automerge bridge
@@ -202,8 +217,7 @@ npm install
 
 2. Start servers if needed:
    ```bash
-   make ws        # Terminal 1
-   make awareness # Terminal 2
+   make dev-all   # Start all servers
    ```
 
 ### Document not syncing
@@ -211,27 +225,38 @@ npm install
 1. Verify both users have the same document ID
 2. Check `:CollabInfo` shows `Connected: true`
 3. Ensure the document ID in the browser URL matches
+4. Wait 5-10 seconds for initial sync to complete
 
-### Debug Mode
+### Empty buffer on open
 
-Enable debug logging to see detailed information:
+If the buffer is empty after `:CollabOpen`, wait 5-10 seconds for the sync server to transfer the content. The initial sync can be slow.
 
-```lua
-require('collab-editor').setup({
-  debug = true,
-})
+### Debug Mode Issues
+
+If you see constant "Press ENTER" messages, you have debug mode enabled. Disable it:
+
+```vim
+:CollabDisconnect
+:lua package.loaded['collab-editor'] = nil
+:lua require('collab-editor').setup({ debug = false })
+:CollabConnect
 ```
+
+## Performance Tips
+
+- **Sync is fast**: Changes appear in collaborators' editors almost instantly
+- **No lag**: Typing in Neovim feels the same as normal editing
+- **Large documents**: Sync may take a few extra seconds for initial load
 
 ## Future Features
 
 The following features are planned for future releases:
 
-- **Remote Cursor Display**: Show where other users are editing in the buffer
 - **Typing Indicators**: Visual feedback when others are typing
-- **User Colors**: Assign colors to users for visual distinction
-- **Offline Support**: Queue changes when disconnected, sync when reconnected
+- **Improved Offline Support**: Queue changes when disconnected, sync when reconnected
 - **Document History**: View and restore previous versions
 - **Multiple Documents**: Edit multiple collaborative documents simultaneously
+- **Better error handling**: More graceful handling of network issues
 
 ## Development Information
 
@@ -244,9 +269,19 @@ To test changes:
 
 1. Make edits to the source files
 2. Restart Neovim or reload the plugin: `:lua package.loaded['collab-editor'] = nil`
-3. Re-setup: `:lua require('collab-editor').setup()`
+3. Re-setup: `:lua require('collab-editor').setup({ debug = false })`
+
+## Success Stories
+
+The plugin has been successfully tested with:
+- Real-time text synchronization between Neovim and browser
+- Multiple simultaneous edits merging correctly via CRDT
+- Remote cursor position indicators
+- Fast sync (faster than window switching)
+- Stable connection over extended editing sessions
 
 ## Related Documentation
 
 - [Architecture Overview](architecture.md) - System architecture details
 - [User Guide](user-guide.md) - Web editor documentation
+- [TODO](../TODO.md) - Known issues and planned improvements

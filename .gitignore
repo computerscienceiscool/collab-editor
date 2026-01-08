@@ -25,6 +25,7 @@ test-results/
 .grok
 .grok.lock
 *.lock
+.aidda/
 	
 # Optional: if you don't want to commit these
 package-lock.json
@@ -53,4 +54,4 @@ copilot.log
 embeddings.db
 
 .exe
-nvim/go-helper/go-helper
+.amrg/

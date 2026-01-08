@@ -19,8 +19,18 @@ If no document is specified, a globally unique document name (UUID) will be gene
 Example:
 ```
 http://localhost:8080/?doc=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
-```
 
+```
+### Collaborating from Neovim (Optional)
+
+For users who prefer terminal-based editing, a Neovim plugin is available that enables real-time collaboration with browser users. The plugin provides:
+- Bidirectional sync between Neovim and browser
+- Remote cursor indicators showing where collaborators are editing
+- Instant synchronization of all changes
+
+See [docs/neovim-plugin.md](neovim-plugin.md) for complete installation and usage instructions.
+
+**Note:** Many users will use the web interface - the Neovim plugin is optional for advanced users who prefer vim-based editing.
 ---
 
 ## The Interface
@@ -547,11 +557,11 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **Rust WebAssembly (WASM)** powers all text processing features for near-native performance.
 - **PromiseGrid CBOR encoding** provides authentic decentralized computing protocol messaging.
 - The editor supports **live cursor awareness**, **document-based isolation**, and **multi-user document interaction** out of the box.
-- ~~The backend may be powered by a **Rust** server instead of the default y-websocket server.~~
 - **All text processing happens client-side** - no server required for formatting operations.
 - **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
 - **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
 - **Real-time markdown preview** updates automatically without requiring manual refresh.
+- **Neovim integration** provides optional terminal-based editing with full collaboration support (see [neovim-plugin.md](neovim-plugin.md))
 
 ---
 
