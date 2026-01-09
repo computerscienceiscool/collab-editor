@@ -30,13 +30,19 @@
 - Keep tests deterministic; avoid network calls unless explicitly required.
 
 ## TODO Tracking
-- Track work in `TODO/` with an index at `TODO/TODO.md`.
-- Number TODOs `001`, `002`, …; don’t renumber; sort the index by priority; mark completion by appending `DONE` after the number.
+- Preferred: track work in `TODO/` with an index at `TODO/TODO.md` (number `001`, `002`, …; don’t renumber; sort by priority; append `DONE` when complete).
+- Legacy: `TODO.md` exists at the repo root—move it to ./TODO/ when updating.
 
 ## Commit & Pull Request Guidelines
-- Commit subjects are short and imperative; history commonly uses optional prefixes like `docs:`/`chore:` (e.g., `docs: Remove Yjs references...`, `Fix ...`).
-- Prefer one logical change per PR, include test commands run, and link relevant issues/docs (screenshots for UI changes).
-- `make commit` runs `grok commit` to generate a message and pushes to the current branch—review the output before using.
+- Commit after major milestones and when tests pass.
+- Staging: add files explicitly (e.g., `git add AGENTS.md src/app.js`), not `git add .` / `git add -A`.
+- Messages: short, imperative, and capitalized; history sometimes uses prefixes like `docs:`/`chore:`.
+- Bodies: include a small section per changed file with bullet summaries; use multiple `-m` flags or `git commit -F -` (avoid literal `\\n` escapes).
+- PRs: concise summary, test commands run, linked issues/docs; include before/after notes or example output for behavior/UI changes (screenshots for UI work).
+- `make commit` runs `grok commit | git commit -F -` and pushes to the current branch—review before using.
+
+## Agent-Specific Instructions
+- A chat message containing only `commit` means: add and commit all changes with an `AGENTS.md`-compliant message (using `git diff` to summarize).
 
 ## Local State & Generated Files
 - Don’t commit local state or generated artifacts (see `.gitignore`), including `.grok`, `.aidda/`, `node_modules/`, `dist/`, `rust-wasm/pkg/`, and `rust-server/target/`.
