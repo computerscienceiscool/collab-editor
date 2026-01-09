@@ -30,8 +30,9 @@
 - Keep tests deterministic; avoid network calls unless explicitly required.
 
 ## TODO Tracking
-- Preferred: track work in `TODO/` with an index at `TODO/TODO.md` (number `001`, `002`, …; don’t renumber; sort by priority; append `DONE` when complete).
-- Legacy: `TODO.md` exists at the repo root—move it to ./TODO/ when updating.
+- Preferred: track work in `TODO/` with an index at `TODO/TODO.md` (number `001`, `002`, …; don’t renumber; sort by priority).
+- Mark completion with checkboxes (e.g., `- [ ] 005 - ...` → `- [x] 005 - ...`).
+- Legacy: root `TODO.md` exists for historical reference; update `TODO/TODO.md` going forward.
 
 ## Commit & Pull Request Guidelines
 - Commit after major milestones and when tests pass.

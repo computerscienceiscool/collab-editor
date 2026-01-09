@@ -1,5 +1,6 @@
-
 # Collaborative Editor TODO
+
+NOTE: This legacy file has been migrated to `TODO/TODO.md` (source of truth). Keep this file for historical reference; update `TODO/TODO.md` going forward.
 
 ## Completed
 
@@ -132,5 +133,4 @@
 - [] Offline editing test failed - Browser froze when you tried to edit while offline
 - [] nvim-user indicator - Doesn't show in browser after refresh
 - [] Initial document load - Sometimes vim opens with empty buffer instead of browser's content (this happened earlier but seems to work now)
-
 
