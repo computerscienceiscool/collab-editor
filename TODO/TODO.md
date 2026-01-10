@@ -31,6 +31,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 026 - Add dark mode toggle
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 071 - Add logging around Neovim on_lines to debug Copilot sync
+- [ ] 072 - Neovim: Tweak browser presence badge (nvim-user bar shows as full-width notification)
+- [ ] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 
 ## Low (Legacy / Backlog)
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data

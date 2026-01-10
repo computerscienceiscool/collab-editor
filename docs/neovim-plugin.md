@@ -244,6 +244,12 @@ If you see constant "Press ENTER" messages, you have debug mode enabled. Disable
 :CollabConnect
 ```
 
+### Presence missing after browser refresh
+
+- The awareness server sends presence over port 1235; the helper keeps a heartbeat.
+- If Neovim is connected but the browser doesn't show `nvim-user` after a refresh, wait a few seconds for the heartbeat or run `:CollabInfo` to confirm awareness URL.
+- Ensure `make awareness` is running and the Neovim helper has `awareness_url` set (default `ws://localhost:1235`).
+
 ## Performance Tips
 
 - **Sync is fast**: Changes appear in collaborators' editors almost instantly

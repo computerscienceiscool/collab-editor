@@ -286,6 +286,16 @@ end
 -- Show connection info
 function M.show_info()
   M.send({ type = 'info' })
+  if M.config.debug then
+    local parts = {
+      'connected=' .. tostring(M.state.connected),
+      'doc=' .. (M.state.doc_id or 'none'),
+      'user=' .. (M.state.user_id or 'unknown'),
+      'sync=' .. (M.config.sync_url or 'n/a'),
+      'awareness=' .. (M.config.awareness_url or 'n/a'),
+    }
+    vim.notify('[collab] ' .. table.concat(parts, ' | '), vim.log.levels.INFO)
+  end
 end
 
 -- Handle stdout from helper
@@ -376,8 +386,11 @@ function M.attach_buffer(initial_content)
   vim.bo[bufnr].buftype = 'nofile'
 
   -- Attach to buffer changes
-  local function send_buffer_if_changed()
+  local function send_buffer_if_changed(reason)
     if M.state.ignore_changes then
+      if M.config.debug then
+        vim.notify(string.format('[collab] skip send (%s): ignoring changes', reason or 'unknown'), vim.log.levels.DEBUG)
+      end
       return
     end
     if bufnr ~= M.state.bufnr then
@@ -385,12 +398,18 @@ function M.attach_buffer(initial_content)
     end
     local tick = vim.api.nvim_buf_get_changedtick(bufnr)
     if tick == M.state.last_sent_tick then
+      if M.config.debug then
+        vim.notify(string.format('[collab] skip send (%s): tick unchanged (%d)', reason or 'unknown', tick), vim.log.levels.DEBUG)
+      end
       return
     end
     M.state.last_sent_tick = tick
 
     local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
     local content = table.concat(lines, '\n')
+    if M.config.debug then
+      vim.notify(string.format('[collab] send (%s): tick %d len %d', reason or 'unknown', tick, #content), vim.log.levels.DEBUG)
+    end
     M.send({ type = 'edit', content = content })
   end
 
@@ -399,13 +418,13 @@ function M.attach_buffer(initial_content)
       if buf ~= bufnr then
         return
       end
-      send_buffer_if_changed()
+      send_buffer_if_changed('on_lines')
     end,
     on_bytes = function(_, buf, _, _, _, _, _, _)
       if buf ~= bufnr then
         return
       end
-      send_buffer_if_changed()
+      send_buffer_if_changed('on_bytes')
     end,
     on_detach = function()
       if M.state.bufnr == bufnr then
@@ -416,7 +435,9 @@ function M.attach_buffer(initial_content)
 
   vim.api.nvim_create_autocmd({'TextChanged', 'TextChangedI'}, {
     buffer = bufnr,
-    callback = send_buffer_if_changed,
+    callback = function()
+      send_buffer_if_changed('TextChanged')
+    end,
   })
 
   -- Track cursor movements
