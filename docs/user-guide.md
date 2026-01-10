@@ -552,6 +552,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **Automerge** handles real-time synchronization and awareness.
 - **CodeMirror 6** powers the rich text editing with undo/redo support.
 - **IndexedDB** is used for offline persistence.
+- **Connection status pill** in the status bar shows online/offline/reconnecting.
 - **Rust WebAssembly (WASM)** powers all text processing features for near-native performance.
 - **PromiseGrid CBOR encoding** provides authentic decentralized computing protocol messaging.
 - The editor supports **live cursor awareness**, **document-based isolation**, and **multi-user document interaction** out of the box.
@@ -560,6 +561,7 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 - **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
 - **Real-time markdown preview** updates automatically without requiring manual refresh.
 - **Neovim integration** provides optional terminal-based editing with full collaboration support (see [neovim-plugin.md](neovim-plugin.md))
+- For protocol/presence details, see [docs/message-flow.md](message-flow.md).
 
 ---
 
@@ -574,4 +576,3 @@ http://localhost:8080/
 ```
 
 Share the full URL with others to collaborate!
-

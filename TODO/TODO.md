@@ -1,7 +1,7 @@
 # TODO Index
 
 Rules:
-- Use 3-digit IDs (`001`, `002`, ...); do not renumber.
+- Use 3-digit IDs (`001`, `002`, ...); do not renumber. 
 - Sort this file by priority, not number.
 - Mark completion with checkboxes (`- [ ] 005 - ...` → `- [x] 005 - ...`).
 
@@ -29,7 +29,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 024 - Improve mobile responsiveness
 - [ ] 025 - Add a connection status indicator (e.g., "connected", "saving", etc.)
 - [ ] 026 - Add dark mode toggle
-- [x] 027 - Display last saved timestamp
+- [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 
 ## Low (Legacy / Backlog)
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data

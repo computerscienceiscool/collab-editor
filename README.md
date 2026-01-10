@@ -1,4 +1,4 @@
-
+ 
 # Collaborative Text Editor (Automerge-Based + PromiseGrid)
 
 This is a collaborative text editor demo based on [Automerge CRDT](https://automerge.org/) with **PromiseGrid protocol integration**.  

@@ -313,6 +313,35 @@ html, body {
   align-items: center;
 }
 
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-pill.online {
+  background: #e6f4ea;
+  color: #137333;
+  border-color: #c7e8ce;
+}
+
+.status-pill.offline {
+  background: #fce8e6;
+  color: #c5221f;
+  border-color: #f5c2bd;
+}
+
+.status-pill.reconnecting {
+  background: #fff4e5;
+  color: #b65c00;
+  border-color: #ffd8a8;
+}
+
 .user-indicator {
   display: inline-flex;
   align-items: center;

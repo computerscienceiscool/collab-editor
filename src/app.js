@@ -212,6 +212,12 @@ async function initApp() {
 
   //3b.i. Attach the editor globally available for menu actions
   window.editorView = view;
+  const connectionStatus = document.getElementById('connection-status');
+  const setConnectionStatus = (state, label) => {
+    if (!connectionStatus) return;
+    connectionStatus.className = `status-pill ${state}`;
+    connectionStatus.textContent = label;
+  };
 
   // 3c. Hook up UI elements: name/color fields
   setupUserControls(awareness);
@@ -227,6 +233,23 @@ async function initApp() {
 
   // 3g. Update user list in the toolbar
   setupUserList(awareness);
+
+  // Connection status indicator
+  // Uses browser online/offline plus repo network events to reflect connectivity
+  window.addEventListener('online', () => setConnectionStatus('online', 'Online'));
+  window.addEventListener('offline', () => setConnectionStatus('offline', 'Offline'));
+  setConnectionStatus(navigator.onLine ? 'online' : 'offline', navigator.onLine ? 'Online' : 'Offline');
+  if (repo) {
+    repo.networkSubsystem?.on?.('connection', ({ status }) => {
+      if (status === 'connected') {
+        setConnectionStatus('online', 'Online');
+      } else if (status === 'disconnected') {
+        setConnectionStatus('offline', 'Offline');
+      } else {
+        setConnectionStatus('reconnecting', 'Reconnecting…');
+      }
+    });
+  }
   
   // Setup document stats (needs to work with Automerge)
   setupDocumentStats(handle, view);

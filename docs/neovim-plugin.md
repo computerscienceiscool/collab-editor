@@ -20,10 +20,12 @@ A Neovim plugin that enables real-time collaborative editing with the web-based 
 
 ## Known Issues
 
-- **nvim-user presence indicator**: Doesn't always appear in browser after page refresh
-- **Initial document load**: Occasionally returns empty buffer (wait 5-10 seconds for sync)
-- **Cursor error messages**: "Unknown message type: cursor" error appears (cosmetic, can be ignored)
-- **Browser offline editing**: Browser may freeze when attempting to edit while offline
+- **Browser offline editing**: Browser may freeze when attempting to edit while offline. 
+- **Awareness RangeError**: Rare CodeMirror RangeError when a remote selection exceeds local doc length; see TODO 070 (`TODO/070-awareness-rangeerror.md`) for tracking.
+
+Fixed:
+- `nvim-user` presence after browser refresh now handled via awareness heartbeat (see helper).
+- Initial doc opens avoid empty buffers with delayed sync retry in the helper.
 
 ## Quick Start
 
