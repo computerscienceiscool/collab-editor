@@ -121,10 +121,11 @@ function connectAwareness(url) {
       const msg = JSON.parse(data.toString());
       // Forward cursor updates to Neovim
       if (msg.type === 'awareness' && msg.clientID !== userId) {
+        const displayName = (msg.state?.user?.name || '').trim() || msg.clientID || 'unknown';
         send({
           type: 'cursor',
           userId: msg.clientID,
-          name: msg.state?.user?.name || 'unknown',
+          name: displayName,
           color: msg.state?.user?.color || '#888888',
           anchor: msg.state?.selection?.anchor ?? null,
           head: msg.state?.selection?.head ?? null

@@ -54,6 +54,16 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
   if not M.state.bufnr or not vim.api.nvim_buf_is_valid(M.state.bufnr) then
     return
   end
+
+  local function shorten_label(label)
+    if not label or label == '' then
+      return nil
+    end
+    if #label > 20 then
+      return label:sub(1, 17) .. "..."
+    end
+    return label
+  end
   
   -- Create namespace if needed
   if not M.state.cursor_ns then
@@ -127,8 +137,9 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
   end
   
   -- Create extmark with virtual text
+  local display_name = shorten_label(name) or shorten_label(user_id) or "user"
   local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_col, {
-    virt_text = {{ " " .. (name or "user") .. " ", "Search" }},
+    virt_text = {{ " " .. display_name .. " ", "Search" }},
     virt_text_pos = "overlay",
     priority = 100,
   })
