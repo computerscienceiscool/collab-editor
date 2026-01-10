@@ -207,12 +207,10 @@ async function handleMessage(msg) {
         log(`Opening document: ${docId}`);
 
         try {
-          // Find the document
+          // Find the document (repo.find is async in v2)
           const fullDocId = docId.startsWith('automerge:') ? docId : `automerge:${docId}`;
-          handle = repo.find(fullDocId);
-
-          // Wait for it to be ready (local storage)
-          await handle.whenReady();
+          // Repo.find resolves when the handle is ready in v2
+          handle = await repo.find(fullDocId);
           
           // Check if we got content from local storage
           let doc = handle.doc();
