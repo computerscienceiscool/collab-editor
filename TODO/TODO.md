@@ -8,16 +8,10 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
 ## High
-- [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
-- [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 - [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
-- [x] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
-- [x] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
-- [x] 069 - Neovim: Copilot Tab completions are not synced to browser clients
-- [x] 027 - Display last saved timestamp
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
@@ -40,7 +34,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
 ## Low (Legacy / Backlog)
-- [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
 - [ ] 012 - Legacy (Yjs): Observe changes using `.observe` and `.observeDeep`
 - [ ] 013 - Legacy (Yjs): Handle nested types like `Y.Array` inside `Y.Map`
 - [ ] 014 - Legacy (Yjs): Test encoding for JSON and binary formats
@@ -55,6 +48,12 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 023 - Legacy (Yjs): Learn to build a custom provider with `y-protocols/awareness`
 
 ## Done
+- [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
+- [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
+- [x] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
+- [x] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
+- [x] 069 - Neovim: Copilot Tab completions are not synced to browser clients
+- [x] 027 - Display last saved timestamp
 - [x] 032 - Prompt for username and assign persistent color
 - [x] 033 - Display correct username and room in the toolbar
 - [x] 034 - Share cursor position using provider.awareness
@@ -103,3 +102,4 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 
 - [x] 067 - Replace hardcoded values with config (e.g., WebSocket URL, room)
 - [x] 068 - Modularize editor.js into separate concerns
+- [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
