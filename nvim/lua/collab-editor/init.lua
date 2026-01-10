@@ -14,6 +14,7 @@ M.state = {
   cursor_ns = nil,  -- namespace for remote cursors
   remote_cursors = {},  -- track remote cursor extmarks
   remote_selections = {},  -- track remote selection extmarks
+  last_sent_tick = 0,  -- track last changedtick sent to helper
   ignore_changes = false,
 }
 
@@ -362,6 +363,7 @@ end
 function M.attach_buffer(initial_content)
   local bufnr = vim.api.nvim_get_current_buf()
   M.state.bufnr = bufnr
+  M.state.last_sent_tick = vim.api.nvim_buf_get_changedtick(bufnr)
 
   -- Set buffer content
   M.state.ignore_changes = true
@@ -374,25 +376,41 @@ function M.attach_buffer(initial_content)
   vim.bo[bufnr].buftype = 'nofile'
 
   -- Attach to buffer changes
-  vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function(_, buf, _, first, last_old, last_new, _)
-      if M.state.ignore_changes then
-        return
-      end
-      if buf ~= M.state.bufnr then
-        return
-      end
+  local function send_buffer_if_changed()
+    if M.state.ignore_changes then
+      return
+    end
+    if bufnr ~= M.state.bufnr then
+      return
+    end
+    local tick = vim.api.nvim_buf_get_changedtick(bufnr)
+    if tick == M.state.last_sent_tick then
+      return
+    end
+    M.state.last_sent_tick = tick
 
-      -- Get full buffer content and send to helper
-      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-      local content = table.concat(lines, '\n')
-      M.send({ type = 'edit', content = content })
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local content = table.concat(lines, '\n')
+    M.send({ type = 'edit', content = content })
+  end
+
+  vim.api.nvim_buf_attach(bufnr, false, {
+    on_lines = function(_, buf, _, _, _, _, _)
+      if buf ~= bufnr then
+        return
+      end
+      send_buffer_if_changed()
     end,
     on_detach = function()
       if M.state.bufnr == bufnr then
         M.state.bufnr = nil
       end
     end,
+  })
+
+  vim.api.nvim_create_autocmd({'TextChanged', 'TextChangedI'}, {
+    buffer = bufnr,
+    callback = send_buffer_if_changed,
   })
 
   -- Track cursor movements
