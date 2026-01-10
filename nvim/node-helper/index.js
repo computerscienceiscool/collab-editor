@@ -229,6 +229,7 @@ async function handleMessage(msg) {
           const fullDocId = docId.startsWith('automerge:') ? docId : `automerge:${docId}`;
           // Repo.find resolves when the handle is ready in v2
           handle = await repo.find(fullDocId);
+          await handle.whenReady();
           
           // Check if we got content from local storage
           let doc = handle.doc();
@@ -241,7 +242,7 @@ async function handleMessage(msg) {
             content = await new Promise((resolve, reject) => {
               const timeout = setTimeout(() => {
                 resolve('');
-              }, 5000);
+              }, 8000);
               
               handle.on('change', ({ doc }) => {
                 const c = doc?.content || '';
@@ -260,6 +261,22 @@ async function handleMessage(msg) {
 
           send({ type: 'opened', docId: docId, content: content });
           log(`Opened document: ${docId} (${content.length} chars)`);
+
+          // Fallback: if initial content was empty, re-check after sync settles
+          setTimeout(() => {
+            try {
+              if (!handle) return;
+              const latest = handle.doc()?.content || '';
+              if (latest && latest !== content) {
+                isApplyingRemote = true;
+                send({ type: 'changed', content: latest });
+                isApplyingRemote = false;
+                log(`Delayed content sync delivered (${latest.length} chars)`);
+              }
+            } catch (e) {
+              log(`Delayed content check failed: ${e.message}`);
+            }
+          }, 3000);
         } catch (e) {
           send({ type: 'error', message: `Failed to open: ${e.message}` });
           log(`Open failed: ${e.message}`);
