@@ -23,12 +23,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 024 - Improve mobile responsiveness
 - [ ] 026 - Add dark mode toggle
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
-- [x] 071 - Add logging around Neovim on_lines to debug Copilot sync
-- [x] 072 - Neovim: Tweak browser presence badge (nvim-user bar shows as full-width notification)
 - [ ] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
-- [x] 074 - Neovim: Allow setting name/color from client and reflect in browser badges
-- [x] 075 - Neovim: Deprecate/remove legacy Go helper and protocol.lua references
-- [x] 076 - Consolidate Neovim plugin docs into docs/neovim-plugin.md and remove nvim/README.md
 - [ ] 077 - Fix search functionality in browser and Neovim plugin; add coverage
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
