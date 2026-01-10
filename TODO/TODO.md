@@ -30,7 +30,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 027 - Display last saved timestamp
 
 ## Low (Legacy / Backlog)
-- [ ] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
+- [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
 - [ ] 012 - Legacy (Yjs): Observe changes using `.observe` and `.observeDeep`
 - [ ] 013 - Legacy (Yjs): Handle nested types like `Y.Array` inside `Y.Map`
 - [ ] 014 - Legacy (Yjs): Test encoding for JSON and binary formats
