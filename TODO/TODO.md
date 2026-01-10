@@ -14,8 +14,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 - [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
-- [ ] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
-- [ ] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
+- [x] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
+- [x] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
 - [x] 069 - Neovim: Copilot Tab completions are not synced to browser clients
 - [x] 027 - Display last saved timestamp
 
@@ -29,7 +29,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 024 - Improve mobile responsiveness
 - [ ] 025 - Add a connection status indicator (e.g., "connected", "saving", etc.)
 - [ ] 026 - Add dark mode toggle
-- [ ] 027 - Display last saved timestamp
+- [x] 027 - Display last saved timestamp
 
 ## Low (Legacy / Backlog)
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
