@@ -24,6 +24,7 @@ import WebSocket from 'ws';
 let repo = null;
 let handle = null;
 let awarenessWs = null;
+let awarenessHeartbeat = null;
 let userId = null;
 let userName = 'nvim-user';
 let currentDocId = null;
@@ -73,6 +74,10 @@ function connectAwareness(url) {
   if (awarenessWs) {
     awarenessWs.close();
   }
+  if (awarenessHeartbeat) {
+    clearInterval(awarenessHeartbeat);
+    awarenessHeartbeat = null;
+  }
 
   awarenessWs = new WebSocket(url);
 
@@ -80,6 +85,11 @@ function connectAwareness(url) {
     log('Awareness connected');
     // Send initial presence
     sendAwareness();
+
+    // Periodically refresh presence so newly joined clients see us
+    awarenessHeartbeat = setInterval(() => {
+      sendAwareness();
+    }, 5000);
   });
 
   awarenessWs.on('message', (data) => {
@@ -103,6 +113,10 @@ function connectAwareness(url) {
 
   awarenessWs.on('close', () => {
     log('Awareness disconnected');
+    if (awarenessHeartbeat) {
+      clearInterval(awarenessHeartbeat);
+      awarenessHeartbeat = null;
+    }
   });
 
   awarenessWs.on('error', (err) => {
@@ -164,6 +178,10 @@ async function handleMessage(msg) {
         if (awarenessWs) {
           awarenessWs.close();
           awarenessWs = null;
+        }
+        if (awarenessHeartbeat) {
+          clearInterval(awarenessHeartbeat);
+          awarenessHeartbeat = null;
         }
         if (repo) {
           repo = null;
