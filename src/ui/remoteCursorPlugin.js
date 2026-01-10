@@ -52,6 +52,7 @@ export function remoteCursorPlugin(awareness, clientID) {
       updateDecorations() {
         const decorations = [];
         const states = awareness.getStates();
+        const docLength = this.view.state.doc.length;
 
         states.forEach((state, id) => {
           if (id === clientID) return;
@@ -60,11 +61,13 @@ export function remoteCursorPlugin(awareness, clientID) {
           const selection = state.selection;
 
           if (user && selection && typeof selection.anchor === 'number') {
+            // Clamp anchor/head to the current doc length to avoid out-of-range errors
+            const anchor = Math.max(0, Math.min(selection.anchor, docLength));
             decorations.push(
               Decoration.widget({
                 widget: new CursorWidget(user.name, user.color),
                 side: -1,
-              }).range(selection.anchor)
+              }).range(anchor)
             );
           }
         });
