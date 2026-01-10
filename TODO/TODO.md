@@ -30,6 +30,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 025 - Add a connection status indicator (e.g., "connected", "saving", etc.)
 - [ ] 026 - Add dark mode toggle
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
+- [ ] 071 - Add logging around Neovim on_lines to debug Copilot sync
 
 ## Low (Legacy / Backlog)
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data

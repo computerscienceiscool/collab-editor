@@ -401,6 +401,12 @@ function M.attach_buffer(initial_content)
       end
       send_buffer_if_changed()
     end,
+    on_bytes = function(_, buf, _, _, _, _, _, _)
+      if buf ~= bufnr then
+        return
+      end
+      send_buffer_if_changed()
+    end,
     on_detach = function()
       if M.state.bufnr == bufnr then
         M.state.bufnr = nil

@@ -61,6 +61,29 @@ function log(msg) {
 }
 
 /**
+ * Convert document content to a plain string
+ */
+function contentToString(doc) {
+  if (!doc || doc.content === undefined) return '';
+  const value = doc.content;
+  if (typeof value === 'string') return value;
+  if (value && typeof value.toString === 'function') {
+    try {
+      return value.toString();
+    } catch (e) {
+      log(`contentToString toString error: ${e.message}`);
+      return '';
+    }
+  }
+  try {
+    return String(value);
+  } catch (e) {
+    log(`contentToString String() error: ${e.message}`);
+    return '';
+  }
+}
+
+/**
  * Generate a simple user ID
  */
 function generateUserId() {
@@ -233,7 +256,7 @@ async function handleMessage(msg) {
           
           // Check if we got content from local storage
           let doc = handle.doc();
-          let content = doc?.content || '';
+          let content = contentToString(doc);
           
           // If empty, wait for sync server to send the real content
           if (content === '') {
@@ -245,7 +268,7 @@ async function handleMessage(msg) {
               }, 8000);
               
               handle.on('change', ({ doc }) => {
-                const c = doc?.content || '';
+                const c = contentToString(doc);
                 if (c !== '') {
                   clearTimeout(timeout);
                   resolve(c);
@@ -266,7 +289,7 @@ async function handleMessage(msg) {
           setTimeout(() => {
             try {
               if (!handle) return;
-              const latest = handle.doc()?.content || '';
+              const latest = contentToString(handle.doc());
               if (latest && latest !== content) {
                 isApplyingRemote = true;
                 send({ type: 'changed', content: latest });
@@ -320,7 +343,7 @@ async function handleMessage(msg) {
       }
 
       case 'cursor': {
-        const docLen = (handle?.doc()?.content || '').length;
+        const docLen = contentToString(handle?.doc()).length;
         const offset = Math.max(0, Math.min(Number(msg.offset) || 0, docLen));
         currentCursorOffset = offset;
 
@@ -364,7 +387,7 @@ function setupChangeListener() {
   if (!handle) return;
 
   handle.on('change', ({ doc }) => {
-    const content = doc?.content || '';
+    const content = contentToString(doc);
     
     isApplyingRemote = true;
     send({ type: 'changed', content: content });
