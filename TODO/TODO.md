@@ -16,6 +16,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
 - [ ] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
 - [ ] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
+- [ ] 069 - Neovim: Copilot Tab completions are not synced to browser clients
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
