@@ -6,6 +6,8 @@ It enables multiple users to edit shared text documents in real-time using WebSo
 
 This demo has been extended with additional features that are useful to teams, including user presence, logging, export options, document awareness, and **genuine PromiseGrid protocol messaging**.
 
+For an end-to-end view of browser/Neovim sync and presence channels, see `docs/message-flow.md`.
+
 ---
 
 ## Features

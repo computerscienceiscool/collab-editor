@@ -115,6 +115,31 @@ async function initGrokkerWasm() {
 
 // 2. Declare a typingTimeout variable — it's needed across functions
 let typingTimeout = null;
+let lastSavedTimestamp = Date.now();
+let lastSavedInterval = null;
+
+function formatLastSaved(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 15000) return 'Saved just now';
+  if (diff < 60000) return `Saved ${Math.round(diff / 1000)}s ago`;
+  if (diff < 3600000) return `Saved ${Math.round(diff / 60000)}m ago`;
+  const d = new Date(ts);
+  return `Saved at ${d.toLocaleTimeString()}`;
+}
+
+function updateLastSaved(ts = Date.now()) {
+  lastSavedTimestamp = ts;
+  const el = typeof document !== 'undefined' ? document.getElementById('last-saved') : null;
+  if (el) {
+    el.textContent = formatLastSaved(lastSavedTimestamp);
+  }
+}
+
+function startLastSavedTicker() {
+  if (lastSavedInterval) return;
+  updateLastSaved(lastSavedTimestamp);
+  lastSavedInterval = setInterval(() => updateLastSaved(lastSavedTimestamp), 15000);
+}
 
 // 3. Main initialization function
 async function initApp() {
@@ -142,6 +167,7 @@ async function initApp() {
   
   // 3b. Set up Automerge state: repository, document handle, awareness, etc.
   const { repo, handle, doc, awareness, documentId, isNew } = await setupAutomerge(docParam);
+  startLastSavedTicker();
   
   // If new document, log the shareable URL
   if (isNew) {
@@ -150,12 +176,13 @@ async function initApp() {
     
   // Listen for document changes and save versions
   handle.on('change', ({ doc }) => {
-    if (doc && doc.content) {
-      const content = doc.content.toString();
+    if (doc && doc.content !== undefined) {
+      const content = typeof doc.content === 'string' ? doc.content : '';
       const timestamp = Date.now();
       
       // Save to IndexedDB with versioning
       saveVersionToIndexedDB(content, timestamp, documentId);
+      updateLastSaved(timestamp);
     }
   });
 

@@ -8,15 +8,16 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
 ## High
-- [ ] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
-- [ ] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
+- [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
+- [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 - [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
 - [ ] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh
 - [ ] 031 - Neovim: Initial document load sometimes opens with empty buffer instead of browser content
-- [ ] 069 - Neovim: Copilot Tab completions are not synced to browser clients
+- [x] 069 - Neovim: Copilot Tab completions are not synced to browser clients
+- [x] 027 - Display last saved timestamp
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
