@@ -27,6 +27,7 @@ let awarenessWs = null;
 let awarenessHeartbeat = null;
 let userId = null;
 let userName = 'nvim-user';
+let userColor = '#88cc88';
 let currentDocId = null;
 let isApplyingRemote = false;
 let currentSelection = { anchor: 0 };
@@ -160,7 +161,7 @@ function sendAwareness(selection = null) {
       type: "awareness",
       clientID: userId,
       state: {
-        user: { name: userName, color: "#88cc88" },
+        user: { name: userName, color: userColor },
         typing: false,
         selection: selectionState
       },
@@ -177,6 +178,12 @@ async function handleMessage(msg) {
     switch (msg.type) {
       case 'connect': {
         userId = generateUserId();
+        if (msg.name) {
+          userName = msg.name;
+        }
+        if (msg.color) {
+          userColor = msg.color;
+        }
         
         // Create Automerge repo with WebSocket sync
         repo = new Repo({
@@ -339,6 +346,14 @@ async function handleMessage(msg) {
         sendAwareness();
         send({ type: 'name_set', name: userName });
         log(`Name set to: ${userName}`);
+        break;
+      }
+
+      case 'set_color': {
+        userColor = msg.color || '#88cc88';
+        sendAwareness();
+        send({ type: 'color_set', color: userColor });
+        log(`Color set to: ${userColor}`);
         break;
       }
 

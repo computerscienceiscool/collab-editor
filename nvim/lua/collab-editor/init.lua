@@ -23,6 +23,8 @@ M.config = {
   sync_url = 'ws://localhost:1234',
   awareness_url = 'ws://localhost:1235',
   node_helper_path = nil, -- Will be auto-detected
+  user_name = nil,
+  user_color = nil,
   debug = false,
 }
 
@@ -163,6 +165,14 @@ function M.setup_commands()
   vim.api.nvim_create_user_command('CollabInfo', function()
     M.show_info()
   end, { desc = 'Show connection info' })
+
+  vim.api.nvim_create_user_command('CollabSetName', function(opts)
+    M.set_name(opts.args)
+  end, { nargs = 1, desc = 'Set collaboration display name' })
+
+  vim.api.nvim_create_user_command('CollabSetColor', function(opts)
+    M.set_color(opts.args)
+  end, { nargs = 1, desc = 'Set collaboration display color (hex)' })
 end
 
 -- Send JSON message to helper
@@ -173,6 +183,30 @@ function M.send(msg)
     if M.config.debug then
       vim.notify('[collab] Sent: ' .. vim.fn.json_encode(msg), vim.log.levels.DEBUG)
     end
+  end
+end
+
+function M.set_name(name)
+  if not name or name == '' then
+    vim.notify('[collab] Name required', vim.log.levels.ERROR)
+    return
+  end
+  M.config.user_name = name
+  M.send({ type = 'set_name', name = name })
+  if M.config.debug then
+    vim.notify('[collab] Set name to ' .. name, vim.log.levels.DEBUG)
+  end
+end
+
+function M.set_color(color)
+  if not color or color == '' then
+    vim.notify('[collab] Color required (e.g., #88cc88)', vim.log.levels.ERROR)
+    return
+  end
+  M.config.user_color = color
+  M.send({ type = 'set_color', color = color })
+  if M.config.debug then
+    vim.notify('[collab] Set color to ' .. color, vim.log.levels.DEBUG)
   end
 end
 
@@ -221,7 +255,17 @@ function M.connect()
     type = 'connect',
     syncUrl = M.config.sync_url,
     awarenessUrl = M.config.awareness_url,
+    name = M.config.user_name,
+    color = M.config.user_color,
   })
+
+  -- Apply configured identity after connect
+  if M.config.user_name then
+    M.set_name(M.config.user_name)
+  end
+  if M.config.user_color then
+    M.set_color(M.config.user_color)
+  end
 end
 
 -- Disconnect from server
