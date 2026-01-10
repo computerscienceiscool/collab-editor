@@ -36,6 +36,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 074 - Neovim: Allow setting name/color from client and reflect in browser badges
 - [ ] 075 - Neovim: Deprecate/remove legacy Go helper and protocol.lua references
 - [ ] 076 - Consolidate Neovim plugin docs into docs/neovim-plugin.md and remove nvim/README.md
+- [ ] 077 - Fix search functionality in browser and Neovim plugin; add coverage
+- [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
 ## Low (Legacy / Backlog)
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
