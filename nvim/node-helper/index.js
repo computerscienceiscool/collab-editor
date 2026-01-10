@@ -283,6 +283,14 @@ async function handleMessage(msg) {
         break;
       }
 
+      case 'cursor': {
+        const docLen = (handle?.doc()?.content || '').length;
+        const offset = Math.max(0, Math.min(Number(msg.offset) || 0, docLen));
+        currentCursorOffset = offset;
+        sendAwareness();
+        break;
+      }
+
       case 'info': {
         send({
           type: 'info',
@@ -350,4 +358,3 @@ process.on('SIGTERM', () => {
 });
 
 log('Helper started, waiting for commands...');
-
