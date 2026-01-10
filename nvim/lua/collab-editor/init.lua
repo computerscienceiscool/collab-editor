@@ -13,6 +13,7 @@ M.state = {
   bufnr = nil,
   cursor_ns = nil,  -- namespace for remote cursors
   remote_cursors = {},  -- track remote cursor extmarks
+  remote_selections = {},  -- track remote selection extmarks
   ignore_changes = false,
 }
 
@@ -46,7 +47,7 @@ function M.setup(opts)
 end
 
 -- Show remote cursor in buffer using extmarks
-function M.show_remote_cursor(user_id, name, color, anchor)
+function M.show_remote_cursor(user_id, name, color, anchor, head)
   if not M.state.bufnr or not vim.api.nvim_buf_is_valid(M.state.bufnr) then
     return
   end
@@ -56,45 +57,83 @@ function M.show_remote_cursor(user_id, name, color, anchor)
     M.state.cursor_ns = vim.api.nvim_create_namespace("collab_cursors")
   end
   
-  -- Clear previous cursor for this user
+  -- Clear previous cursor/selection for this user
   if M.state.remote_cursors[user_id] then
     pcall(vim.api.nvim_buf_del_extmark, M.state.bufnr, M.state.cursor_ns, M.state.remote_cursors[user_id])
+    M.state.remote_cursors[user_id] = nil
+  end
+  if M.state.remote_selections and M.state.remote_selections[user_id] then
+    pcall(vim.api.nvim_buf_del_extmark, M.state.bufnr, M.state.cursor_ns, M.state.remote_selections[user_id])
+    M.state.remote_selections[user_id] = nil
   end
   
   -- Convert anchor (character offset) to row/col
   local lines = vim.api.nvim_buf_get_lines(M.state.bufnr, 0, -1, false)
-  local offset = 0
-  local target_row = 0
-  local target_col = 0
-  
+  if #lines == 0 then
+    lines = { '' }
+  end
+
+  local total_len = 0
   for i, line in ipairs(lines) do
-    local line_len = #line + 1  -- +1 for newline
-    if offset + line_len > anchor then
-      target_row = i - 1
-      target_col = anchor - offset
-      break
+    total_len = total_len + #line
+    if i < #lines then
+      total_len = total_len + 1
     end
-    offset = offset + line_len
   end
-  
-  -- Clamp to valid range
-  local line_count = vim.api.nvim_buf_line_count(M.state.bufnr)
-  if target_row >= line_count then
-    target_row = line_count - 1
+
+  local function clamp_offset(off)
+    return math.max(0, math.min(tonumber(off) or 0, total_len))
   end
-  local line = vim.api.nvim_buf_get_lines(M.state.bufnr, target_row, target_row + 1, false)[1] or ""
-  if target_col > #line then
-    target_col = #line
+
+  local function offset_to_pos(off)
+    local clamped = clamp_offset(off)
+    local offset = 0
+    local target_row = 0
+    local target_col = 0
+
+    for i, line in ipairs(lines) do
+      local line_len = #line + 1  -- +1 for newline
+      if offset + line_len > clamped then
+        target_row = i - 1
+        target_col = clamped - offset
+        return target_row, target_col
+      end
+      offset = offset + line_len
+    end
+
+    local last_row = math.max(0, #lines - 1)
+    local last_line = lines[#lines] or ""
+    return last_row, math.min(clamped - offset, #last_line)
+  end
+
+  local cursor_row, cursor_col = offset_to_pos(anchor or 0)
+
+  local selection_mark_id = nil
+  if head ~= nil and head ~= anchor then
+    local start_off = clamp_offset(math.min(anchor or 0, head))
+    local end_off = clamp_offset(math.max(anchor or 0, head))
+    local start_row, start_col = offset_to_pos(start_off)
+    local end_row, end_col = offset_to_pos(end_off)
+
+    selection_mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, start_row, start_col, {
+      end_line = end_row,
+      end_col = end_col,
+      hl_group = "Visual",
+      priority = 90,
+    })
   end
   
   -- Create extmark with virtual text
-  local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, target_row, target_col, {
+  local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_col, {
     virt_text = {{ " " .. (name or "user") .. " ", "Search" }},
     virt_text_pos = "overlay",
     priority = 100,
   })
   
   M.state.remote_cursors[user_id] = mark_id
+  if selection_mark_id then
+    M.state.remote_selections[user_id] = selection_mark_id
+  end
 end
 
 
@@ -298,8 +337,8 @@ function M.handle_message(msg)
 
   elseif msg.type == 'cursor' then
     -- Remote cursor update - display in buffer
-    if msg.anchor then
-      M.show_remote_cursor(msg.userId, msg.name, msg.color, msg.anchor)
+    if msg.anchor ~= nil then
+      M.show_remote_cursor(msg.userId, msg.name, msg.color, msg.anchor, msg.head)
     end
     if M.config.debug then
       vim.notify('[collab] Cursor from ' .. (msg.name or msg.userId), vim.log.levels.DEBUG)
@@ -361,33 +400,52 @@ function M.attach_buffer(initial_content)
     buffer = bufnr,
     callback = function()
       local cursor = vim.api.nvim_win_get_cursor(0)
-      local row = cursor[1] - 1  -- Convert to 0-indexed
-      local col = cursor[2]
-      
+      local row = cursor[1]  -- 1-indexed
+      local col = cursor[2]  -- 0-indexed
+
       local all_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      
-      -- Calculate total document length
-      local total_len = 0
-      for i, line in ipairs(all_lines) do
-        total_len = total_len + #line
-        if i < #all_lines then
-          total_len = total_len + 1
+      if #all_lines == 0 then
+        all_lines = { '' }
+      end
+
+      local function clamp_pos(lnum, c)
+        local lnum_clamped = math.max(1, math.min(lnum, #all_lines))
+        local line = all_lines[lnum_clamped] or ""
+        local col_clamped = math.max(0, math.min(c, #line))
+        return lnum_clamped, col_clamped
+      end
+
+      local function offset_from_pos(lnum, c)
+        local lnum_clamped, col_clamped = clamp_pos(lnum, c)
+        local offset = 0
+        for i = 1, lnum_clamped - 1 do
+          offset = offset + #all_lines[i] + 1
         end
+        return offset + col_clamped
       end
-      
-      -- Calculate offset
-      local offset = 0
-      for i = 1, row do
-        offset = offset + #all_lines[i] + 1
+
+      local offset = offset_from_pos(row, col)
+
+      local selection = nil
+      local mode = vim.fn.mode(1)
+      local visual_prefix = mode:sub(1, 1)
+      if visual_prefix == 'v' or visual_prefix == 'V' or visual_prefix == '\22' then
+        local anchor_pos = vim.fn.getpos('v')
+        local anchor_row = anchor_pos[2]
+        local anchor_col = math.max(0, (anchor_pos[3] or 1) - 1)
+
+        selection = {
+          anchor = offset_from_pos(anchor_row, anchor_col),
+          head = offset,
+        }
       end
-      offset = offset + col
-      
-      -- Clamp to document length
-      if offset > total_len then
-        offset = total_len
+
+      local message = { type = 'cursor', offset = offset }
+      if selection then
+        message.selection = selection
       end
-      
-      M.send({ type = 'cursor', offset = offset })
+
+      M.send(message)
     end,
   })
 
@@ -400,6 +458,8 @@ end
 -- Detach from current buffer
 function M.detach_buffer()
   M.state.bufnr = nil
+  M.state.remote_cursors = {}
+  M.state.remote_selections = {}
   -- Note: nvim_buf_attach doesn't have a direct detach, 
   -- but returning true from on_lines would detach
 end

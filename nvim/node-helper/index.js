@@ -28,6 +28,7 @@ let userId = null;
 let userName = 'nvim-user';
 let currentDocId = null;
 let isApplyingRemote = false;
+let currentSelection = { anchor: 0 };
 
 // Storage directory for Automerge data
 const storageDir = path.join(os.homedir(), '.local', 'share', 'collab-editor', 'automerge-data');
@@ -91,7 +92,8 @@ function connectAwareness(url) {
           userId: msg.clientID,
           name: msg.state?.user?.name || 'unknown',
           color: msg.state?.user?.color || '#888888',
-          anchor: msg.state?.selection?.anchor ?? null
+          anchor: msg.state?.selection?.anchor ?? null,
+          head: msg.state?.selection?.head ?? null
         });
       }
     } catch (e) {
@@ -113,8 +115,9 @@ function connectAwareness(url) {
  */
 let currentCursorOffset = 0;
 
-function sendAwareness(ranges = []) {
-  log('sendAwareness called, offset=' + currentCursorOffset);
+function sendAwareness(selection = null) {
+  const selectionState = selection || currentSelection || { anchor: currentCursorOffset };
+  log('sendAwareness called, selection anchor=' + selectionState.anchor + (selectionState.head !== undefined ? ` head=${selectionState.head}` : ''));
   if (awarenessWs && awarenessWs.readyState === WebSocket.OPEN) {
     awarenessWs.send(JSON.stringify({
       type: "awareness",
@@ -122,7 +125,7 @@ function sendAwareness(ranges = []) {
       state: {
         user: { name: userName, color: "#88cc88" },
         typing: false,
-        selection: { anchor: currentCursorOffset }
+        selection: selectionState
       },
       documentId: currentDocId
     }));
@@ -287,6 +290,16 @@ async function handleMessage(msg) {
         const docLen = (handle?.doc()?.content || '').length;
         const offset = Math.max(0, Math.min(Number(msg.offset) || 0, docLen));
         currentCursorOffset = offset;
+
+        if (msg.selection && typeof msg.selection === 'object') {
+          const anchor = Math.max(0, Math.min(Number(msg.selection.anchor) || 0, docLen));
+          const headRaw = msg.selection.head;
+          const head = headRaw === undefined ? anchor : Math.max(0, Math.min(Number(headRaw) || 0, docLen));
+          currentSelection = { anchor, head };
+        } else {
+          currentSelection = { anchor: offset };
+        }
+
         sendAwareness();
         break;
       }
