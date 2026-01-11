@@ -870,6 +870,17 @@ html, body {
     justify-content: center;
     flex-wrap: wrap;
   }
+
+  #user-list {
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  #user-list .user {
+    font-size: 12px;
+    padding: 2px 6px;
+  }
   
   .status-bar {
     flex-direction: column;
