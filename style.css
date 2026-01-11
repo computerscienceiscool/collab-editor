@@ -1058,6 +1058,92 @@ html, body {
   color: #e5e7eb;
 }
 
+.theme-dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.theme-dark #user-log .drag-handle:hover {
+  background: #111827;
+}
+
+.theme-dark .preferences-dialog {
+  background: #111827;
+  border: 1px solid #1f2937;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.theme-dark .preferences-actions {
+  border-color: #1f2937;
+}
+
+.theme-dark .preferences-button {
+  background: #0b1224;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .preferences-button:hover {
+  background: #111827;
+}
+
+.theme-dark .preferences-info {
+  color: #94a3b8;
+}
+
+.theme-dark .category-title {
+  color: #bfdbfe;
+  border-color: #1f2937;
+}
+
+.theme-dark .category-title:before {
+  background: #2563eb;
+}
+
+.theme-dark .shortcut-item {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.theme-dark .shortcut-item:hover {
+  background: #0f172a;
+  border-color: #2563eb;
+}
+
+.theme-dark .shortcut-description {
+  color: #e5e7eb;
+}
+
+.theme-dark .shortcut-key {
+  background: #0b1224;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .shortcut-key:hover {
+  background: #111827;
+  border-color: #2563eb;
+  color: #bfdbfe;
+}
+
+.theme-dark .shortcut-key.editing {
+  background: #433b12;
+  border-color: #fbbf24;
+  color: #facc15;
+}
+
+.theme-dark .preferences-message {
+  background: #22c55e;
+  color: #0b1224;
+}
+
+.theme-dark .shortcuts-container::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.theme-dark .shortcuts-container::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
 /* Modal System Styles */
 .modal-overlay {
   position: fixed;
