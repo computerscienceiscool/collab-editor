@@ -237,12 +237,15 @@ async function initApp() {
   // 3h. Theme toggle
   const root = document.documentElement;
   const themeToggle = document.getElementById('theme-toggle');
+  const activityLog = document.getElementById('user-log');
   const applyTheme = (mode) => {
     if (mode === 'dark') {
       root.classList.add('theme-dark');
+      if (activityLog) activityLog.classList.add('theme-dark');
       if (themeToggle) themeToggle.textContent = '☀️';
     } else {
       root.classList.remove('theme-dark');
+      if (activityLog) activityLog.classList.remove('theme-dark');
       if (themeToggle) themeToggle.textContent = '🌙';
     }
     localStorage.setItem('theme', mode);
