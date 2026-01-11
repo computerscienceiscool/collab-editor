@@ -807,6 +807,9 @@ html, body {
   color: #000;
   margin-right: 4px;
 }
+.theme-toggle-icon {
+  font-size: 14px;
+}
 
 .loading {
   opacity: 0.6;
@@ -930,6 +933,55 @@ html, body {
     top: 160px !important;
     height: calc(100vh - 160px) !important;
   }
+}
+
+.theme-dark {
+  color-scheme: dark;
+}
+
+.theme-dark body {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.theme-dark .menu-bar,
+.theme-dark .toolbar,
+.theme-dark .user-settings,
+.theme-dark .status-bar,
+.theme-dark .dropdown-menu,
+.theme-dark .modal-dialog {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: #1f2937;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.theme-dark .menu-button,
+.theme-dark .toolbar-button {
+  color: #e5e7eb;
+}
+
+.theme-dark .document-title,
+.theme-dark input,
+.theme-dark select,
+.theme-dark textarea {
+  background: #0b1224;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+}
+
+.theme-dark #editor {
+  background: #0b1224;
+  border-color: #1f2937;
+}
+
+.theme-dark .status-pill {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .dropdown-item:hover {
+  background: #1f2937;
 }
 
 /* Modal System Styles */

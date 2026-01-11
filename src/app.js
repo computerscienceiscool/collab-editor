@@ -234,6 +234,28 @@ async function initApp() {
   // 3g. Update user list in the toolbar
   setupUserList(awareness);
 
+  // 3h. Theme toggle
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('theme-toggle');
+  const applyTheme = (mode) => {
+    if (mode === 'dark') {
+      root.classList.add('theme-dark');
+      if (themeToggle) themeToggle.textContent = '☀️';
+    } else {
+      root.classList.remove('theme-dark');
+      if (themeToggle) themeToggle.textContent = '🌙';
+    }
+    localStorage.setItem('theme', mode);
+  };
+  const storedTheme = localStorage.getItem('theme');
+  applyTheme(storedTheme === 'dark' ? 'dark' : 'light');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const next = root.classList.contains('theme-dark') ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  }
+
   // Connection status indicator
   // Uses browser online/offline plus repo network events to reflect connectivity
   window.addEventListener('online', () => setConnectionStatus('online', 'Online'));
