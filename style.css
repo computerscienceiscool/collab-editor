@@ -1033,6 +1033,10 @@ html, body {
   color: #e5e7eb;
 }
 
+.theme-dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
 .theme-dark .markdown-preview {
   background: #0b1224;
   color: #e5e7eb;
