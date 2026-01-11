@@ -26,6 +26,11 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
+- [x] 079 - Dark mode: user activity log uses light background
+- [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
+- [x] 081 - Dark mode: editor gutter/line numbers stay light
+- [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
+- [x] 083 - Dark mode: markdown preview background stays light
 
 ## Low (Legacy / Backlog)
 - [ ] 012 - Legacy (Yjs): Observe changes using `.observe` and `.observeDeep`
@@ -106,6 +111,11 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 026 - Add dark mode toggle
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
+- [x] 079 - Dark mode: user activity log uses light background
+- [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
+- [x] 081 - Dark mode: editor gutter/line numbers stay light
+- [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
+- [x] 083 - Dark mode: markdown preview background stays light
 - [x] 079 - Dark mode: user activity log uses light background
 - [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
 - [x] 081 - Dark mode: editor gutter/line numbers stay light
