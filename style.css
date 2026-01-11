@@ -1310,6 +1310,27 @@ html, body {
   background: #e8eaed;
 }
 
+/* Force dark theme on activity log when element has theme-dark class */
+#user-log.theme-dark {
+  background: #0b1224 !important;
+  border-color: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+#user-log.theme-dark h3 {
+  color: #e5e7eb !important;
+}
+
+#user-log.theme-dark .drag-handle {
+  background: #0f172a;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+#user-log.theme-dark .drag-handle:hover {
+  background: #111827;
+}
+
 #user-log.dragging {
   opacity: 0.8;
   transform: rotate(2deg);

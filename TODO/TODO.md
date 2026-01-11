@@ -21,17 +21,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 028 - Add error handling for fetch, save, and load failures
 - [ ] 024 - Improve mobile responsiveness
-- [x] 026 - Add dark mode toggle
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
-- [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
-- [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [ ] 079 - Dark mode: activity log background still white (text is white)
-- [x] 079 - Dark mode: user activity log uses light background
-- [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
-- [x] 081 - Dark mode: editor gutter/line numbers stay light
-- [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
-- [x] 083 - Dark mode: markdown preview background stays light
 
 ## Done
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
@@ -98,11 +89,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 026 - Add dark mode toggle
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
-- [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
-- [x] 081 - Dark mode: editor gutter/line numbers stay light
-- [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
-- [x] 083 - Dark mode: markdown preview background stays light
-- [x] 079 - Dark mode: user activity log uses light background
+- [x] 079 - Dark mode: activity log background still white (text is white)
 - [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
 - [x] 081 - Dark mode: editor gutter/line numbers stay light
 - [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
