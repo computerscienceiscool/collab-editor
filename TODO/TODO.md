@@ -24,7 +24,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 026 - Add dark mode toggle
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
-- [ ] 077 - Fix search functionality in browser and Neovim plugin; add coverage
+- [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
 ## Low (Legacy / Backlog)
@@ -105,3 +105,4 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
 - [x] 026 - Add dark mode toggle
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
+- [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
