@@ -984,6 +984,22 @@ html, body {
   background: #1f2937;
 }
 
+.theme-dark #user-log {
+  background: #0b1224 !important;
+  border-color: #1f2937 !important;
+  color: #e5e7eb !important;
+}
+
+.theme-dark #user-log h3 {
+  color: #e5e7eb !important;
+}
+
+.theme-dark .cm-gutters {
+  background: #0b1224;
+  color: #94a3b8;
+  border-color: #1f2937;
+}
+
 /* Modal System Styles */
 .modal-overlay {
   position: fixed;
@@ -1898,6 +1914,79 @@ input[type="password"].settings-input {
 .diff-stat.additions {
   background: #e6f4ea;
   color: #0d652d;
+}
+
+.theme-dark .diff-toolbar {
+  border-color: #1f2937;
+}
+
+.theme-dark .diff-mode-button {
+  background: #0b1224;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .diff-mode-button:hover {
+  background: #111827;
+}
+
+.theme-dark .diff-mode-button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #e5e7eb;
+}
+
+.theme-dark .diff-header {
+  background: #111827;
+  border-color: #1f2937;
+}
+
+.theme-dark .diff-header-old,
+.theme-dark .diff-header-new {
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .diff-side-old {
+  border-color: #1f2937;
+}
+
+.theme-dark .diff-line-unchanged {
+  background: #0b1224;
+  color: #e5e7eb;
+}
+
+.theme-dark .diff-line-deleted {
+  background: #2f0c0c;
+  color: #fca5a5;
+}
+
+.theme-dark .diff-line-added {
+  background: #0f2f1a;
+  color: #9efbb7;
+}
+
+.theme-dark .diff-line-empty {
+  background: #0f172a;
+}
+
+.theme-dark .unified-diff {
+  background: #0b1224;
+}
+
+.theme-dark .raw-section {
+  border-color: #1f2937;
+}
+
+.theme-dark .raw-section h4 {
+  background: #111827;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .raw-section pre {
+  background: #0b1224;
+  color: #e5e7eb;
 }
 
 .diff-stat.deletions {
