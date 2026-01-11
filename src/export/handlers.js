@@ -1,5 +1,6 @@
 // File: src/export/handlers.js
-import { Decoration, ViewPlugin } from '@codemirror/view';
+import { Decoration, EditorView } from '@codemirror/view';
+import { StateEffect, StateField } from '@codemirror/state';
 import { search_document } from '../wasm/initWasm.js';
 import * as Automerge from '@automerge/automerge';
 import { encode, decode } from 'cbor-x'; 
@@ -533,30 +534,62 @@ const searchHighlight = Decoration.mark({
   attributes: { style: 'background-color: yellow; color: black;' }
 });
 
-let currentSearchDecorations = Decoration.set([]); 
+const setSearchHighlights = StateEffect.define();
+const searchHighlightField = StateField.define({
+  create() {
+    return Decoration.none;
+  },
+  update(deco, tr) {
+    deco = deco.map(tr.changes);
+    for (const e of tr.effects) {
+      if (e.is(setSearchHighlights)) return e.value;
+    }
+    return deco;
+  },
+  provide: f => EditorView.decorations.from(f)
+});
+
+function ensureSearchField(view) {
+  if (view.__searchFieldConfigured) return;
+  view.__searchFieldConfigured = true;
+  view.dispatch({
+    effects: StateEffect.appendConfig.of([searchHighlightField])
+  });
+}
 
 function highlightMatches(view, matches) {
   console.log('Found', matches.length, 'matches:', matches);
   
   if (matches.length === 0) {
-    alert('No matches found');
+    clearHighlights(view);
+    console.info('No matches found');
     return;
   }
+
+  ensureSearchField(view);
   
-  // Just scroll to and select the first match
+  const ranges = matches
+    .filter(m => typeof m.start === 'number' && typeof m.end === 'number' && m.end >= m.start)
+    .map(m => searchHighlight.range(m.start, m.end));
+  const deco = Decoration.set(ranges, true);
+
+  // Select and scroll to the first match
   const firstMatch = matches[0];
   view.dispatch({
     selection: { anchor: firstMatch.start, head: firstMatch.end },
-    scrollIntoView: true
+    scrollIntoView: true,
+    effects: setSearchHighlights.of(deco)
   });
   
-  // Show user how many matches were found
-  alert(`Found ${matches.length} matches. First match selected.`);
+  console.info(`Found ${matches.length} matches. First match selected.`);
 }
 
 
 function clearHighlights(view) {
-  // Clear selection
+  ensureSearchField(view);
+  view.dispatch({
+    effects: setSearchHighlights.of(Decoration.none)
+  });
   const currentPos = view.state.selection.main.head;
   view.dispatch({
     selection: { anchor: currentPos, head: currentPos }
