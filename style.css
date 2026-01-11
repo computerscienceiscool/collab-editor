@@ -1000,6 +1000,60 @@ html, body {
   border-color: #1f2937;
 }
 
+.theme-dark .modal-dialog {
+  background: #111827;
+  border: 1px solid #1f2937;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.theme-dark .modal-header,
+.theme-dark .modal-footer,
+.theme-dark #user-log .drag-handle {
+  background: #0f172a;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .modal-title {
+  color: #e5e7eb;
+}
+
+.theme-dark .modal-content {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+.theme-dark .modal-content code,
+.theme-dark .modal-content pre {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.theme-dark .modal-close {
+  color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview {
+  background: #0b1224;
+  color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview th {
+  background: #111827;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview td {
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview code {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
 /* Modal System Styles */
 .modal-overlay {
   position: fixed;
