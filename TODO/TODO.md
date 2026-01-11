@@ -26,6 +26,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
+- [ ] 079 - Dark mode: activity log background still white (text is white)
 - [x] 079 - Dark mode: user activity log uses light background
 - [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
 - [x] 081 - Dark mode: editor gutter/line numbers stay light
@@ -111,7 +112,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 026 - Add dark mode toggle
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage
-- [x] 079 - Dark mode: user activity log uses light background
 - [x] 080 - Dark mode: diff viewer/raw diff panes use light backgrounds
 - [x] 081 - Dark mode: editor gutter/line numbers stay light
 - [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
