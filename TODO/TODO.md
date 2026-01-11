@@ -33,20 +33,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
 - [x] 083 - Dark mode: markdown preview background stays light
 
-## Low (Legacy / Backlog)
-- [ ] 012 - Legacy (Yjs): Observe changes using `.observe` and `.observeDeep`
-- [ ] 013 - Legacy (Yjs): Handle nested types like `Y.Array` inside `Y.Map`
-- [ ] 014 - Legacy (Yjs): Test encoding for JSON and binary formats
-- [ ] 015 - Legacy (Yjs): Use `ydoc.transact` for grouped mutations
-- [ ] 016 - Legacy (Yjs): Understand transaction lifecycle events
-- [ ] 017 - Legacy: Use `Y.Map` or `Y.Array` to hold multiple documents
-- [ ] 018 - Legacy: Support adding/removing documents dynamically
-- [ ] 019 - Legacy: Include metadata such as title and timestamps
-- [ ] 020 - Legacy: Build a minimal multi-document interface
-- [ ] 021 - Legacy (Yjs): Store Yjs updates in a full backend database
-- [ ] 022 - Legacy (Yjs): Add Redis sync using `y-redis`
-- [ ] 023 - Legacy (Yjs): Learn to build a custom provider with `y-protocols/awareness`
-
 ## Done
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
 - [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
