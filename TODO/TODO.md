@@ -25,7 +25,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [x] 084 - Add user-facing error banner for load/save/fetch failures
 
 ## Done
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
@@ -98,3 +97,4 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 081 - Dark mode: editor gutter/line numbers stay light
 - [x] 082 - Dark mode: keyboard shortcuts dialog background stays light
 - [x] 083 - Dark mode: markdown preview background stays light
+- [x] 084 - Add user-facing error banner for load/save/fetch failures
