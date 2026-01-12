@@ -240,16 +240,6 @@ async function initApp() {
   const activityLog = document.getElementById('user-log');
   const setLogThemeVars = (mode) => {
     const isDark = mode === 'dark';
-    root.style.setProperty('--user-log-bg', isDark ? '#0b1224' : '#ffffff');
-    root.style.setProperty('--user-log-border', isDark ? '#1f2937' : '#dadce0');
-    root.style.setProperty('--user-log-text', isDark ? '#e5e7eb' : '#333333');
-    root.style.setProperty('--user-log-handle-bg', isDark ? '#0f172a' : '#f8f9fa');
-    root.style.setProperty('--user-log-handle-border', isDark ? '#1f2937' : '#dadce0');
-    root.style.setProperty('--user-log-handle-text', isDark ? '#e5e7eb' : '#3c4043');
-    root.style.setProperty('--user-log-handle-hover', isDark ? '#111827' : '#e8eaed');
-  };
-  const applyLogTheme = (mode) => {
-    const isDark = mode === 'dark';
     const bg = isDark ? '#0b1224' : '#ffffff';
     const border = isDark ? '#1f2937' : '#dadce0';
     const text = isDark ? '#e5e7eb' : '#333333';
@@ -258,25 +248,36 @@ async function initApp() {
     const handleText = isDark ? '#e5e7eb' : '#3c4043';
     const handleHover = isDark ? '#111827' : '#e8eaed';
 
-    setLogThemeVars(mode);
+    root.style.setProperty('--user-log-bg', bg);
+    root.style.setProperty('--user-log-border', border);
+    root.style.setProperty('--user-log-text', text);
+    root.style.setProperty('--user-log-handle-bg', handleBg);
+    root.style.setProperty('--user-log-handle-border', handleBorder);
+    root.style.setProperty('--user-log-handle-text', handleText);
+    root.style.setProperty('--user-log-handle-hover', handleHover);
+
+    return { bg, border, text, handleBg, handleBorder, handleText, handleHover };
+  };
+  const applyLogTheme = (mode) => {
+    const { bg, border, text, handleBg, handleBorder, handleText, handleHover } = setLogThemeVars(mode);
 
     if (activityLog) {
-      activityLog.style.backgroundColor = bg;
-      activityLog.style.borderColor = border;
-      activityLog.style.color = text;
+      activityLog.style.setProperty('background-color', bg, 'important');
+      activityLog.style.setProperty('border-color', border, 'important');
+      activityLog.style.setProperty('color', text, 'important');
     }
 
     const logEntries = document.getElementById('log-entries');
     if (logEntries) {
-      logEntries.style.backgroundColor = bg;
-      logEntries.style.color = text;
+      logEntries.style.setProperty('background-color', bg, 'important');
+      logEntries.style.setProperty('color', text, 'important');
     }
 
     const logHandle = document.getElementById('log-drag-handle');
     if (logHandle) {
-      logHandle.style.backgroundColor = handleBg;
-      logHandle.style.borderColor = handleBorder;
-      logHandle.style.color = handleText;
+      logHandle.style.setProperty('background-color', handleBg, 'important');
+      logHandle.style.setProperty('border-color', handleBorder, 'important');
+      logHandle.style.setProperty('color', handleText, 'important');
       logHandle.dataset.hoverColor = handleHover;
     }
   };
@@ -296,6 +297,11 @@ async function initApp() {
   };
   const storedTheme = localStorage.getItem('theme');
   applyTheme(storedTheme === 'dark' ? 'dark' : 'light');
+  const syncActivityLogTheme = () => {
+    const mode = root.classList.contains('theme-dark') ? 'dark' : 'light';
+    applyLogTheme(mode);
+  };
+  window.syncActivityLogTheme = syncActivityLogTheme;
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
       const next = root.classList.contains('theme-dark') ? 'light' : 'dark';
@@ -622,6 +628,9 @@ async function initApp() {
     toggleLogBtn.addEventListener('click', () => {
       const visible = logPanel.style.display !== 'none';
       logPanel.style.display = visible ? 'none' : 'block';
+      if (typeof window.syncActivityLogTheme === 'function') {
+        window.syncActivityLogTheme();
+      }
     });
   }
   

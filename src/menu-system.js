@@ -279,6 +279,10 @@ class MenuSystem {
       toggleText.textContent = 'Hide Activity Log';
     }
 
+    if (window.syncActivityLogTheme) {
+      window.syncActivityLogTheme();
+    }
+
     // Also trigger the old toggle log button for compatibility
     const oldToggleButton = document.getElementById('toggle-log');
     if (oldToggleButton) {
