@@ -248,6 +248,39 @@ async function initApp() {
     root.style.setProperty('--user-log-handle-text', isDark ? '#e5e7eb' : '#3c4043');
     root.style.setProperty('--user-log-handle-hover', isDark ? '#111827' : '#e8eaed');
   };
+  const applyLogTheme = (mode) => {
+    const isDark = mode === 'dark';
+    const bg = isDark ? '#0b1224' : '#ffffff';
+    const border = isDark ? '#1f2937' : '#dadce0';
+    const text = isDark ? '#e5e7eb' : '#333333';
+    const handleBg = isDark ? '#0f172a' : '#f8f9fa';
+    const handleBorder = border;
+    const handleText = isDark ? '#e5e7eb' : '#3c4043';
+    const handleHover = isDark ? '#111827' : '#e8eaed';
+
+    setLogThemeVars(mode);
+
+    if (activityLog) {
+      activityLog.style.backgroundColor = bg;
+      activityLog.style.borderColor = border;
+      activityLog.style.color = text;
+    }
+
+    const logEntries = document.getElementById('log-entries');
+    if (logEntries) {
+      logEntries.style.backgroundColor = bg;
+      logEntries.style.color = text;
+    }
+
+    const logHandle = document.getElementById('log-drag-handle');
+    if (logHandle) {
+      logHandle.style.backgroundColor = handleBg;
+      logHandle.style.borderColor = handleBorder;
+      logHandle.style.color = handleText;
+      logHandle.dataset.hoverColor = handleHover;
+    }
+  };
+
   const applyTheme = (mode) => {
     if (mode === 'dark') {
       root.classList.add('theme-dark');
@@ -258,7 +291,7 @@ async function initApp() {
       if (activityLog) activityLog.classList.remove('theme-dark');
       if (themeToggle) themeToggle.textContent = '🌙';
     }
-    setLogThemeVars(mode);
+    applyLogTheme(mode);
     localStorage.setItem('theme', mode);
   };
   const storedTheme = localStorage.getItem('theme');
