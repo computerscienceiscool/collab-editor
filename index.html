@@ -1093,13 +1093,30 @@ async handleViewDiffs() {
               
               logPanel.style.setProperty('width', '280px', 'important');
               logPanel.style.setProperty('height', '400px', 'important');
-              logPanel.style.setProperty('background', 'white', 'important');
-              logPanel.style.setProperty('border', '1px solid #dadce0', 'important');
+              const rootStyles = getComputedStyle(document.documentElement);
+              const bg = (rootStyles.getPropertyValue('--user-log-bg') || 'white').trim();
+              const borderColor = (rootStyles.getPropertyValue('--user-log-border') || '#dadce0').trim();
+              const handleBg = (rootStyles.getPropertyValue('--user-log-handle-bg') || '#f8f9fa').trim();
+              const handleText = (rootStyles.getPropertyValue('--user-log-handle-text') || '#3c4043').trim();
+              const handleBorder = (rootStyles.getPropertyValue('--user-log-handle-border') || borderColor).trim();
+              logPanel.style.setProperty('background', bg, 'important');
+              logPanel.style.setProperty('border', `1px solid ${borderColor}`, 'important');
               logPanel.style.setProperty('borderRadius', '8px', 'important');
               logPanel.style.setProperty('boxShadow', '0 4px 16px rgba(0,0,0,0.15)', 'important');
               logPanel.style.setProperty('padding', '0', 'important'); // No padding since we have the drag handle
               logPanel.style.setProperty('overflowY', 'auto', 'important');
               logPanel.style.setProperty('zIndex', '9999', 'important');
+
+              const dragHandle = document.getElementById('log-drag-handle');
+              if (dragHandle) {
+                dragHandle.style.setProperty('background', handleBg, 'important');
+                dragHandle.style.setProperty('color', handleText, 'important');
+                dragHandle.style.setProperty('borderBottom', `1px solid ${handleBorder}`, 'important');
+              }
+              
+              if (window.syncActivityLogTheme) {
+                window.syncActivityLogTheme();
+              }
               
               console.log('Applied styles with !important, final position:', logPanel.style.top, logPanel.style.left);
               
