@@ -13,6 +13,16 @@ html, body {
   background: #f8f9fa;
 }
 
+:root {
+  --user-log-bg: #ffffff;
+  --user-log-border: #dadce0;
+  --user-log-text: #333333;
+  --user-log-handle-bg: #f8f9fa;
+  --user-log-handle-border: #dadce0;
+  --user-log-handle-text: #3c4043;
+  --user-log-handle-hover: #e8eaed;
+}
+
 /* Menu Bar Styles */
 .menu-bar {
   background: white;
@@ -560,8 +570,8 @@ html, body {
   top: 120px !important;
   width: 280px !important;
   height: 400px !important;
-  background: white !important;
-  border: 1px solid #dadce0 !important;
+  background: var(--user-log-bg) !important;
+  border: 1px solid var(--user-log-border) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
   padding: 16px !important;
@@ -577,7 +587,7 @@ html, body {
 #user-log h3 {
   margin-top: 0 !important;
   margin-bottom: 12px !important;
-  color: #333 !important;
+  color: var(--user-log-text) !important;
   font-size: 16px !important;
 }
 
@@ -977,6 +987,13 @@ html, body {
 
 .theme-dark {
   color-scheme: dark;
+  --user-log-bg: #0b1224;
+  --user-log-border: #1f2937;
+  --user-log-text: #e5e7eb;
+  --user-log-handle-bg: #0f172a;
+  --user-log-handle-border: #1f2937;
+  --user-log-handle-text: #e5e7eb;
+  --user-log-handle-hover: #111827;
 }
 
 .theme-dark body {
@@ -1024,16 +1041,6 @@ html, body {
   background: #1f2937;
 }
 
-.theme-dark #user-log {
-  background: #0b1224 !important;
-  border-color: #1f2937 !important;
-  color: #e5e7eb !important;
-}
-
-.theme-dark #user-log h3 {
-  color: #e5e7eb !important;
-}
-
 .theme-dark .cm-gutters {
   background: #0b1224;
   color: #94a3b8;
@@ -1047,8 +1054,7 @@ html, body {
 }
 
 .theme-dark .modal-header,
-.theme-dark .modal-footer,
-.theme-dark #user-log .drag-handle {
+.theme-dark .modal-footer {
   background: #0f172a;
   border-color: #1f2937;
   color: #e5e7eb;
@@ -1100,10 +1106,6 @@ html, body {
 
 .theme-dark .modal-overlay {
   background: rgba(0, 0, 0, 0.65);
-}
-
-.theme-dark #user-log .drag-handle:hover {
-  background: #111827;
 }
 
 .theme-dark .preferences-dialog {
@@ -1338,42 +1340,47 @@ html, body {
   cursor: move;
   user-select: none;
   padding: 8px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #dadce0;
+  background: var(--user-log-handle-bg);
+  border-bottom: 1px solid var(--user-log-handle-border);
   font-weight: 500;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: var(--user-log-handle-text);
 }
 
 #user-log .drag-handle:hover {
-  background: #e8eaed;
+  background: var(--user-log-handle-hover);
 }
 
-/* Force dark theme on activity log when element has theme-dark class */
-#user-log.theme-dark {
-  background: #0b1224 !important;
-  border-color: #1f2937 !important;
-  color: #e5e7eb !important;
+#user-log.theme-dark,
+.theme-dark #user-log {
+  background: var(--user-log-bg) !important;
+  border-color: var(--user-log-border) !important;
+  color: var(--user-log-text) !important;
 }
 
-#user-log.theme-dark h3 {
-  color: #e5e7eb !important;
+#user-log.theme-dark h3,
+.theme-dark #user-log h3 {
+  color: var(--user-log-text) !important;
 }
 
-#user-log.theme-dark .drag-handle {
-  background: #0f172a;
-  border-color: #1f2937;
-  color: #e5e7eb;
+#user-log.theme-dark .drag-handle,
+.theme-dark #user-log .drag-handle {
+  background: var(--user-log-handle-bg);
+  border-color: var(--user-log-handle-border);
+  color: var(--user-log-handle-text);
 }
 
-#user-log.theme-dark .drag-handle:hover {
-  background: #111827;
+#user-log.theme-dark .drag-handle:hover,
+.theme-dark #user-log .drag-handle:hover {
+  background: var(--user-log-handle-hover);
 }
 
-#user-log.theme-dark #log-entries {
-  background: #0b1224;
-  color: #e5e7eb;
+#user-log.theme-dark #log-entries,
+.theme-dark #user-log #log-entries {
+  background: var(--user-log-bg);
+  color: var(--user-log-text);
 }
 
 #user-log.dragging {
