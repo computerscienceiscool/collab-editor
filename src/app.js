@@ -12,6 +12,7 @@ import { setupTypingIndicator } from './ui/typingIndicator.js';
 import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
+import { showErrorBanner } from './ui/errors.js';
 
 // 0. Version storage functions
 async function saveVersionToIndexedDB(content, timestamp, docId) {
@@ -146,16 +147,32 @@ async function initApp() {
 
   // Initialize WASM FIRST
   console.log("Initializing Rust WASM...");
-  await initWasm();
-  console.log("Rust WASM ready!");
+  try {
+    await initWasm();
+    console.log("Rust WASM ready!");
+  } catch (err) {
+    console.error("Failed to initialize Rust WASM:", err);
+    showErrorBanner("Failed to load Rust WASM. Try `make wasm` and reload.");
+    return;
+  }
 
   // Then initialize Grokker WASM
   console.log("Initializing Grokker WASM...");
-  await initGrokkerWasm();
+  try {
+    await initGrokkerWasm();
+  } catch (err) {
+    console.error("Failed to initialize Grokker WASM:", err);
+    showErrorBanner("Failed to load Grokker WASM. Try `make grokker-wasm`.");
+  }
   
   // Initialize Diff WASM
   console.log("Initializing Diff WASM...");
-  await initDiffWasm();
+  try {
+    await initDiffWasm();
+  } catch (err) {
+    console.error("Failed to initialize Diff WASM:", err);
+    showErrorBanner("Failed to load diff engine. Rebuild WASM and retry.");
+  }
   
   // Add a delay to ensure everything is ready
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -166,7 +183,14 @@ async function initApp() {
   const docParam = urlParams.get('doc');
   
   // 3b. Set up Automerge state: repository, document handle, awareness, etc.
-  const { repo, handle, doc, awareness, documentId, isNew } = await setupAutomerge(docParam);
+  let repo, handle, doc, awareness, documentId, isNew;
+  try {
+    ({ repo, handle, doc, awareness, documentId, isNew } = await setupAutomerge(docParam));
+  } catch (err) {
+    console.error("Could not set up Automerge document:", err);
+    showErrorBanner("Could not load document. Check your connection and refresh.");
+    return;
+  }
   startLastSavedTicker();
   
   // If new document, log the shareable URL

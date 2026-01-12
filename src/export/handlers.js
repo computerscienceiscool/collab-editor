@@ -16,6 +16,7 @@ import {
   promiseGrid,
   getCurrentSessionInfo
 } from '../wasm/initWasm.js';
+import { showErrorBanner } from '../ui/errors.js';
 
 import { undo, redo } from '@codemirror/commands';
 
@@ -350,63 +351,74 @@ function getPromiseGridFilename() {
  * @param {EditorView} view
  */
 async function handleSave(format, handle, view) {
-  let content, blob, filename;
-  
-  // Get current document
-  const doc = await handle.doc();
-  const textContent = doc?.content?.toString() || '';
+  try {
+    let content, blob, filename;
+    
+    // Get current document
+    const doc = await handle.doc();
+    const textContent = doc?.content?.toString() || '';
 
-  switch (format) {
-    case 'txt':
-      content = textContent;
-      blob = new Blob([content], { type: 'text/plain' });
-      filename = getDocumentFilename('txt');
-      break;
+    switch (format) {
+      case 'txt': {
+        content = textContent;
+        blob = new Blob([content], { type: 'text/plain' });
+        filename = getDocumentFilename('txt');
+        break;
+      }
 
-    case 'json':
-      content = JSON.stringify(view.state.toJSON(), null, 2);
-      blob = new Blob([content], { type: 'application/json' });
-      filename = getDocumentFilename('json');
-      break;
+      case 'json': {
+        content = JSON.stringify(view.state.toJSON(), null, 2);
+        blob = new Blob([content], { type: 'application/json' });
+        filename = getDocumentFilename('json');
+        break;
+      }
 
-    case 'cbor':
-      const cborData = {
-        content: textContent,
-        metadata: {
-          document_id: new URLSearchParams(window.location.search).get('doc') || 'default',
-          timestamp: Date.now(),
-          format: 'cbor'
-        }
-      };
-      const encodedCbor = encode(cborData);
-      blob = new Blob([encodedCbor], { type: 'application/cbor' });
-      filename = getDocumentFilename('cbor');
-      break;
+      case 'cbor': {
+        const cborData = {
+          content: textContent,
+          metadata: {
+            document_id: new URLSearchParams(window.location.search).get('doc') || 'default',
+            timestamp: Date.now(),
+            format: 'cbor'
+          }
+        };
+        const encodedCbor = encode(cborData);
+        blob = new Blob([encodedCbor], { type: 'application/cbor' });
+        filename = getDocumentFilename('cbor');
+        break;
+      }
 
-    case 'promisegrid':
-      handlePromiseGridExport(handle, view);
-      return; 
+      case 'promisegrid': {
+        await handlePromiseGridExport(handle, view);
+        return; 
+      }
 
-    case 'automerge':
-      // Export Automerge binary
-      const binary = Automerge.save(doc);
-      blob = new Blob([binary], { type: 'application/octet-stream' });
-      filename = getDocumentFilename('automerge');
-      break;
+      case 'automerge': {
+        // Export Automerge binary
+        const binary = Automerge.save(doc);
+        blob = new Blob([binary], { type: 'application/octet-stream' });
+        filename = getDocumentFilename('automerge');
+        break;
+      }
 
-    case 'automerge-json':
-      // Export Automerge as JSON
-      content = JSON.stringify(doc, null, 2);
-      blob = new Blob([content], { type: 'application/json' });
-      filename = getDocumentFilename('json');
-      break;
+      case 'automerge-json': {
+        // Export Automerge as JSON
+        content = JSON.stringify(doc, null, 2);
+        blob = new Blob([content], { type: 'application/json' });
+        filename = getDocumentFilename('json');
+        break;
+      }
 
-    default:
-      alert('Unsupported export format.');
-      return;
+      default:
+        alert('Unsupported export format.');
+        return;
+    }
+
+    downloadBlob(blob, filename);
+  } catch (error) {
+    console.error('Save/export failed:', error);
+    showErrorBanner('Save failed. Please try again.');
   }
-
-  downloadBlob(blob, filename);
 }
 
 // PromiseGrid export handler
@@ -431,7 +443,8 @@ async function handlePromiseGridExport(handle, view) {
     
   } catch (error) {
     console.error('PromiseGrid export failed:', error);
-    alert('PromiseGrid export failed: ' + error.message);
+    // Surface PromiseGrid export failures in the UI without blocking
+    showErrorBanner('PromiseGrid export failed. Please retry.');
   }
 }
 
