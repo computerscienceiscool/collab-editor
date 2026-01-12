@@ -238,6 +238,16 @@ async function initApp() {
   const root = document.documentElement;
   const themeToggle = document.getElementById('theme-toggle');
   const activityLog = document.getElementById('user-log');
+  const setLogThemeVars = (mode) => {
+    const isDark = mode === 'dark';
+    root.style.setProperty('--user-log-bg', isDark ? '#0b1224' : '#ffffff');
+    root.style.setProperty('--user-log-border', isDark ? '#1f2937' : '#dadce0');
+    root.style.setProperty('--user-log-text', isDark ? '#e5e7eb' : '#333333');
+    root.style.setProperty('--user-log-handle-bg', isDark ? '#0f172a' : '#f8f9fa');
+    root.style.setProperty('--user-log-handle-border', isDark ? '#1f2937' : '#dadce0');
+    root.style.setProperty('--user-log-handle-text', isDark ? '#e5e7eb' : '#3c4043');
+    root.style.setProperty('--user-log-handle-hover', isDark ? '#111827' : '#e8eaed');
+  };
   const applyTheme = (mode) => {
     if (mode === 'dark') {
       root.classList.add('theme-dark');
@@ -248,6 +258,7 @@ async function initApp() {
       if (activityLog) activityLog.classList.remove('theme-dark');
       if (themeToggle) themeToggle.textContent = '🌙';
     }
+    setLogThemeVars(mode);
     localStorage.setItem('theme', mode);
   };
   const storedTheme = localStorage.getItem('theme');
