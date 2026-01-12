@@ -20,7 +20,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 009 - Rust backend: Add basic logging
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 028 - Add error handling for fetch, save, and load failures
-- [ ] 024 - Improve mobile responsiveness
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
@@ -80,6 +79,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 067 - Replace hardcoded values with config (e.g., WebSocket URL, room)
 - [x] 068 - Modularize editor.js into separate concerns
 - [x] 025 - Add a connection status indicator (e.g., "connected", "saving", etc.)
+- [x] 024 - Improve mobile responsiveness
 - [x] 071 - Add logging around Neovim on_lines to debug Copilot sync
 - [x] 072 - Neovim: Tweak browser presence badge (nvim-user bar shows as full-width notification)
 - [x] 074 - Neovim: Allow setting name/color from client and reflect in browser badges
