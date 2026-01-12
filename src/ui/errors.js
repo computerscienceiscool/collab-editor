@@ -8,9 +8,29 @@ export function showErrorBanner(message, duration = 6000) {
     banner = document.createElement('div');
     banner.id = 'error-banner';
     banner.className = 'error-banner hidden';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'error-banner__close';
+    closeBtn.setAttribute('aria-label', 'Dismiss error');
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => {
+      banner.classList.add('hidden');
+      if (hideTimer) clearTimeout(hideTimer);
+    };
+
+    const msgSpan = document.createElement('span');
+    msgSpan.className = 'error-banner__message';
+
+    banner.appendChild(msgSpan);
+    banner.appendChild(closeBtn);
     document.body.prepend(banner);
   }
-  banner.textContent = message;
+  const msgSpan = banner.querySelector('.error-banner__message');
+  if (msgSpan) {
+    msgSpan.textContent = message;
+  } else {
+    banner.textContent = message;
+  }
   banner.classList.remove('hidden');
   banner.classList.add('show');
 
