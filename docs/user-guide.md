@@ -146,6 +146,7 @@ All formatting operations are powered by Rust WebAssembly for maximum performanc
 - **Toggle Markdown Preview (Ctrl+M)**: Show/hide side-by-side markdown preview pane
 - **Update Preview (Ctrl+R)**: Refresh markdown preview with current document text
 - **Full Screen Mode**: Browser fullscreen for distraction-free editing
+- **Dark mode note**: The activity log now follows the selected theme even when opened after toggling dark mode.
 
 ### Keyboard Shortcuts Summary
 
