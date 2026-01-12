@@ -22,6 +22,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 028 - Add error handling for fetch, save, and load failures
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
+- [x] 084 - Add user-facing error banner for load/save/fetch failures
 
 ## Done
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
