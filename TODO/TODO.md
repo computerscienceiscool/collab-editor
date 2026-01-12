@@ -20,6 +20,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 009 - Rust backend: Add basic logging
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 028 - Add error handling for fetch, save, and load failures
+- [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 - [x] 084 - Add user-facing error banner for load/save/fetch failures

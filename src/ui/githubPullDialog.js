@@ -5,6 +5,7 @@
  */
 import { githubService } from '../github/githubService.js';
 import { next as Automerge } from '@automerge/automerge';
+import { showErrorBanner } from './errors.js';
 
 export class GitHubPullDialog {
   constructor() {
@@ -317,6 +318,7 @@ export class GitHubPullDialog {
       }
       this.setStatus('error', `Failed to fetch file: ${error.message}`);
       this.fileContent = null;
+      showErrorBanner('Failed to fetch file from GitHub. Verify token/repo/path.');
     } finally {
       this.setLoading(false);
     }

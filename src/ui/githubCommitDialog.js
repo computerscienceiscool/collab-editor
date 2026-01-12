@@ -4,6 +4,7 @@
  * Handles the process of committing a document to GitHub
  */
 import { githubService } from '../github/githubService.js';
+import { showErrorBanner } from './errors.js';
 
 export class GitHubCommitDialog {
   constructor() {
@@ -769,6 +770,7 @@ export class GitHubCommitDialog {
       }, 3000);
     } catch (error) {
       this.setStatus('error', `Commit failed: ${error.message}`);
+      showErrorBanner('GitHub commit failed. Please try again.');
     } finally {
       this.setLoading(false);
     }

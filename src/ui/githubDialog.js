@@ -4,6 +4,7 @@
  * Provides UI for configuring GitHub integration
  */
 import { githubService } from '../github/githubService.js';
+import { showErrorBanner } from './errors.js';
 
 export class GitHubDialog {
   constructor() {
@@ -314,6 +315,7 @@ export class GitHubDialog {
       
     } catch (error) {
       this.setValidationStatus('error', `Token validation failed: ${error.message}`);
+      showErrorBanner('GitHub token validation failed. Check your token and try again.');
     } finally {
       this.setLoading(false);
     }
@@ -399,6 +401,7 @@ export class GitHubDialog {
       this.setStatus('success', `Fetched ${repos.length} repositories`);
     } catch (error) {
       this.setStatus('error', `Failed to fetch repositories: ${error.message}`);
+      showErrorBanner('GitHub repositories could not be fetched. Verify token and network.');
     } finally {
       this.setLoading(false);
     }
