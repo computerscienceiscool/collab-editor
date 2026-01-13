@@ -16,6 +16,7 @@ M.state = {
   remote_selections = {},  -- track remote selection extmarks
   last_sent_tick = 0,  -- track last changedtick sent to helper
   ignore_changes = false,
+  after_connect = nil, -- deferred action to run after helper connects
 }
 
 -- Configuration defaults
@@ -184,6 +185,11 @@ function M.setup_commands()
   vim.api.nvim_create_user_command('CollabSetColor', function(opts)
     M.set_color(opts.args)
   end, { nargs = 1, desc = 'Set collaboration display color (hex)' })
+
+  -- Testing shortcut: connect (if needed) and open a doc in one step
+  vim.api.nvim_create_user_command('CollabQuick', function(opts)
+    M.quick_connect_open(opts.args)
+  end, { nargs = 1, desc = 'TESTING: Connect and open doc in one step' })
 end
 
 -- Send JSON message to helper
@@ -293,6 +299,7 @@ function M.disconnect()
   M.state.connected = false
   M.state.doc_id = nil
   M.state.user_id = nil
+  M.state.after_connect = nil
 
   if M.state.bufnr then
     M.detach_buffer()
@@ -377,11 +384,17 @@ function M.handle_message(msg)
     M.state.connected = true
     M.state.user_id = msg.userId
     vim.notify('[collab] Connected as ' .. msg.userId, vim.log.levels.INFO)
+    if M.state.after_connect then
+      local cb = M.state.after_connect
+      M.state.after_connect = nil
+      pcall(cb)
+    end
 
   elseif msg.type == 'disconnected' then
     M.state.connected = false
     M.state.doc_id = nil
     vim.notify('[collab] Disconnected', vim.log.levels.INFO)
+    M.state.after_connect = nil
 
   elseif msg.type == 'created' then
     M.state.doc_id = msg.docId
@@ -421,6 +434,33 @@ function M.handle_message(msg)
 
   elseif msg.type == 'error' then
     vim.notify('[collab] Error: ' .. (msg.message or 'unknown'), vim.log.levels.ERROR)
+  end
+end
+
+-- Quick testing helper: connect (if needed) and open a doc
+function M.quick_connect_open(doc_id)
+  if not doc_id or doc_id == '' then
+    vim.notify('[collab] Document ID required', vim.log.levels.ERROR)
+    return
+  end
+
+  local function open_after_connect()
+    M.open_document(doc_id)
+  end
+
+  if M.state.connected then
+    open_after_connect()
+    return
+  end
+
+  M.state.after_connect = open_after_connect
+
+  if not M.state.job_id then
+    M.connect()
+  else
+    if M.config.debug then
+      vim.notify('[collab] Waiting for connect to finish...', vim.log.levels.DEBUG)
+    end
   end
 end
 
@@ -611,6 +651,7 @@ function M.on_exit(code)
   M.state.job_id = nil
   M.state.connected = false
   M.state.doc_id = nil
+  M.state.after_connect = nil
   
   if code ~= 0 then
     vim.notify('[collab] Helper exited with code ' .. code, vim.log.levels.WARN)

@@ -94,6 +94,9 @@ require('collab-editor').setup({
 
 " Disconnect from the server
 :CollabDisconnect
+
+" Testing-only shortcut: connect (if needed) and open a doc in one step
+:CollabQuick 4P1keYUPTG4Lt9bnv5TRdyrvGRZw
 ```
 
 ### Collaborating with Browser Users
@@ -115,6 +118,7 @@ require('collab-editor').setup({
 | `:CollabOpen <id>` | Open an existing document by ID |
 | `:CollabClose` | Close the current collaborative document |
 | `:CollabInfo` | Display connection status and document info |
+| `:CollabQuick <id>` | **Testing only**: Connect (if needed) and open doc in one step |
 
 ## Configuration
 
