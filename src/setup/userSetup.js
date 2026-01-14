@@ -37,8 +37,18 @@ export function setupUserControls(awareness) {
     updateAwarenessAndDisplay(nameInput.value, color);
   });
 
+  function normalizeHex(color) {
+    if (typeof color !== 'string') return null;
+    const trimmed = color.trim();
+    if (/^#([0-9a-fA-F]{6})$/.test(trimmed)) {
+      return `#${trimmed.slice(1).toLowerCase()}`;
+    }
+    return null;
+  }
+
   function updateAwarenessAndDisplay(name, color) {
-    awareness.setLocalStateField('user', { name, color });
+    const normalizedColor = normalizeHex(color) || '#8338ec'; // fallback purple if somehow invalid
+    awareness.setLocalStateField('user', { name, color: normalizedColor });
     const display = document.querySelector('#local-username');
     if (display) {
       display.textContent = `Current User: ${name}`;

@@ -17,6 +17,7 @@ M.state = {
   last_sent_tick = 0,  -- track last changedtick sent to helper
   ignore_changes = false,
   after_connect = nil, -- deferred action to run after helper connects
+  cursor_highlights = {}, -- memoized highlight groups keyed by user
 }
 
 -- Configuration defaults
@@ -28,6 +29,67 @@ M.config = {
   user_color = nil,
   debug = false,
 }
+
+-- Per-user highlight groups: use browser hex if valid, otherwise deterministic palette; defines both GUI and cterm colors so boxes render.
+local function user_highlight_groups(user_id, color)
+  -- Normalize browser hex if present.
+  local normalized = nil
+  if type(color) == 'string' then
+    local trimmed = color:match('^%s*(.-)%s*$')
+    if trimmed and trimmed:match('^#%x%x%x%x%x%x$') then
+      normalized = trimmed:lower()
+    end
+  end
+
+  -- Deterministic fallback palette if the color is missing/invalid.
+  local palette = { '#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#AA96DA', '#FCBAD3', '#A8D8EA', '#06d6a0' }
+  local chosen = normalized
+  if not chosen then
+    local uid = tostring(user_id or 'user')
+    local sum = 0
+    for i = 1, #uid do
+      sum = sum + string.byte(uid, i)
+    end
+    chosen = palette[(sum % #palette) + 1]
+  end
+
+  -- Map hex to a cterm approximation for non-truecolor terminals.
+  local function hex_to_cterm(hex)
+    local r = tonumber(hex:sub(2, 3), 16)
+    local g = tonumber(hex:sub(4, 5), 16)
+    local b = tonumber(hex:sub(6, 7), 16)
+    if not r or not g or not b then return nil end
+    local function to_cube(v) return math.floor((v / 255) * 5 + 0.5) end
+    return 16 + 36 * to_cube(r) + 6 * to_cube(g) + to_cube(b)
+  end
+
+  local safe_user = (user_id or 'user'):gsub('[^%w]', '_')
+  local label_group = 'CollabCursorLabel_' .. safe_user
+  local select_group = 'CollabCursorSel_' .. safe_user
+
+  local function ensure_group(name, fg, bg)
+    if M.state.cursor_highlights[name] == bg then
+      return name
+    end
+    local attrs = { fg = fg, bg = bg, bold = true, default = false }
+    local cterm = hex_to_cterm(bg)
+    if cterm then
+      attrs.ctermbg = cterm
+      attrs.ctermfg = 0
+      attrs.cterm = { bold = true }
+    end
+    local ok = pcall(vim.api.nvim_set_hl, 0, name, attrs)
+    if not ok or vim.fn.hlexists(name) == 0 then
+      return nil
+    end
+    M.state.cursor_highlights[name] = bg
+    return name
+  end
+
+  local label = ensure_group(label_group, '#000000', chosen) or 'Search'
+  local select = ensure_group(select_group, '#000000', chosen) or 'Visual'
+  return label, select
+end
 
 -- Setup function called by user in their init.lua
 function M.setup(opts)
@@ -120,29 +182,37 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
     return last_row, math.min(clamped - offset, #last_line)
   end
 
-  local cursor_row, cursor_col = offset_to_pos(anchor or 0)
+  -- Normalize remote offsets (JSON null becomes vim.NIL userdata); default to 0.
+  local anchor_num = tonumber(anchor) or 0
+  local head_num = tonumber(head)
+
+  local cursor_row, cursor_col = offset_to_pos(anchor_num)
+
+  local label_hl, select_hl = user_highlight_groups(user_id, color)
 
   local selection_mark_id = nil
-  if head ~= nil and head ~= anchor then
-    local start_off = clamp_offset(math.min(anchor or 0, head))
-    local end_off = clamp_offset(math.max(anchor or 0, head))
+  if head_num ~= nil and head_num ~= anchor_num then
+    local start_off = clamp_offset(math.min(anchor_num, head_num))
+    local end_off = clamp_offset(math.max(anchor_num, head_num))
     local start_row, start_col = offset_to_pos(start_off)
     local end_row, end_col = offset_to_pos(end_off)
 
     selection_mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, start_row, start_col, {
       end_line = end_row,
       end_col = end_col,
-      hl_group = "Visual",
-      priority = 90,
+      hl_group = select_hl,
+      hl_mode = 'combine',
+      priority = 200,
     })
   end
   
   -- Create extmark with virtual text
   local display_name = shorten_label(name) or shorten_label(user_id) or "user"
   local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_col, {
-    virt_text = {{ " " .. display_name .. " ", "Search" }},
+    virt_text = {{ " " .. display_name .. " ", label_hl }},
     virt_text_pos = "overlay",
-    priority = 100,
+    hl_mode = 'combine',
+    priority = 300,
   })
   
   M.state.remote_cursors[user_id] = mark_id
