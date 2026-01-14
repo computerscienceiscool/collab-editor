@@ -22,7 +22,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 093 - Fix IndexedDB unbounded storage growth (versions-${docId} databases)
 - [ ] 094 - Make version limit configurable (hardcoded 50 in app.js)
 - [ ] 095 - Fix multiple event listeners per component (awareness.on leaks on reload)
-- [ ] 096 - Add debouncing for document stats (WASM call on every keystroke)
 - [ ] 097 - Clean up disconnected user states from awareness (memory leak)
 - [ ] 098 - Fix GitHub token storage security (XSS risk via localStorage)
 
@@ -60,6 +59,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 096 - Add debouncing for document stats (WASM call on every keystroke)
 - [x] 108 - Deduplicate getClientID() across modules
 - [x] 088 - Fix menu system event listener memory leak (click handlers never removed)
 - [x] 028 - Add error handling for fetch, save, and load failures
