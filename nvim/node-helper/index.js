@@ -350,7 +350,9 @@ async function handleMessage(msg) {
 
         try {
           handle.change(d => {
-            d.content = newContent;
+            // Use Automerge.updateText for proper CRDT merge (not full replacement)
+            // This ensures offline edits merge correctly on reconnect
+            Automerge.updateText(d, ['content'], newContent);
           });
           log(`Edit applied (${newContent.length} chars)`);
         } catch (err) {

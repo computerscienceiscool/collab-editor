@@ -8,9 +8,8 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
 ## Critical
-- [ ] 121 - Neovim: Offline edits lost on reconnect (uses full replacement instead of Automerge.updateText)
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
-- [ ] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
+- [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
 
 ## High
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
@@ -52,6 +51,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 121 - Neovim: Fix offline edits lost on reconnect (use Automerge.updateText)
 - [x] 098 - Fix GitHub token storage security (obfuscation for localStorage)
 - [x] 092 - Add heartbeat/keepalive for awareness WebSocket
 - [x] 093 - BY DESIGN: Keep all IndexedDB databases (no cleanup)
