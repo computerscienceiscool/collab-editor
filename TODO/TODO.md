@@ -26,13 +26,11 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [ ] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters
 - [ ] 100 - Add ARIA labels and keyboard navigation for accessibility
 - [ ] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)
 - [ ] 102 - Rust backend: Add document routing by ID (currently all saves overwrite doc.yjs)
 - [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
 - [ ] 105 - Add user-visible error messages for all failure modes
-- [ ] 106 - Standardize logging format (create shared logger utility)
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -49,6 +47,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters
+- [x] 106 - Standardize logging format (create shared logger utility)
 - [x] 103 - Add timeout handling for awareness server connection
 - [x] 091 - Add awareness WebSocket reconnection with exponential backoff
 - [x] 121 - Neovim: Fix offline edits lost on reconnect (use Automerge.updateText)

@@ -152,7 +152,7 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
 
   local total_len = 0
   for i, line in ipairs(lines) do
-    total_len = total_len + #line
+    total_len = total_len + vim.fn.strchars(line)  -- Use character count, not bytes
     if i < #lines then
       total_len = total_len + 1
     end
@@ -169,7 +169,7 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
     local target_col = 0
 
     for i, line in ipairs(lines) do
-      local line_len = #line + 1  -- +1 for newline
+      local line_len = vim.fn.strchars(line) + 1  -- +1 for newline, use char count not bytes
       if offset + line_len > clamped then
         target_row = i - 1
         target_col = clamped - offset
@@ -180,14 +180,25 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
 
     local last_row = math.max(0, #lines - 1)
     local last_line = lines[#lines] or ""
-    return last_row, math.min(clamped - offset, #last_line)
+    return last_row, math.min(clamped - offset, vim.fn.strchars(last_line))
+  end
+
+  -- Convert character column to byte column for extmarks
+  local function char_to_byte_col(row, char_col)
+    if char_col <= 0 then return 0 end
+    local line = lines[row + 1] or ""  -- row is 0-indexed
+    if char_col >= vim.fn.strchars(line) then return #line end
+    -- Get substring by character count and return byte length
+    local substr = vim.fn.strcharpart(line, 0, char_col)
+    return #substr
   end
 
   -- Normalize remote offsets (JSON null becomes vim.NIL userdata); default to 0.
   local anchor_num = tonumber(anchor) or 0
   local head_num = tonumber(head)
 
-  local cursor_row, cursor_col = offset_to_pos(anchor_num)
+  local cursor_row, cursor_char_col = offset_to_pos(anchor_num)
+  local cursor_byte_col = char_to_byte_col(cursor_row, cursor_char_col)
 
   local label_hl, select_hl = user_highlight_groups(user_id, color)
 
@@ -195,21 +206,24 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
   if head_num ~= nil and head_num ~= anchor_num then
     local start_off = clamp_offset(math.min(anchor_num, head_num))
     local end_off = clamp_offset(math.max(anchor_num, head_num))
-    local start_row, start_col = offset_to_pos(start_off)
-    local end_row, end_col = offset_to_pos(end_off)
+    local start_row, start_char_col = offset_to_pos(start_off)
+    local end_row, end_char_col = offset_to_pos(end_off)
+    -- Convert character columns to byte columns for extmarks
+    local start_byte_col = char_to_byte_col(start_row, start_char_col)
+    local end_byte_col = char_to_byte_col(end_row, end_char_col)
 
-    selection_mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, start_row, start_col, {
+    selection_mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, start_row, start_byte_col, {
       end_line = end_row,
-      end_col = end_col,
+      end_col = end_byte_col,
       hl_group = select_hl,
       hl_mode = 'combine',
       priority = 200,
     })
   end
-  
+
   -- Create extmark with virtual text
   local display_name = shorten_label(name) or shorten_label(user_id) or "user"
-  local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_col, {
+  local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_byte_col, {
     virt_text = {{ " " .. display_name .. " ", label_hl }},
     virt_text_pos = "overlay",
     hl_mode = 'combine',
@@ -616,20 +630,31 @@ function M.attach_buffer(initial_content)
         all_lines = { '' }
       end
 
-      local function clamp_pos(lnum, c)
-        local lnum_clamped = math.max(1, math.min(lnum, #all_lines))
-        local line = all_lines[lnum_clamped] or ""
-        local col_clamped = math.max(0, math.min(c, #line))
-        return lnum_clamped, col_clamped
+      -- Convert byte column to character column
+      local function byte_to_char_col(line, byte_col)
+        if byte_col <= 0 then return 0 end
+        if byte_col >= #line then return vim.fn.strchars(line) end
+        -- Get substring up to byte position and count characters
+        local substr = string.sub(line, 1, byte_col)
+        return vim.fn.strchars(substr)
       end
 
-      local function offset_from_pos(lnum, c)
-        local lnum_clamped, col_clamped = clamp_pos(lnum, c)
+      local function clamp_pos(lnum, byte_c)
+        local lnum_clamped = math.max(1, math.min(lnum, #all_lines))
+        local line = all_lines[lnum_clamped] or ""
+        local byte_clamped = math.max(0, math.min(byte_c, #line))
+        -- Convert byte column to character column
+        local char_col = byte_to_char_col(line, byte_clamped)
+        return lnum_clamped, char_col
+      end
+
+      local function offset_from_pos(lnum, byte_c)
+        local lnum_clamped, char_col = clamp_pos(lnum, byte_c)
         local offset = 0
         for i = 1, lnum_clamped - 1 do
-          offset = offset + #all_lines[i] + 1
+          offset = offset + vim.fn.strchars(all_lines[i]) + 1  -- Use char count, not bytes
         end
-        return offset + col_clamped
+        return offset + char_col
       end
 
       local offset = offset_from_pos(row, col)
