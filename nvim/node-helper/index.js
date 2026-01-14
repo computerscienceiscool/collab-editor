@@ -32,6 +32,7 @@ let userColor = '#88cc88';
 let currentDocId = null;
 let isApplyingRemote = false;
 let currentSelection = { anchor: 0 };
+let changeHandler = null;  // Track change listener for cleanup
 
 // Storage directory for Automerge data
 const storageDir = path.join(os.homedir(), '.local', 'share', 'collab-editor', 'automerge-data');
@@ -213,6 +214,11 @@ async function handleMessage(msg) {
       }
 
       case 'disconnect': {
+        // Clean up change listener
+        if (handle && changeHandler) {
+          handle.off('change', changeHandler);
+          changeHandler = null;
+        }
         if (handle) {
           handle = null;
         }
@@ -279,19 +285,24 @@ async function handleMessage(msg) {
           // If empty, wait for sync server to send the real content
           if (content === '') {
             log('Local storage empty, waiting for sync...');
-            
-            content = await new Promise((resolve, reject) => {
+
+            content = await new Promise((resolve) => {
               const timeout = setTimeout(() => {
+                handle.off('change', syncHandler);
                 resolve('');
               }, 8000);
-              
-              handle.on('change', ({ doc }) => {
+
+              // Named handler so we can remove it after sync
+              const syncHandler = ({ doc }) => {
                 const c = contentToString(doc);
                 if (c !== '') {
                   clearTimeout(timeout);
+                  handle.off('change', syncHandler);
                   resolve(c);
                 }
-              });
+              };
+
+              handle.on('change', syncHandler);
             });
           }
 
@@ -336,16 +347,25 @@ async function handleMessage(msg) {
         }
 
         const newContent = msg.content;
-        
-        handle.change(d => {
-          d.content = newContent;
-        });
-        
-        log(`Edit applied (${newContent.length} chars)`);
+
+        try {
+          handle.change(d => {
+            d.content = newContent;
+          });
+          log(`Edit applied (${newContent.length} chars)`);
+        } catch (err) {
+          send({ type: 'error', message: `Edit failed: ${err.message}` });
+          log(`Edit failed: ${err.message}`);
+        }
         break;
       }
 
       case 'close': {
+        // Clean up change listener before releasing handle
+        if (handle && changeHandler) {
+          handle.off('change', changeHandler);
+          changeHandler = null;
+        }
         handle = null;
         send({ type: 'closed' });
         log('Document closed');
@@ -408,28 +428,61 @@ async function handleMessage(msg) {
 
 /**
  * Setup listener for remote changes
+ * Removes previous listener to prevent accumulation
  */
 function setupChangeListener() {
   if (!handle) return;
 
-  handle.on('change', ({ doc }) => {
+  // Remove previous listener to prevent accumulation
+  if (changeHandler) {
+    handle.off('change', changeHandler);
+    changeHandler = null;
+  }
+
+  // Create named handler for cleanup capability
+  changeHandler = ({ doc }) => {
     const content = contentToString(doc);
-    
+
     isApplyingRemote = true;
     send({ type: 'changed', content: content });
     isApplyingRemote = false;
-    
+
     log(`Remote change received (${content.length} chars)`);
-  });
+  };
+
+  handle.on('change', changeHandler);
+}
+
+// Message queue for serialized processing
+// Prevents concurrent handleMessage() calls during rapid input (e.g., offline reconnect)
+const messageQueue = [];
+let isProcessingQueue = false;
+
+async function processQueue() {
+  if (isProcessingQueue) return;
+  isProcessingQueue = true;
+
+  while (messageQueue.length > 0) {
+    const msg = messageQueue.shift();
+    try {
+      await handleMessage(msg);
+    } catch (e) {
+      send({ type: 'error', message: `Handler error: ${e.message}` });
+      log(`Handler error: ${e.message}`);
+    }
+  }
+
+  isProcessingQueue = false;
 }
 
 // Process stdin line by line
-rl.on('line', async (line) => {
+rl.on('line', (line) => {
   if (!line.trim()) return;
-  
+
   try {
     const msg = JSON.parse(line);
-    await handleMessage(msg);
+    messageQueue.push(msg);
+    processQueue();
   } catch (e) {
     send({ type: 'error', message: `Parse error: ${e.message}` });
     log(`Parse error: ${e.message}`);

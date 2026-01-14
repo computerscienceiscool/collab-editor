@@ -18,6 +18,7 @@ M.state = {
   ignore_changes = false,
   after_connect = nil, -- deferred action to run after helper connects
   cursor_highlights = {}, -- memoized highlight groups keyed by user
+  autocmd_group = nil,  -- augroup for buffer autocmds (cleanup on detach)
 }
 
 -- Configuration defaults
@@ -540,6 +541,14 @@ function M.attach_buffer(initial_content)
   M.state.bufnr = bufnr
   M.state.last_sent_tick = vim.api.nvim_buf_get_changedtick(bufnr)
 
+  -- Clean up previous autocmds if any
+  if M.state.autocmd_group then
+    pcall(vim.api.nvim_del_augroup_by_id, M.state.autocmd_group)
+  end
+
+  -- Create augroup for this buffer's autocmds (enables cleanup on detach)
+  M.state.autocmd_group = vim.api.nvim_create_augroup('CollabEditor_' .. bufnr, { clear = true })
+
   -- Set buffer content
   M.state.ignore_changes = true
   local lines = vim.split(initial_content, '\n', { plain = true })
@@ -550,7 +559,7 @@ function M.attach_buffer(initial_content)
   vim.bo[bufnr].modified = false
   vim.bo[bufnr].buftype = 'nofile'
 
-  -- Attach to buffer changes
+  -- Send buffer content to helper (debounced by changedtick)
   local function send_buffer_if_changed(reason)
     if M.state.ignore_changes then
       if M.config.debug then
@@ -570,26 +579,21 @@ function M.attach_buffer(initial_content)
     end
     M.state.last_sent_tick = tick
 
-    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-    local content = table.concat(lines, '\n')
+    local buf_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local content = table.concat(buf_lines, '\n')
     if M.config.debug then
       vim.notify(string.format('[collab] send (%s): tick %d len %d', reason or 'unknown', tick, #content), vim.log.levels.DEBUG)
     end
     M.send({ type = 'edit', content = content })
   end
 
+  -- Attach to buffer changes using on_lines only (not on_bytes - avoid duplicates)
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(_, buf, _, _, _, _, _)
       if buf ~= bufnr then
         return
       end
       send_buffer_if_changed('on_lines')
-    end,
-    on_bytes = function(_, buf, _, _, _, _, _, _)
-      if buf ~= bufnr then
-        return
-      end
-      send_buffer_if_changed('on_bytes')
     end,
     on_detach = function()
       if M.state.bufnr == bufnr then
@@ -598,15 +602,9 @@ function M.attach_buffer(initial_content)
     end,
   })
 
-  vim.api.nvim_create_autocmd({'TextChanged', 'TextChangedI'}, {
-    buffer = bufnr,
-    callback = function()
-      send_buffer_if_changed('TextChanged')
-    end,
-  })
-
-  -- Track cursor movements
+  -- Track cursor movements (in augroup for cleanup)
   vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI'}, {
+    group = M.state.autocmd_group,
     buffer = bufnr,
     callback = function()
       local cursor = vim.api.nvim_win_get_cursor(0)
@@ -659,7 +657,6 @@ function M.attach_buffer(initial_content)
     end,
   })
 
-
   if M.config.debug then
     vim.notify('[collab] Attached to buffer ' .. bufnr, vim.log.levels.DEBUG)
   end
@@ -667,10 +664,16 @@ end
 
 -- Detach from current buffer
 function M.detach_buffer()
+  -- Clean up autocmds
+  if M.state.autocmd_group then
+    pcall(vim.api.nvim_del_augroup_by_id, M.state.autocmd_group)
+    M.state.autocmd_group = nil
+  end
+
   M.state.bufnr = nil
   M.state.remote_cursors = {}
   M.state.remote_selections = {}
-  -- Note: nvim_buf_attach doesn't have a direct detach, 
+  -- Note: nvim_buf_attach doesn't have a direct detach,
   -- but returning true from on_lines would detach
 end
 
@@ -699,21 +702,25 @@ function M.apply_remote_change(content)
 
   -- Apply change
   M.state.ignore_changes = true
-  
+
   -- Save cursor position
   local cursor = vim.api.nvim_win_get_cursor(0)
-  
+
   local lines = vim.split(content, '\n', { plain = true })
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  
+
   -- Restore cursor position (clamped to valid range)
   local line_count = vim.api.nvim_buf_line_count(bufnr)
   local new_row = math.min(cursor[1], line_count)
   local new_line = vim.api.nvim_buf_get_lines(bufnr, new_row - 1, new_row, false)[1] or ''
   local new_col = math.min(cursor[2], #new_line)
   vim.api.nvim_win_set_cursor(0, { new_row, new_col })
-  
-  M.state.ignore_changes = false
+
+  -- Use vim.schedule to reset ignore_changes after all buffer events have processed
+  -- This prevents race conditions with queued change events
+  vim.schedule(function()
+    M.state.ignore_changes = false
+  end)
 end
 
 -- Handle helper exit
