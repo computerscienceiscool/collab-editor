@@ -278,44 +278,112 @@ function createCustomAwareness(documentId) {
 // Shared WebSocket connection for awareness
 let awarenessWebSocket = null;
 let awarenessHandlers = [];
+let currentDocumentId = null;
+
+// Reconnection settings
+const CONNECTION_TIMEOUT_MS = 10000; // 10 seconds to connect
+const INITIAL_RECONNECT_DELAY_MS = 1000; // Start with 1 second
+const MAX_RECONNECT_DELAY_MS = 30000; // Max 30 seconds between attempts
+const BACKOFF_MULTIPLIER = 2; // Double delay each attempt
+
+let reconnectAttempts = 0;
+let reconnectTimeout = null;
+let isReconnecting = false;
 
 /**
  * Get or create WebSocket connection to awareness server
- * Now uses documentId instead of room name
+ * Includes connection timeout and automatic reconnection with exponential backoff
  */
 function getOrCreateAwarenessWebSocket(documentId) {
-  if (!awarenessWebSocket || awarenessWebSocket.readyState === WebSocket.CLOSED) {
-    awarenessWebSocket = new WebSocket(config.urls.awareness);
-    
-    awarenessWebSocket.onopen = () => {
-      console.log('[Awareness] WebSocket connected to', config.urls.awareness);
-      awarenessWebSocket.send(JSON.stringify({
-        type: 'join',
-        documentId: documentId,
-        clientID: getClientID()
-      }));
-    };
+  currentDocumentId = documentId;
 
-    awarenessWebSocket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        awarenessHandlers.forEach(handler => handler(data));
-      } catch (e) {
-        console.error('[Awareness] Failed to parse message:', e);
-      }
-    };
-
-    awarenessWebSocket.onerror = (error) => {
-      console.error('[Awareness] WebSocket error:', error);
-    };
-
-    awarenessWebSocket.onclose = () => {
-      console.log('[Awareness] WebSocket closed');
-      awarenessWebSocket = null;
-    };
+  if (awarenessWebSocket && awarenessWebSocket.readyState === WebSocket.OPEN) {
+    return awarenessWebSocket;
   }
 
+  if (awarenessWebSocket && awarenessWebSocket.readyState === WebSocket.CONNECTING) {
+    return awarenessWebSocket;
+  }
+
+  // Clear any pending reconnect
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
+  awarenessWebSocket = new WebSocket(config.urls.awareness);
+
+  // Connection timeout (103)
+  const connectionTimeout = setTimeout(() => {
+    if (awarenessWebSocket && awarenessWebSocket.readyState === WebSocket.CONNECTING) {
+      console.error('[Awareness] Connection timeout after', CONNECTION_TIMEOUT_MS, 'ms');
+      awarenessWebSocket.close();
+    }
+  }, CONNECTION_TIMEOUT_MS);
+
+  awarenessWebSocket.onopen = () => {
+    clearTimeout(connectionTimeout);
+    reconnectAttempts = 0; // Reset backoff on successful connection
+    isReconnecting = false;
+    console.log('[Awareness] WebSocket connected to', config.urls.awareness);
+    awarenessWebSocket.send(JSON.stringify({
+      type: 'join',
+      documentId: documentId,
+      clientID: getClientID()
+    }));
+  };
+
+  awarenessWebSocket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      awarenessHandlers.forEach(handler => handler(data));
+    } catch (e) {
+      console.error('[Awareness] Failed to parse message:', e);
+    }
+  };
+
+  awarenessWebSocket.onerror = (error) => {
+    clearTimeout(connectionTimeout);
+    console.error('[Awareness] WebSocket error:', error);
+  };
+
+  awarenessWebSocket.onclose = () => {
+    clearTimeout(connectionTimeout);
+    console.log('[Awareness] WebSocket closed');
+    awarenessWebSocket = null;
+
+    // Reconnect with exponential backoff (091)
+    scheduleReconnect();
+  };
+
   return awarenessWebSocket;
+}
+
+/**
+ * Schedule a reconnection attempt with exponential backoff
+ */
+function scheduleReconnect() {
+  if (isReconnecting || !currentDocumentId) {
+    return;
+  }
+
+  isReconnecting = true;
+  reconnectAttempts++;
+
+  // Calculate delay with exponential backoff
+  const delay = Math.min(
+    INITIAL_RECONNECT_DELAY_MS * Math.pow(BACKOFF_MULTIPLIER, reconnectAttempts - 1),
+    MAX_RECONNECT_DELAY_MS
+  );
+
+  console.log(`[Awareness] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+
+  reconnectTimeout = setTimeout(() => {
+    isReconnecting = false;
+    if (currentDocumentId) {
+      getOrCreateAwarenessWebSocket(currentDocumentId);
+    }
+  }, delay);
 }
 
 /**

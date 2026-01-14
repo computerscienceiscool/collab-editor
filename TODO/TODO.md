@@ -15,7 +15,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
-- [ ] 091 - Add awareness WebSocket reconnection with exponential backoff
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
@@ -31,7 +30,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 100 - Add ARIA labels and keyboard navigation for accessibility
 - [ ] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)
 - [ ] 102 - Rust backend: Add document routing by ID (currently all saves overwrite doc.yjs)
-- [ ] 103 - Add timeout handling for awareness server connection
 - [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
 - [ ] 105 - Add user-visible error messages for all failure modes
 - [ ] 106 - Standardize logging format (create shared logger utility)
@@ -51,6 +49,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 103 - Add timeout handling for awareness server connection
+- [x] 091 - Add awareness WebSocket reconnection with exponential backoff
 - [x] 121 - Neovim: Fix offline edits lost on reconnect (use Automerge.updateText)
 - [x] 098 - Fix GitHub token storage security (obfuscation for localStorage)
 - [x] 092 - Add heartbeat/keepalive for awareness WebSocket
