@@ -82,12 +82,14 @@ export class GitHubDialog {
             <p>Enter your GitHub personal access token (needs repo scope)</p>
             <div class="input-group">
               <label for="github-token">Access Token:</label>
-              <input 
-                type="password" 
-                id="github-token" 
-                class="settings-input" 
+              <input
+                type="password"
+                id="github-token"
+                class="settings-input"
                 placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                autocomplete="off"
+                autocomplete="new-password"
+                data-lpignore="true"
+                data-form-type="other"
               />
               <button id="validate-token" class="settings-button">Validate Token</button>
             </div>
@@ -100,12 +102,14 @@ export class GitHubDialog {
             <p>Enter your Grokker API key for AI-generated commit messages</p>
             <div class="input-group">
               <label for="grokker-api-key">Grokker API Key:</label>
-              <input 
-                type="password" 
-                id="grokker-api-key" 
-                class="settings-input" 
+              <input
+                type="password"
+                id="grokker-api-key"
+                class="settings-input"
                 placeholder="grokker_xxxxxxxxxxxxxxxxxxxx"
-                autocomplete="off"
+                autocomplete="new-password"
+                data-lpignore="true"
+                data-form-type="other"
               />
               <button id="validate-grokker-key" class="settings-button">Validate Key</button>
             </div>

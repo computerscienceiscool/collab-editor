@@ -3,6 +3,50 @@
  * GitHub integration service for the collaborative editor
  * Handles GitHub API communications and settings management
  */
+
+// Simple obfuscation for sensitive data in localStorage
+// Note: This is NOT encryption - it's obfuscation to prevent casual snooping.
+// True security requires server-side token handling with httpOnly cookies.
+const OBFUSCATION_KEY = 'collab-editor-v1';
+
+/**
+ * Obfuscate a string to prevent plain-text storage
+ * @param {string} str - String to obfuscate
+ * @returns {string} Obfuscated string
+ */
+function obfuscate(str) {
+  if (!str) return str;
+  // XOR with key, then base64
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(str.charCodeAt(i) ^ OBFUSCATION_KEY.charCodeAt(i % OBFUSCATION_KEY.length));
+  }
+  return btoa(result);
+}
+
+/**
+ * Deobfuscate a string
+ * @param {string} str - Obfuscated string
+ * @returns {string} Original string
+ */
+function deobfuscate(str) {
+  if (!str) return str;
+  try {
+    const decoded = atob(str);
+    let result = '';
+    for (let i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ OBFUSCATION_KEY.charCodeAt(i % OBFUSCATION_KEY.length));
+    }
+    return result;
+  } catch (e) {
+    // If deobfuscation fails, return original (for migration from old format)
+    return str;
+  }
+}
+
+// Fields that contain sensitive data and should be obfuscated
+const SENSITIVE_FIELDS = ['token', 'grokkerApiKey'];
+
 export class GitHubService {
   constructor() {
     this.settings = this.loadSettings();
@@ -10,13 +54,21 @@ export class GitHubService {
 
   /**
    * Load GitHub settings from localStorage
+   * Deobfuscates sensitive fields (token, API keys)
    * @returns {Object} GitHub settings
    */
   loadSettings() {
     try {
       const savedSettings = localStorage.getItem('github-settings');
       if (savedSettings) {
-        return JSON.parse(savedSettings);
+        const settings = JSON.parse(savedSettings);
+        // Deobfuscate sensitive fields
+        SENSITIVE_FIELDS.forEach(field => {
+          if (settings[field]) {
+            settings[field] = deobfuscate(settings[field]);
+          }
+        });
+        return settings;
       }
     } catch (error) {
       console.error('Failed to load GitHub settings:', error);
@@ -32,18 +84,27 @@ export class GitHubService {
       commitMessage: 'Update from collaborative editor',
       enabled: false,
       lastCommit: null,
-      useAICommitMessage: false, // Add this field for AI checkbox state
-      grokkerApiKey: '' // Add Grokker API key field
+      useAICommitMessage: false,
+      grokkerApiKey: ''
     };
   }
 
   /**
    * Save GitHub settings to localStorage
+   * Obfuscates sensitive fields (token, API keys) before saving
    * @param {Object} settings - Settings to save
    */
   saveSettings(settings = this.settings) {
     try {
-      localStorage.setItem('github-settings', JSON.stringify(settings));
+      // Create copy with obfuscated sensitive fields for storage
+      const settingsToStore = { ...settings };
+      SENSITIVE_FIELDS.forEach(field => {
+        if (settingsToStore[field]) {
+          settingsToStore[field] = obfuscate(settingsToStore[field]);
+        }
+      });
+      localStorage.setItem('github-settings', JSON.stringify(settingsToStore));
+      // Keep original (unobfuscated) in memory
       this.settings = settings;
     } catch (error) {
       console.error('Failed to save GitHub settings:', error);

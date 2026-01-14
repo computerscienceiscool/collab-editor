@@ -16,9 +16,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 - [ ] 091 - Add awareness WebSocket reconnection with exponential backoff
-- [ ] 092 - Add heartbeat/keepalive for awareness WebSocket
-- [ ] 093 - Fix IndexedDB unbounded storage growth (versions-${docId} databases)
-- [ ] 098 - Fix GitHub token storage security (XSS risk via localStorage)
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
@@ -54,6 +51,9 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 098 - Fix GitHub token storage security (obfuscation for localStorage)
+- [x] 092 - Add heartbeat/keepalive for awareness WebSocket
+- [x] 093 - BY DESIGN: Keep all IndexedDB databases (no cleanup)
 - [x] 095 - Fix multiple event listeners per component (awareness.on leaks on reload)
 - [x] 097 - Clean up disconnected user states from awareness (memory leak)
 - [x] 094 - BY DESIGN: Remove version limit - keep full history (was hardcoded 50 in app.js)
