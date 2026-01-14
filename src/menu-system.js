@@ -2,6 +2,12 @@
 class MenuSystem {
   constructor() {
     this.activeMenu = null;
+    // Store bound handlers for cleanup
+    this._boundHandlers = {
+      clickOutside: null,
+      menuActions: null,
+      keyboardShortcuts: null
+    };
     this.init();
   }
 
@@ -10,6 +16,20 @@ class MenuSystem {
     this.setupMenuActions();
     this.setupKeyboardShortcuts();
     this.setupClickOutside();
+  }
+
+  destroy() {
+    // Remove document-level event listeners
+    if (this._boundHandlers.clickOutside) {
+      document.removeEventListener('click', this._boundHandlers.clickOutside);
+    }
+    if (this._boundHandlers.menuActions) {
+      document.removeEventListener('click', this._boundHandlers.menuActions);
+    }
+    if (this._boundHandlers.keyboardShortcuts) {
+      document.removeEventListener('keydown', this._boundHandlers.keyboardShortcuts);
+    }
+    this._boundHandlers = { clickOutside: null, menuActions: null, keyboardShortcuts: null };
   }
 
   setupMenuToggling() {
@@ -50,22 +70,24 @@ class MenuSystem {
   }
 
   setupClickOutside() {
-    document.addEventListener('click', (e) => {
+    this._boundHandlers.clickOutside = (e) => {
       if (!e.target.closest('.menu-item')) {
         this.closeAllMenus();
       }
-    });
+    };
+    document.addEventListener('click', this._boundHandlers.clickOutside);
   }
 
   setupMenuActions() {
-    document.addEventListener('click', (e) => {
+    this._boundHandlers.menuActions = (e) => {
       const action = e.target.dataset.action;
       if (action) {
         e.preventDefault();
         this.closeAllMenus();
         this.handleAction(action);
       }
-    });
+    };
+    document.addEventListener('click', this._boundHandlers.menuActions);
   }
 
   handleAction(action) {
@@ -374,7 +396,7 @@ To test: Use any formatting button and watch the console.`);
   }
 
   setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
+    this._boundHandlers.keyboardShortcuts = (e) => {
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case 'n':
@@ -405,19 +427,20 @@ To test: Use any formatting button and watch the console.`);
             break;
         }
       }
-      
+
       // ESC key closes menus
       if (e.key === 'Escape') {
         this.closeAllMenus();
       }
-    });
+    };
+    document.addEventListener('keydown', this._boundHandlers.keyboardShortcuts);
   }
 }
 
 // Initialize menu system when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new MenuSystem();
+  window.menuSystemInstance = new MenuSystem();
 });
 
 // Export for compatibility
-window.menuSystem = MenuSystem;
+window.MenuSystem = MenuSystem;

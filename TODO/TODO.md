@@ -1,17 +1,30 @@
 # TODO Index
 
 Rules:
-- Use 3-digit IDs (`001`, `002`, ...); do not renumber. 
+- Use 3-digit IDs (`001`, `002`, ...); do not renumber.
 - Sort this file by priority, not number.
 - Mark completion with checkboxes (`- [ ] 005 - ...` → `- [x] 005 - ...`).
 
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
+## Critical
+- [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
+- [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
+- [ ] 089 - Add error boundaries for app initialization with user-facing error UI
+- [ ] 090 - Fix silent failures in editor setup (doc=undefined causes later crashes)
+
 ## High
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
-- [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
+- [ ] 091 - Add awareness WebSocket reconnection with exponential backoff
+- [ ] 092 - Add heartbeat/keepalive for awareness WebSocket
+- [ ] 093 - Fix IndexedDB unbounded storage growth (versions-${docId} databases)
+- [ ] 094 - Make version limit configurable (hardcoded 50 in app.js)
+- [ ] 095 - Fix multiple event listeners per component (awareness.on leaks on reload)
+- [ ] 096 - Add debouncing for document stats (WASM call on every keystroke)
+- [ ] 097 - Clean up disconnected user states from awareness (memory leak)
+- [ ] 098 - Fix GitHub token storage security (XSS risk via localStorage)
 
 ## Medium
 - [ ] 003 - Allow user to switch/select different rooms/documents
@@ -22,10 +35,33 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
-- [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
+- [ ] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters
+- [ ] 100 - Add ARIA labels and keyboard navigation for accessibility
+- [ ] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)
+- [ ] 102 - Rust backend: Add document routing by ID (currently all saves overwrite doc.yjs)
+- [ ] 103 - Add timeout handling for awareness server connection
+- [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
+- [ ] 105 - Add user-visible error messages for all failure modes
+- [ ] 106 - Standardize logging format (create shared logger utility)
+- [ ] 108 - Deduplicate getClientID() across modules
+
+## Low (Features)
+- [ ] 109 - Add real-time conflict indication (show unmerged changes)
+- [ ] 110 - Add document history viewer (browse/restore old versions from IndexedDB)
+- [ ] 111 - Add change highlighting (show what changed since last save)
+- [ ] 112 - Add comment/annotation system for specific text passages
+- [ ] 113 - Add user permissions model (reader/editor/owner roles)
+- [ ] 114 - Add mention system (@username notifications)
+- [ ] 115 - Add export as HTML/PDF (not just plaintext)
+- [ ] 116 - Add document templates (start from pre-built formats)
+- [ ] 117 - Add production monitoring/error tracking (Sentry integration)
+- [ ] 118 - Add Docker support for deployment
+- [ ] 119 - Add environment-specific config (.env support)
+- [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 088 - Fix menu system event listener memory leak (click handlers never removed)
 - [x] 028 - Add error handling for fetch, save, and load failures
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
 - [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
