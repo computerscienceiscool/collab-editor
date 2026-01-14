@@ -38,18 +38,7 @@ async function saveVersionToIndexedDB(content, timestamp, docId) {
         content,
         length: content.length
       });
-      
-      // Keep only last 50 versions
-      const index = store.index('timestamp');
-      const getAllRequest = index.getAll();
-      getAllRequest.onsuccess = () => {
-        const versions = getAllRequest.result;
-        if (versions.length > 50) {
-          versions.sort((a, b) => a.timestamp - b.timestamp);
-          const toDelete = versions.slice(0, versions.length - 50);
-          toDelete.forEach(version => store.delete(version.timestamp));
-        }
-      };
+      // All versions are kept - no cleanup, full history preserved
     };
   } catch (error) {
     console.error('Failed to save version:', error);
