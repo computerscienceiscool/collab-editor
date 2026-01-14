@@ -10,7 +10,7 @@ export async function initDiffWasm() {
   // Check if Go runtime is available
   if (typeof Go === 'undefined') {
     console.error("Go WASM runtime not loaded. Make sure wasm_exec.js is loaded first.");
-    return false;
+    throw new Error('Go WASM runtime not loaded for diff');
   }
   
   try {
@@ -43,13 +43,13 @@ export async function initDiffWasm() {
       return true;
     } else {
       console.error("Diff WASM loaded but functions not available");
-      return false;
+      throw new Error('Diff WASM functions missing after load');
     }
     
   } catch (error) {
     console.error("Failed to load diff WASM:", error);
     console.log("Make sure to run: make diff-wasm");
-    return false;
+    throw error;
   }
 }
 

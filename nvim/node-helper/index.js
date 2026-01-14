@@ -25,6 +25,7 @@ let repo = null;
 let handle = null;
 let awarenessWs = null;
 let awarenessHeartbeat = null;
+let awarenessNotified = false;
 let userId = null;
 let userName = 'nvim-user';
 let userColor = '#88cc88';
@@ -104,6 +105,7 @@ function connectAwareness(url) {
   }
 
   awarenessWs = new WebSocket(url);
+  awarenessNotified = false;
 
   awarenessWs.on('open', () => {
     log('Awareness connected');
@@ -142,10 +144,18 @@ function connectAwareness(url) {
       clearInterval(awarenessHeartbeat);
       awarenessHeartbeat = null;
     }
+    if (!awarenessNotified) {
+      send({ type: 'error', message: 'Awareness connection closed' });
+      awarenessNotified = true;
+    }
   });
 
   awarenessWs.on('error', (err) => {
     log(`Awareness error: ${err.message}`);
+    if (!awarenessNotified) {
+      send({ type: 'error', message: `Awareness connection failed: ${err.message}` });
+      awarenessNotified = true;
+    }
   });
 }
 

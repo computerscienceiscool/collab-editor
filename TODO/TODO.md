@@ -19,7 +19,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
 - [ ] 009 - Rust backend: Add basic logging
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
-- [ ] 028 - Add error handling for fetch, save, and load failures
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
@@ -27,6 +26,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 
 ## Done
+- [x] 028 - Add error handling for fetch, save, and load failures
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)
 - [x] 001 - Document message flow (`TODO/001-message-flow-doc.md`)
 - [x] 030 - Neovim: `nvim-user` indicator doesn't show in browser after refresh

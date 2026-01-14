@@ -94,7 +94,7 @@ window.getLatestVersionFromIndexedDB = getLatestVersionFromIndexedDB;
 async function initGrokkerWasm() {
   if (typeof Go === 'undefined') {
     console.error("Go WASM runtime not loaded. Make sure wasm_exec.js is loaded first.");
-    return;
+    throw new Error('Go WASM runtime not loaded');
   }
   
   const go = new Go();
@@ -111,6 +111,7 @@ async function initGrokkerWasm() {
   } catch (error) {
     console.error("Failed to load Grokker WASM:", error);
     console.log("Make sure to run: make grokker-wasm");
+    throw error;
   }
 }
 
@@ -162,7 +163,7 @@ async function initApp() {
     await initGrokkerWasm();
   } catch (err) {
     console.error("Failed to initialize Grokker WASM:", err);
-    showErrorBanner("Failed to load Grokker WASM. Try `make grokker-wasm`.");
+    showErrorBanner("Failed to load Grokker WASM. Try `make grokker-wasm` and reload.");
   }
   
   // Initialize Diff WASM
@@ -171,7 +172,7 @@ async function initApp() {
     await initDiffWasm();
   } catch (err) {
     console.error("Failed to initialize Diff WASM:", err);
-    showErrorBanner("Failed to load diff engine. Rebuild WASM and retry.");
+    showErrorBanner("Failed to load diff engine. Run `make diff-wasm` and reload.");
   }
   
   // Add a delay to ensure everything is ready
@@ -182,10 +183,25 @@ async function initApp() {
   const urlParams = new URLSearchParams(window.location.search);
   const docParam = urlParams.get('doc');
   
-  // 3b. Set up Automerge state: repository, document handle, awareness, etc.
+  // 3b. Set up Automerge state: repository, document handle, awareness, etc., with one retry
   let repo, handle, doc, awareness, documentId, isNew;
+  let loadAttempt = 0;
+  async function loadAutomergeWithRetry() {
+    try {
+      return await setupAutomerge(docParam);
+    } catch (err) {
+      loadAttempt += 1;
+      if (loadAttempt <= 1) {
+        console.warn('[Automerge] retrying after failure:', err);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return loadAutomergeWithRetry();
+      }
+      throw err;
+    }
+  }
+
   try {
-    ({ repo, handle, doc, awareness, documentId, isNew } = await setupAutomerge(docParam));
+    ({ repo, handle, doc, awareness, documentId, isNew } = await loadAutomergeWithRetry());
   } catch (err) {
     console.error("Could not set up Automerge document:", err);
     showErrorBanner("Could not load document. Check your connection and refresh.");
