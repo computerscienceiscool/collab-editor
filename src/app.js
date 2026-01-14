@@ -145,7 +145,20 @@ function startLastSavedTicker() {
 
 // 3. Main initialization function
 async function initApp() {
+  try {
+    await initAppInternal();
+  } catch (err) {
+    // Top-level error boundary - catches any uncaught errors during initialization
+    console.error('[App] Fatal initialization error:', err);
+    showErrorBanner('Application failed to start. Please refresh the page.');
+  }
+}
 
+/**
+ * Internal initialization logic, wrapped by initApp error boundary.
+ * Separated to keep error handling clean and ensure all errors are caught.
+ */
+async function initAppInternal() {
   // Initialize WASM FIRST
   console.log("Initializing Rust WASM...");
   try {
@@ -248,7 +261,26 @@ async function initApp() {
 
 
   // 3b. Set up the CodeMirror editor
-  const view = setupEditor(repo, handle, awareness);
+  // Validate required objects before proceeding - prevents silent failures downstream
+  if (!handle) {
+    throw new Error('Document handle is undefined - cannot initialize editor');
+  }
+  if (!awareness) {
+    throw new Error('Awareness is undefined - cannot initialize editor');
+  }
+
+  let view;
+  try {
+    view = setupEditor(repo, handle, awareness);
+  } catch (err) {
+    console.error('[App] Failed to initialize editor:', err);
+    showErrorBanner('Editor failed to load. Please refresh the page.');
+    throw err; // Re-throw to stop further initialization
+  }
+
+  if (!view) {
+    throw new Error('Editor view is undefined after setup');
+  }
 
   //3b.i. Attach the editor globally available for menu actions
   window.editorView = view;
@@ -684,6 +716,17 @@ async function initApp() {
     console.log("GitHub integration available");
   }
 }
+
+// Global error handlers - catch any unhandled errors and show user-friendly message
+window.addEventListener('error', (event) => {
+  console.error('[App] Unhandled error:', event.error);
+  showErrorBanner('An unexpected error occurred. Some features may not work correctly.');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[App] Unhandled promise rejection:', event.reason);
+  showErrorBanner('An unexpected error occurred. Some features may not work correctly.');
+});
 
 // Run initialization immediately if DOM is ready, otherwise wait
 if (document.readyState === 'loading') {

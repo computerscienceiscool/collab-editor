@@ -10,8 +10,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 ## Critical
 - [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [ ] 029 - Neovim: Offline editing test failed (browser froze when editing while offline)
-- [ ] 089 - Add error boundaries for app initialization with user-facing error UI
-- [ ] 090 - Fix silent failures in editor setup (doc=undefined causes later crashes)
 
 ## High
 - [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
@@ -59,6 +57,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 089 - Add error boundaries for app initialization with user-facing error UI
+- [x] 090 - Fix silent failures in editor setup (doc=undefined causes later crashes)
 - [x] 096 - Add debouncing for document stats (WASM call on every keystroke)
 - [x] 108 - Deduplicate getClientID() across modules
 - [x] 088 - Fix menu system event listener memory leak (click handlers never removed)
