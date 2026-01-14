@@ -2,8 +2,13 @@
 import { formatTime } from '../utils/timeUtils.js';
 import { getClientID } from '../utils/clientId.js';
 
+// Module-level handler reference for cleanup (prevents duplicate listeners)
+let changeHandler = null;
+let previousStates = new Map();
+
 /**
  * Sets up user join/leave logging in the activity sidebar.
+ * Uses named handler to prevent duplicate listeners on re-initialization.
  *
  * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
@@ -12,13 +17,16 @@ export function setupUserLogging(awareness) {
 
   if (!logContainer) return;
 
+  // Remove previous handler if exists (prevents duplicates on HMR/re-init)
+  if (changeHandler) {
+    awareness.off('change', changeHandler);
+  }
+
   // Get local client ID
   const localClientID = getClientID();
-  
-  // Track previous states to detect joins/leaves
-  let previousStates = new Map();
 
-  awareness.on('change', (states) => {
+  // Create named handler for cleanup capability
+  changeHandler = (states) => {
     const currentStates = new Map(states);
     
     // Detect new joins
@@ -48,7 +56,10 @@ export function setupUserLogging(awareness) {
     });
     
     previousStates = currentStates;
-  });
+  };
+
+  // Register the handler
+  awareness.on('change', changeHandler);
 
   function logEntry(message, color = '#000') {
     const entry = document.createElement('div');

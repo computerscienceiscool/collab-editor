@@ -18,8 +18,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 091 - Add awareness WebSocket reconnection with exponential backoff
 - [ ] 092 - Add heartbeat/keepalive for awareness WebSocket
 - [ ] 093 - Fix IndexedDB unbounded storage growth (versions-${docId} databases)
-- [ ] 095 - Fix multiple event listeners per component (awareness.on leaks on reload)
-- [ ] 097 - Clean up disconnected user states from awareness (memory leak)
 - [ ] 098 - Fix GitHub token storage security (XSS risk via localStorage)
 
 ## Medium
@@ -56,6 +54,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 095 - Fix multiple event listeners per component (awareness.on leaks on reload)
+- [x] 097 - Clean up disconnected user states from awareness (memory leak)
 - [x] 094 - BY DESIGN: Remove version limit - keep full history (was hardcoded 50 in app.js)
 - [x] 089 - Add error boundaries for app initialization with user-facing error UI
 - [x] 090 - Fix silent failures in editor setup (doc=undefined causes later crashes)

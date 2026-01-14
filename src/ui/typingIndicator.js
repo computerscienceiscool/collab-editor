@@ -1,8 +1,12 @@
 // File: src/ui/typingIndicator.js
 import { getClientID } from '../utils/clientId.js';
 
+// Module-level handler reference for cleanup (prevents duplicate listeners)
+let changeHandler = null;
+
 /**
  * Sets up typing indicator for remote users.
+ * Uses named handler to prevent duplicate listeners on re-initialization.
  *
  * @param {Object} awareness - Custom awareness instance (not Yjs)
  */
@@ -10,10 +14,16 @@ export function setupTypingIndicator(awareness) {
   const indicator = document.getElementById('typing-indicator');
   if (!indicator) return;
 
+  // Remove previous handler if exists (prevents duplicates on HMR/re-init)
+  if (changeHandler) {
+    awareness.off('change', changeHandler);
+  }
+
   const localID = getClientID();
   const active = new Map();
 
-  awareness.on('change', (states) => {
+  // Create named handler for cleanup capability
+  changeHandler = (states) => {
     // Clear all previous typing timeouts
     active.forEach(clearTimeout);
     active.clear();
@@ -36,7 +46,10 @@ export function setupTypingIndicator(awareness) {
     });
 
     updateIndicator(messages);
-  });
+  };
+
+  // Register the handler
+  awareness.on('change', changeHandler);
 
   function updateIndicator(messages) {
     if (!messages.length) {

@@ -131,9 +131,15 @@ async function waitForDocumentReady(handle, timeoutMs = 10000) {
   });
 }
 
+// Heartbeat and timeout settings (in milliseconds)
+const HEARTBEAT_INTERVAL_MS = 30000; // Send "I'm here" every 30 seconds
+const USER_TIMEOUT_MS = 90000; // Consider user gone after 90 seconds of no heartbeat
+const CLEANUP_INTERVAL_MS = 30000; // Check for stale users every 30 seconds
+
 /**
  * Creates a custom awareness system for user presence
  * Uses document ID to group users (replaces room-based grouping)
+ * Includes automatic cleanup of disconnected users via timeout
  */
 function createCustomAwareness(documentId) {
   const localState = {
@@ -143,6 +149,7 @@ function createCustomAwareness(documentId) {
   };
 
   const remoteStates = new Map();
+  const lastSeen = new Map(); // Track when each remote user was last seen
   const listeners = new Set();
 
   // Connect to awareness server using document ID as the "room"
@@ -162,9 +169,45 @@ function createCustomAwareness(documentId) {
   const handleAwarenessMessage = (data) => {
     if (data.type === 'awareness' && data.clientID !== getClientID()) {
       remoteStates.set(data.clientID, data.state);
+      lastSeen.set(data.clientID, Date.now()); // Update last seen timestamp
       notifyListeners();
     }
   };
+
+  /**
+   * Remove users who haven't sent updates within the timeout period.
+   * This handles cases where disconnect messages are missed.
+   */
+  const cleanupStaleUsers = () => {
+    const now = Date.now();
+    let removed = false;
+
+    lastSeen.forEach((timestamp, clientID) => {
+      if (now - timestamp > USER_TIMEOUT_MS) {
+        console.log(`[Awareness] Removing stale user: ${clientID} (last seen ${Math.round((now - timestamp) / 1000)}s ago)`);
+        remoteStates.delete(clientID);
+        lastSeen.delete(clientID);
+        removed = true;
+      }
+    });
+
+    if (removed) {
+      notifyListeners();
+    }
+  };
+
+  // Start periodic cleanup of stale users
+  const cleanupInterval = setInterval(cleanupStaleUsers, CLEANUP_INTERVAL_MS);
+
+  // Heartbeat: periodically broadcast presence even when idle
+  // This tells other clients "I'm still here" so they don't remove us
+  const heartbeatInterval = setInterval(() => {
+    broadcastState();
+    console.log('[Awareness] Heartbeat sent');
+  }, HEARTBEAT_INTERVAL_MS);
+
+  // Send initial presence immediately
+  setTimeout(broadcastState, 100);
 
   const notifyListeners = () => {
     const states = getAllStates();
@@ -215,6 +258,17 @@ function createCustomAwareness(documentId) {
       if (event === 'change') {
         listeners.delete(callback);
       }
+    },
+
+    /**
+     * Clean up resources (stops heartbeat and stale user cleanup intervals)
+     */
+    destroy() {
+      clearInterval(cleanupInterval);
+      clearInterval(heartbeatInterval);
+      remoteStates.clear();
+      lastSeen.clear();
+      listeners.clear();
     },
 
     _handleMessage: handleAwarenessMessage
