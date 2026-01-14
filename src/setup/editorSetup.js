@@ -7,6 +7,7 @@ import { keymap } from '@codemirror/view';
 import { lineNumbers } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
 import { next as Automerge } from '@automerge/automerge';
+import { getClientID } from '../utils/clientId.js';
 
 /**
  * Initializes the CodeMirror editor with Automerge integration.
@@ -192,16 +193,4 @@ export function setupEditor(repo, handle, awareness) {
   console.log('[Editor] Line numbers initially:', lineNumbersEnabled ? 'enabled' : 'disabled');
 
   return view;
-}
-
-/**
- * Generate or retrieve persistent client ID
- */
-function getClientID() {
-  let clientID = localStorage.getItem('automerge-client-id');
-  if (!clientID) {
-    clientID = crypto.randomUUID();
-    localStorage.setItem('automerge-client-id', clientID);
-  }
-  return clientID;
 }

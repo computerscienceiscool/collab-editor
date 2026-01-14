@@ -4,6 +4,7 @@ import { Repo } from '@automerge/automerge-repo'
 import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
 import { config } from '../config.js'
+import { getClientID } from '../utils/clientId.js'
 
 /**
  * Initializes the Automerge repository and document.
@@ -261,18 +262,6 @@ function getOrCreateAwarenessWebSocket(documentId) {
   }
 
   return awarenessWebSocket;
-}
-
-/**
- * Generate or retrieve persistent client ID
- */
-function getClientID() {
-  let clientID = localStorage.getItem('automerge-client-id');
-  if (!clientID) {
-    clientID = crypto.randomUUID();
-    localStorage.setItem('automerge-client-id', clientID);
-  }
-  return clientID;
 }
 
 /**

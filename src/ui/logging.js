@@ -1,5 +1,6 @@
 // File: src/ui/logging.js
 import { formatTime } from '../utils/timeUtils.js';
+import { getClientID } from '../utils/clientId.js';
 
 /**
  * Sets up user join/leave logging in the activity sidebar.
@@ -73,14 +74,4 @@ export function setupUserLogging(awareness) {
   function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-}
-
-// Helper function to get client ID
-function getClientID() {
-  let clientID = localStorage.getItem('automerge-client-id');
-  if (!clientID) {
-    clientID = crypto.randomUUID();
-    localStorage.setItem('automerge-client-id', clientID);
-  }
-  return clientID;
 }

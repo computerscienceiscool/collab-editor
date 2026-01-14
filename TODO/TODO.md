@@ -44,7 +44,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
 - [ ] 105 - Add user-visible error messages for all failure modes
 - [ ] 106 - Standardize logging format (create shared logger utility)
-- [ ] 108 - Deduplicate getClientID() across modules
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -61,6 +60,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 108 - Deduplicate getClientID() across modules
 - [x] 088 - Fix menu system event listener memory leak (click handlers never removed)
 - [x] 028 - Add error handling for fetch, save, and load failures
 - [x] 002 - Fix cursor message flow and "Unknown message type: cursor" (`TODO/002-fix-cursor-message-flow.md`)

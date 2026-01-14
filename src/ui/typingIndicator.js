@@ -1,4 +1,5 @@
 // File: src/ui/typingIndicator.js
+import { getClientID } from '../utils/clientId.js';
 
 /**
  * Sets up typing indicator for remote users.
@@ -44,14 +45,4 @@ export function setupTypingIndicator(awareness) {
       indicator.textContent = messages.join(', ');
     }
   }
-}
-
-// Helper function to get client ID
-function getClientID() {
-  let clientID = localStorage.getItem('automerge-client-id');
-  if (!clientID) {
-    clientID = crypto.randomUUID();
-    localStorage.setItem('automerge-client-id', clientID);
-  }
-  return clientID;
 }
