@@ -12,7 +12,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
 
 ## High
-- [ ] 005 - Rust backend: Add `/export` endpoint to serve Markdown (from `.yjs`)
+- [x] 005 - Rust backend: Add `/export` endpoint to serve Markdown
 - [ ] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 
@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 005 - Rust backend: Add `/export` endpoint to serve Markdown
 - [x] 070 - Fix awareness position RangeError (clamp positions, handle mapping failures)
 - [x] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters
 - [x] 106 - Standardize logging format (create shared logger utility)

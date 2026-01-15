@@ -50,7 +50,8 @@ async fn main() {
         .route("/load", get(load_handler)) // API route
         .route("/save", post(save_handler)) // API route
         .route("/save-cbor", post(save_cbor_handler)) // API route for saving CBOR data
-        .route("/load-cbor", get(load_cbor_handler)) // API route for loading CBOR data                                   
+        .route("/load-cbor", get(load_cbor_handler)) // API route for loading CBOR data
+        .route("/export", get(export_handler)) // Export document as markdown
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // Set max upload size to 10MB
 
 
@@ -138,4 +139,29 @@ async fn load_cbor_handler() -> impl IntoResponse {
         },
         Err(_) => (StatusCode::NOT_FOUND, "doc.cbor not found").into_response(),
     }
+}
+
+// Handle GET /export -> Export document content as markdown/text
+async fn export_handler() -> impl IntoResponse {
+    // Try CBOR first (preferred format with structured data)
+    if let Ok(cbor_bytes) = fs::read("doc.cbor") {
+        if let Ok(doc_data) = serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
+            return Response::builder()
+                .header("Content-Type", "text/markdown; charset=utf-8")
+                .header("Content-Disposition", "attachment; filename=\"document.md\"")
+                .body(Body::from(doc_data.content))
+                .unwrap();
+        }
+    }
+
+    // Fallback: try to read raw text from doc.yjs (legacy format - raw bytes)
+    // Note: doc.yjs contains Yjs binary, not plain text, so this is limited
+    if let Ok(_) = fs::read("doc.yjs") {
+        return (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "doc.yjs contains binary data. Use /load endpoint or save as CBOR first.",
+        ).into_response();
+    }
+
+    (StatusCode::NOT_FOUND, "No document found. Save a document first.").into_response()
 }
