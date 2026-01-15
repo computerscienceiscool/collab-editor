@@ -20,7 +20,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 003 - Allow user to switch/select different rooms/documents
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
-- [ ] 009 - Rust backend: Add basic logging
+- [x] 009 - Rust backend: Add basic logging
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 009 - Rust backend: Add basic logging (tracing with info/warn/error levels)
 - [x] 122 - Fix doc ID display cutoff in user settings (shorter ID, full URL in tooltip)
 - [x] 100 - Add ARIA labels and keyboard navigation for accessibility
 - [x] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)

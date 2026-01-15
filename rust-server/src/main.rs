@@ -6,7 +6,7 @@ use axum::{
     response::IntoResponse,
     routing::{get, post},
     Router,
-}; 
+};
 
 // Import necessary crates
 use serde::{Serialize, Deserialize};
@@ -15,6 +15,7 @@ use std::fs::File;
 use std::io::Write;
 use std::net::SocketAddr;
 use tower_http::services::{ServeDir, ServeFile};
+use tracing::{info, warn, error, debug};
 
 #[derive(Serialize, Deserialize)]
 struct DocumentData {
@@ -62,15 +63,22 @@ fn atomic_write(path: &str, data: &[u8]) -> Result<(), String> {
 
 #[tokio::main]
 async fn main() {
-    
-    // Read port from environment variable or default to 8080
+    // Initialize logging with RUST_LOG env var support (default: info)
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::from_default_env()
+                .add_directive(tracing::Level::INFO.into())
+        )
+        .init();
+
+    // Read port from environment variable or default to 3000
     let port = env::var("PORT")
         .ok()
         .and_then(|p| p.parse::<u16>().ok())
         .unwrap_or(3000);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    println!("Rust server running at http://{}", addr);
+    info!("Rust server starting at http://{}", addr);
     // Serve static files from ./public with fallback to index.html
     let static_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
 
@@ -92,11 +100,14 @@ async fn main() {
 
 // Handle GET /load -> Return the Yjs document if it exists
 async fn load_handler() -> impl IntoResponse {
+    debug!("GET /load - Loading Yjs document");
     match fs::read("doc.yjs") {
         Ok(contents) => {
             if contents.is_empty() {
+                warn!("GET /load - Document is empty");
                 return (StatusCode::NO_CONTENT, "Document is empty").into_response();
             }
+            info!("GET /load - Loaded {} bytes", contents.len());
             Response::builder()
                 .header("Content-Type", "application/octet-stream")
                 .body(Body::from(contents))
@@ -108,6 +119,7 @@ async fn load_handler() -> impl IntoResponse {
                 std::io::ErrorKind::PermissionDenied => "Permission denied reading document".to_string(),
                 _ => format!("Failed to read document: {}", e),
             };
+            warn!("GET /load - {}", msg);
             (StatusCode::NOT_FOUND, msg).into_response()
         },
     }
@@ -115,18 +127,23 @@ async fn load_handler() -> impl IntoResponse {
 
 // Handle POST /save -> Save the document (Yjs binary format)
 async fn save_handler(body: Bytes) -> impl IntoResponse {
+    debug!("POST /save - Saving Yjs document ({} bytes)", body.len());
     // Validate payload
     if body.is_empty() {
+        warn!("POST /save - Empty payload rejected");
         return (StatusCode::BAD_REQUEST, "Empty payload").into_response();
     }
 
     // Use atomic write to prevent corruption
     match atomic_write("doc.yjs", &body) {
-        Ok(_) => StatusCode::OK.into_response(),
-        Err(err) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            err,
-        ).into_response(),
+        Ok(_) => {
+            info!("POST /save - Saved {} bytes", body.len());
+            StatusCode::OK.into_response()
+        },
+        Err(err) => {
+            error!("POST /save - Failed: {}", err);
+            (StatusCode::INTERNAL_SERVER_ERROR, err).into_response()
+        },
     }
 }
 
@@ -134,8 +151,10 @@ async fn save_handler(body: Bytes) -> impl IntoResponse {
 
 // Handle POST /save-cbor -> Save document as CBOR
 async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
+    debug!("POST /save-cbor - Saving CBOR document ({} bytes)", body.len());
     // Validate payload
     if body.is_empty() {
+        warn!("POST /save-cbor - Empty payload rejected");
         return (StatusCode::BAD_REQUEST, "Empty payload").into_response();
     }
 
@@ -143,6 +162,7 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
     let doc_data = match serde_cbor::from_slice::<DocumentData>(&body) {
         Ok(data) => data,
         Err(err) => {
+            warn!("POST /save-cbor - Invalid CBOR format: {}", err);
             return (
                 StatusCode::BAD_REQUEST,
                 format!("Invalid CBOR format: {}", err),
@@ -152,6 +172,7 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
 
     // Validate document content (basic sanity checks)
     if doc_data.metadata.room_id.is_empty() {
+        warn!("POST /save-cbor - Missing room_id");
         return (StatusCode::BAD_REQUEST, "Missing room_id in metadata").into_response();
     }
 
@@ -159,6 +180,7 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
     let cbor_bytes = match serde_cbor::to_vec(&doc_data) {
         Ok(bytes) => bytes,
         Err(err) => {
+            error!("POST /save-cbor - CBOR encoding failed: {}", err);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("CBOR encoding failed: {}", err),
@@ -168,13 +190,20 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
 
     // Use atomic write to prevent corruption
     match atomic_write("doc.cbor", &cbor_bytes) {
-        Ok(_) => StatusCode::OK.into_response(),
-        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err).into_response(),
+        Ok(_) => {
+            info!("POST /save-cbor - Saved {} bytes (room: {})", cbor_bytes.len(), doc_data.metadata.room_id);
+            StatusCode::OK.into_response()
+        },
+        Err(err) => {
+            error!("POST /save-cbor - Failed: {}", err);
+            (StatusCode::INTERNAL_SERVER_ERROR, err).into_response()
+        },
     }
 }
 
 // Handle GET /load-cbor -> Load document from CBOR
 async fn load_cbor_handler() -> impl IntoResponse {
+    debug!("GET /load-cbor - Loading CBOR document");
     let cbor_bytes = match fs::read("doc.cbor") {
         Ok(bytes) => bytes,
         Err(e) => {
@@ -183,11 +212,13 @@ async fn load_cbor_handler() -> impl IntoResponse {
                 std::io::ErrorKind::PermissionDenied => "Permission denied reading document".to_string(),
                 _ => format!("Failed to read document: {}", e),
             };
+            warn!("GET /load-cbor - {}", msg);
             return (StatusCode::NOT_FOUND, msg).into_response();
         }
     };
 
     if cbor_bytes.is_empty() {
+        warn!("GET /load-cbor - Document is empty");
         return (StatusCode::NO_CONTENT, "Document is empty").into_response();
     }
 
@@ -195,6 +226,7 @@ async fn load_cbor_handler() -> impl IntoResponse {
     let doc_data = match serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
         Ok(data) => data,
         Err(err) => {
+            error!("GET /load-cbor - Document corrupted: {}", err);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Document corrupted - CBOR parsing failed: {}", err),
@@ -202,24 +234,31 @@ async fn load_cbor_handler() -> impl IntoResponse {
         }
     };
 
+    info!("GET /load-cbor - Loaded {} bytes (room: {})", cbor_bytes.len(), doc_data.metadata.room_id);
+
     // Re-encode for response
     match serde_cbor::to_vec(&doc_data) {
         Ok(response_bytes) => Response::builder()
             .header("Content-Type", "application/cbor")
             .body(Body::from(response_bytes))
             .unwrap(),
-        Err(err) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("CBOR encoding failed: {}", err),
-        ).into_response(),
+        Err(err) => {
+            error!("GET /load-cbor - CBOR encoding failed: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("CBOR encoding failed: {}", err),
+            ).into_response()
+        },
     }
 }
 
 // Handle GET /export -> Export document content as markdown/text
 async fn export_handler() -> impl IntoResponse {
+    debug!("GET /export - Exporting document as markdown");
     // Try CBOR first (preferred format with structured data)
     if let Ok(cbor_bytes) = fs::read("doc.cbor") {
         if let Ok(doc_data) = serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
+            info!("GET /export - Exported {} chars", doc_data.content.len());
             return Response::builder()
                 .header("Content-Type", "text/markdown; charset=utf-8")
                 .header("Content-Disposition", "attachment; filename=\"document.md\"")
@@ -231,11 +270,13 @@ async fn export_handler() -> impl IntoResponse {
     // Fallback: try to read raw text from doc.yjs (legacy format - raw bytes)
     // Note: doc.yjs contains Yjs binary, not plain text, so this is limited
     if let Ok(_) = fs::read("doc.yjs") {
+        warn!("GET /export - Only binary doc.yjs available");
         return (
             StatusCode::UNPROCESSABLE_ENTITY,
             "doc.yjs contains binary data. Use /load endpoint or save as CBOR first.",
         ).into_response();
     }
 
+    warn!("GET /export - No document found");
     (StatusCode::NOT_FOUND, "No document found. Save a document first.").into_response()
 }
