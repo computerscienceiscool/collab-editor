@@ -2,7 +2,7 @@
 
 # 
 .amrg/
-
+.claude/
 
 # Rust WASM build output
 rust-wasm/pkg/
