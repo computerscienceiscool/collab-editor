@@ -249,6 +249,18 @@ async function initAppInternal() {
     });
   }
 
+  // Persist document title across page refreshes
+  const titleInput = document.getElementById('document-title');
+  if (titleInput) {
+    const titleKey = `docTitle:${documentId}`;
+    const savedTitle = localStorage.getItem(titleKey);
+    if (savedTitle) {
+      titleInput.value = savedTitle;
+    }
+    titleInput.addEventListener('input', () => {
+      localStorage.setItem(titleKey, titleInput.value);
+    });
+  }
 
   // 3b. Set up the CodeMirror editor
   // Validate required objects before proceeding - prevents silent failures downstream

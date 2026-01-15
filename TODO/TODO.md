@@ -17,6 +17,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 
 ## Medium
+- [x] 123 - Document name resets to "Untitled Document" on page refresh (not persisted)
 - [ ] 003 - Allow user to switch/select different rooms/documents
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
@@ -47,6 +48,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 123 - Persist document title to localStorage (keyed by document ID)
 - [x] 009 - Rust backend: Add basic logging (tracing with info/warn/error levels)
 - [x] 122 - Fix doc ID display cutoff in user settings (shorter ID, full URL in tooltip)
 - [x] 100 - Add ARIA labels and keyboard navigation for accessibility
