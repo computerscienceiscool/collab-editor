@@ -26,7 +26,15 @@ export function remoteCursorPlugin(awareness, clientID) {
           return e.value;
         }
       }
-      return deco.map(tr.changes);
+      // Safely map decorations through changes
+      // If mapping fails (position out of range), return empty decorations
+      try {
+        return deco.map(tr.changes);
+      } catch (e) {
+        // Position out of range - clear decorations, they'll be rebuilt
+        console.warn('[RemoteCursor] Decoration mapping failed, clearing:', e.message);
+        return Decoration.none;
+      }
     },
     provide: f => EditorView.decorations.from(f)
   });
@@ -36,7 +44,6 @@ export function remoteCursorPlugin(awareness, clientID) {
     class {
       constructor(view) {
         this.view = view;
-        this.decorations = Decoration.none;
         this.updateDecorations = this.updateDecorations.bind(this);
         this.updateDecorations();
 
@@ -50,35 +57,46 @@ export function remoteCursorPlugin(awareness, clientID) {
       }
 
       updateDecorations() {
-        const decorations = [];
-        const states = awareness.getStates();
-        const docLength = this.view.state.doc.length;
+        // Build decorations based on current awareness states
+        // Positions are clamped at dispatch time to avoid race conditions
+        const buildDecorations = (currentDocLength) => {
+          const decorations = [];
+          const states = awareness.getStates();
 
-        states.forEach((state, id) => {
-          if (id === clientID) return;
+          states.forEach((state, id) => {
+            if (id === clientID) return;
 
-          const user = state.user;
-          const selection = state.selection;
+            const user = state.user;
+            const selection = state.selection;
 
-          if (user && selection && typeof selection.anchor === 'number') {
-            // Clamp anchor/head to the current doc length to avoid out-of-range errors
-            const anchor = Math.max(0, Math.min(selection.anchor, docLength));
-            decorations.push(
-              Decoration.widget({
-                widget: new CursorWidget(user.name, user.color),
-                side: -1,
-              }).range(anchor)
-            );
-          }
-        });
-
-        this.decorations = Decoration.set(decorations);
-
-        // Safely dispatch decoration update
-        setTimeout(() => {
-          this.view.dispatch({
-            effects: setRemoteCursors.of(this.decorations)
+            if (user && selection && typeof selection.anchor === 'number') {
+              // Clamp anchor to current doc length to avoid out-of-range errors
+              const anchor = Math.max(0, Math.min(selection.anchor, currentDocLength));
+              decorations.push(
+                Decoration.widget({
+                  widget: new CursorWidget(user.name, user.color),
+                  side: -1,
+                }).range(anchor)
+              );
+            }
           });
+
+          return Decoration.set(decorations);
+        };
+
+        // Dispatch with fresh positions to avoid race condition
+        // The setTimeout is needed to avoid recursive dispatch during update
+        setTimeout(() => {
+          try {
+            // Re-check doc length at dispatch time (not when updateDecorations was called)
+            const currentDocLength = this.view.state.doc.length;
+            const freshDecorations = buildDecorations(currentDocLength);
+            this.view.dispatch({
+              effects: setRemoteCursors.of(freshDecorations)
+            });
+          } catch (e) {
+            console.warn('[RemoteCursor] Dispatch failed:', e.message);
+          }
         }, 0);
       }
 

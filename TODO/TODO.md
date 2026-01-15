@@ -8,7 +8,7 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
 ## Critical
-- [ ] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
+- [x] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
 - [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
 
 ## High
@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 070 - Fix awareness position RangeError (clamp positions, handle mapping failures)
 - [x] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters
 - [x] 106 - Standardize logging format (create shared logger utility)
 - [x] 103 - Add timeout handling for awareness server connection
