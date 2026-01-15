@@ -20,12 +20,14 @@ A Neovim plugin that enables real-time collaborative editing with the web-based 
 
 ## Known Issues
 
-- **Browser offline editing**: Browser may freeze when attempting to edit while offline. 
-- **Awareness RangeError**: Rare CodeMirror RangeError when a remote selection exceeds local doc length; see TODO 070 (`TODO/070-awareness-rangeerror.md`) for tracking.
+No major known issues at this time.
 
-Fixed:
-- `nvim-user` presence after browser refresh now handled via awareness heartbeat (see helper).
-- Initial doc opens avoid empty buffers with delayed sync retry in the helper.
+## Recently Fixed
+
+- **Browser offline editing**: Browser no longer freezes when editing offline.
+- **Awareness RangeError**: Fixed by clamping positions to document length and handling mapping failures gracefully.
+- **nvim-user presence**: Presence after browser refresh now handled via awareness heartbeat.
+- **Initial document load**: Empty buffer issue resolved with delayed sync retry in the helper.
 
 ## Quick Start
 

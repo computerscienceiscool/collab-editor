@@ -533,6 +533,32 @@ If your browser disconnects, a **yellow OFFLINE MODE banner** appears at the top
 
 ---
 
+## Accessibility
+
+The editor is designed to be accessible to all users:
+
+### Keyboard Navigation
+- All features are accessible via keyboard
+- Tab through interface elements, Enter to activate
+- Arrow keys navigate within menus
+- See [keyboard-shortcuts.md](keyboard-shortcuts.md) for the complete shortcut reference
+
+### Screen Reader Support
+- All buttons, menus, and controls have ARIA labels
+- Roles and states are properly announced
+- Live regions announce status changes
+
+### Focus Management
+- Modal dialogs (Preferences, GitHub Settings) use focus traps
+- Tab cycles within dialogs, preventing focus from escaping behind them
+- Escape closes dialogs and returns focus appropriately
+
+### Customization
+- Keyboard shortcuts can be customized to suit individual needs
+- Access **Tools → Preferences** to modify any shortcut
+
+---
+
 ## Troubleshooting
 
 - Ensure you're using a supported browser like **Chrome** or **Firefox**.

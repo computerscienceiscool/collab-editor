@@ -47,8 +47,34 @@ Inside the helper:
 - `selection.head` is optional; if omitted, consumers treat it as a caret at `anchor`.
 - The awareness server simply broadcasts inbound JSON to other connected clients.
 
+## Awareness Connection Resilience
+
+The awareness WebSocket connection includes several reliability features:
+
+### Reconnection with Exponential Backoff
+When the awareness WebSocket disconnects:
+1. Client waits 1 second, then attempts reconnect
+2. If that fails, waits 2 seconds, then 4, 8, etc.
+3. Maximum backoff caps at 30 seconds
+4. Successful reconnect resets the backoff timer
+
+### Heartbeat/Keepalive
+- Client sends periodic ping messages to keep connection alive
+- Detects stale connections that appear open but aren't responding
+- Server-side timeout closes inactive connections
+
+### Connection Timeout
+- Initial connection attempts have a timeout (default 10 seconds)
+- User sees feedback if connection takes too long
+- Graceful fallback if awareness server is unavailable
+
+### Disconnected User Cleanup
+- When a user disconnects, their awareness state is removed from memory
+- Prevents stale cursors and user indicators from persisting
+- Other clients are notified to update their UI
+
 ## Common Failure Modes and Fixes
-- Missing handler for `cursor` in the helper → “Unknown message type: cursor” and no remote cursors. Fixed by adding the case and calling `sendAwareness()`.
+- Missing handler for `cursor` in the helper → "Unknown message type: cursor" and no remote cursors. Fixed by adding the case and calling `sendAwareness()`.
 - Presence shape mismatches: ensure `selection.anchor`/`head` are numbers and clamped to doc length.
 - Wrong ports/URLs: verify `config.urls.automergeSync` and `config.urls.awareness` match the running servers (or Neovim opts).
 

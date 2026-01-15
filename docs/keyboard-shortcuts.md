@@ -167,9 +167,15 @@ Replace **Ctrl** with **Cmd** (⌘) for all shortcuts:
 ## Accessibility Notes
 
 ### Screen Reader Support
-- All buttons and menus are keyboard accessible
+- All buttons and menus have ARIA labels for screen reader compatibility
 - Tab navigation works throughout the interface
 - Menu items announce their keyboard shortcuts
+- Roles and states are properly announced
+
+### Focus Management
+- Modal dialogs (GitHub settings, Preferences) use focus traps
+- Tab cycles within the dialog when open, preventing focus from escaping
+- Escape key closes dialogs and returns focus to the previous element
 
 ### High Contrast
 - Use browser settings for high contrast mode

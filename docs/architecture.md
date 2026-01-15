@@ -242,6 +242,57 @@ ws.on('message', (message) => {
 - Broadcasts user presence info (name, color, cursor, typing state)
 - Separate from sync because protocols are incompatible
 
+### Awareness Connection Management
+
+The awareness WebSocket includes resilient connection handling:
+
+- **Reconnection with exponential backoff**: If the connection drops, the client automatically reconnects with increasing delays (1s, 2s, 4s, etc.) up to a maximum interval
+- **Heartbeat/keepalive**: Periodic pings keep the connection alive and detect stale connections
+- **Connection timeout**: Initial connection attempts timeout gracefully with user feedback
+- **Disconnected user cleanup**: When users disconnect, their awareness state is cleaned up to prevent memory leaks
+
+---
+
+## Error Handling
+
+The application uses a layered error handling approach:
+
+### Error Boundaries
+- App initialization is wrapped in try/catch with user-facing error UI
+- Silent failures in editor setup (e.g., undefined document) are caught early
+- Error banners display load/save/fetch failures to users
+
+### Error Banner (`src/ui/errorBanner.js`)
+```javascript
+// Show error to user
+showErrorBanner('Failed to save document', 'error');
+showErrorBanner('Reconnecting...', 'warning');
+```
+
+- Non-blocking error display at top of screen
+- Auto-dismiss after timeout
+- Different styles for error/warning/info
+
+---
+
+## Logging
+
+### Logger Utility (`src/utils/logger.js`)
+
+Standardized logging across the application:
+
+```javascript
+import { logger } from './utils/logger.js';
+
+logger.info('Document loaded', { docId: handle.documentId });
+logger.warn('Connection unstable');
+logger.error('Failed to save', { error: e.message });
+```
+
+- Consistent format with timestamps
+- Log levels: debug, info, warn, error
+- Structured data support for debugging
+
 ---
 
 ## Storage
