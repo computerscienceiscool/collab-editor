@@ -8,27 +8,20 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
 
 ## Critical
-- [x] 070 - Investigate awareness position RangeError (`TODO/070-awareness-rangeerror.md`)
-- [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
+(none)
 
 ## High
-- [x] 005 - Rust backend: Add `/export` endpoint to serve Markdown
-- [x] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 
 ## Medium
-- [x] 123 - Document name resets to "Untitled Document" on page refresh (not persisted)
 - [ ] 003 - Allow user to switch/select different rooms/documents
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
-- [x] 009 - Rust backend: Add basic logging
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [x] 100 - Add ARIA labels and keyboard navigation for accessibility
-- [x] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)
 - [ ] 102 - Rust backend: Add document routing by ID (currently all saves overwrite doc.yjs)
 - [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
 - [ ] 105 - Add user-visible error messages for all failure modes
@@ -48,6 +41,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
 - [x] 123 - Persist document title to localStorage (keyed by document ID)
 - [x] 009 - Rust backend: Add basic logging (tracing with info/warn/error levels)
 - [x] 122 - Fix doc ID display cutoff in user settings (shorter ID, full URL in tooltip)
