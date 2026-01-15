@@ -13,7 +13,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 
 ## High
 - [x] 005 - Rust backend: Add `/export` endpoint to serve Markdown
-- [ ] 004 - Rust backend: Validate file writes and error handling
+- [x] 004 - Rust backend: Validate file writes and error handling
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 
 ## Medium
@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 004 - Rust backend: Validate file writes and error handling (atomic writes, validation)
 - [x] 005 - Rust backend: Add `/export` endpoint to serve Markdown
 - [x] 070 - Fix awareness position RangeError (clamp positions, handle mapping failures)
 - [x] 099 - Fix Neovim byte-to-char conversion for multi-byte/Unicode characters

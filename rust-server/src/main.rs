@@ -11,6 +11,8 @@ use axum::{
 // Import necessary crates
 use serde::{Serialize, Deserialize};
 use std::{env, fs};
+use std::fs::File;
+use std::io::Write;
 use std::net::SocketAddr;
 use tower_http::services::{ServeDir, ServeFile};
 
@@ -25,6 +27,34 @@ struct DocumentMetadata {
     room_id: String,
     timestamp: u64,
     format: String,
+}
+
+/// Atomically write data to a file using temp file + rename pattern.
+/// This prevents data corruption if the process crashes mid-write.
+fn atomic_write(path: &str, data: &[u8]) -> Result<(), String> {
+    let temp_path = format!("{}.tmp", path);
+
+    // Validate data isn't empty
+    if data.is_empty() {
+        return Err("Cannot save empty data".to_string());
+    }
+
+    // Write to temp file
+    let mut file = File::create(&temp_path)
+        .map_err(|e| format!("Failed to create temp file: {}", e))?;
+
+    file.write_all(data)
+        .map_err(|e| format!("Failed to write data: {}", e))?;
+
+    // Flush to disk to ensure data is persisted
+    file.sync_all()
+        .map_err(|e| format!("Failed to sync to disk: {}", e))?;
+
+    // Atomic rename (overwrites existing file)
+    fs::rename(&temp_path, path)
+        .map_err(|e| format!("Failed to rename temp file: {}", e))?;
+
+    Ok(())
 }
 
 
@@ -63,23 +93,40 @@ async fn main() {
 // Handle GET /load -> Return the Yjs document if it exists
 async fn load_handler() -> impl IntoResponse {
     match fs::read("doc.yjs") {
-        Ok(contents) => Response::builder()
-            .header("Content-Type", "application/octet-stream")
-            .body(Body::from(contents))
-            .unwrap(),
-        Err(_) => (StatusCode::NOT_FOUND, "doc.yjs not found").into_response(),
+        Ok(contents) => {
+            if contents.is_empty() {
+                return (StatusCode::NO_CONTENT, "Document is empty").into_response();
+            }
+            Response::builder()
+                .header("Content-Type", "application/octet-stream")
+                .body(Body::from(contents))
+                .unwrap()
+        },
+        Err(e) => {
+            let msg = match e.kind() {
+                std::io::ErrorKind::NotFound => "Document not found. Create a new document first.".to_string(),
+                std::io::ErrorKind::PermissionDenied => "Permission denied reading document".to_string(),
+                _ => format!("Failed to read document: {}", e),
+            };
+            (StatusCode::NOT_FOUND, msg).into_response()
+        },
     }
 }
 
-// Handle POST /save -> Save the document
+// Handle POST /save -> Save the document (Yjs binary format)
 async fn save_handler(body: Bytes) -> impl IntoResponse {
-    match fs::write("doc.yjs", &body) {
+    // Validate payload
+    if body.is_empty() {
+        return (StatusCode::BAD_REQUEST, "Empty payload").into_response();
+    }
+
+    // Use atomic write to prevent corruption
+    match atomic_write("doc.yjs", &body) {
         Ok(_) => StatusCode::OK.into_response(),
         Err(err) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Failed to save: {}", err),
-        )
-            .into_response(),
+            err,
+        ).into_response(),
     }
 }
 
@@ -87,57 +134,84 @@ async fn save_handler(body: Bytes) -> impl IntoResponse {
 
 // Handle POST /save-cbor -> Save document as CBOR
 async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
-    // Decode CBOR data
-    match serde_cbor::from_slice::<DocumentData>(&body) {
-        Ok(doc_data) => {
-            // Save as CBOR file
-            match serde_cbor::to_vec(&doc_data) {
-                Ok(cbor_bytes) => {
-                    match fs::write("doc.cbor", cbor_bytes) {
-                        Ok(_) => StatusCode::OK.into_response(),
-                        Err(err) => (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            format!("Failed to save CBOR: {}", err),
-                        ).into_response(),
-                    }
-                },
-                Err(err) => (
-                    StatusCode::BAD_REQUEST,
-                    format!("CBOR encoding failed: {}", err),
-                ).into_response(),
-            }
-        },
-        Err(err) => (
-            StatusCode::BAD_REQUEST,
-            format!("Invalid CBOR data: {}", err),
-        ).into_response(),
+    // Validate payload
+    if body.is_empty() {
+        return (StatusCode::BAD_REQUEST, "Empty payload").into_response();
+    }
+
+    // Decode and validate CBOR data
+    let doc_data = match serde_cbor::from_slice::<DocumentData>(&body) {
+        Ok(data) => data,
+        Err(err) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                format!("Invalid CBOR format: {}", err),
+            ).into_response();
+        }
+    };
+
+    // Validate document content (basic sanity checks)
+    if doc_data.metadata.room_id.is_empty() {
+        return (StatusCode::BAD_REQUEST, "Missing room_id in metadata").into_response();
+    }
+
+    // Re-encode to ensure clean CBOR
+    let cbor_bytes = match serde_cbor::to_vec(&doc_data) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("CBOR encoding failed: {}", err),
+            ).into_response();
+        }
+    };
+
+    // Use atomic write to prevent corruption
+    match atomic_write("doc.cbor", &cbor_bytes) {
+        Ok(_) => StatusCode::OK.into_response(),
+        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err).into_response(),
     }
 }
 
 // Handle GET /load-cbor -> Load document from CBOR
 async fn load_cbor_handler() -> impl IntoResponse {
-    match fs::read("doc.cbor") {
-        Ok(cbor_bytes) => {
-            match serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
-                Ok(doc_data) => {
-                    match serde_cbor::to_vec(&doc_data) {
-                        Ok(response_bytes) => Response::builder()
-                            .header("Content-Type", "application/cbor")
-                            .body(Body::from(response_bytes))
-                            .unwrap(),
-                        Err(err) => (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            format!("CBOR encoding failed: {}", err),
-                        ).into_response(),
-                    }
-                },
-                Err(err) => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("CBOR parsing failed: {}", err),
-                ).into_response(),
-            }
-        },
-        Err(_) => (StatusCode::NOT_FOUND, "doc.cbor not found").into_response(),
+    let cbor_bytes = match fs::read("doc.cbor") {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            let msg = match e.kind() {
+                std::io::ErrorKind::NotFound => "Document not found. Save a document first.".to_string(),
+                std::io::ErrorKind::PermissionDenied => "Permission denied reading document".to_string(),
+                _ => format!("Failed to read document: {}", e),
+            };
+            return (StatusCode::NOT_FOUND, msg).into_response();
+        }
+    };
+
+    if cbor_bytes.is_empty() {
+        return (StatusCode::NO_CONTENT, "Document is empty").into_response();
+    }
+
+    // Parse and validate CBOR
+    let doc_data = match serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
+        Ok(data) => data,
+        Err(err) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Document corrupted - CBOR parsing failed: {}", err),
+            ).into_response();
+        }
+    };
+
+    // Re-encode for response
+    match serde_cbor::to_vec(&doc_data) {
+        Ok(response_bytes) => Response::builder()
+            .header("Content-Type", "application/cbor")
+            .body(Body::from(response_bytes))
+            .unwrap(),
+        Err(err) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("CBOR encoding failed: {}", err),
+        ).into_response(),
     }
 }
 
