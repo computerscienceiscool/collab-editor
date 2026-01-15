@@ -5,6 +5,7 @@
  */
 import { githubService } from '../github/githubService.js';
 import { showErrorBanner } from './errors.js';
+import { createFocusTrap } from './focusTrap.js';
 
 export class GitHubDialog {
   constructor() {
@@ -13,6 +14,7 @@ export class GitHubDialog {
     this.validationStatus = null;
     this.repos = [];
     this.handleEscape = null;
+    this.focusTrap = null;
   }
 
   /**
@@ -20,20 +22,27 @@ export class GitHubDialog {
    */
   async show() {
     if (this.isOpen) return;
-    
+
     this.isOpen = true;
     document.body.style.overflow = 'hidden';
-    
+
     // Create and show modal
     const modal = this.createModalHTML();
     document.body.appendChild(modal);
-    
+
     // Load current settings
     this.populateSettings();
-    
+
     // Setup event listeners
     this.setupEventListeners();
-    
+
+    // Activate focus trap for accessibility
+    const dialogContent = modal.querySelector('.modal-dialog');
+    if (dialogContent) {
+      this.focusTrap = createFocusTrap(dialogContent);
+      this.focusTrap.activate();
+    }
+
     console.log('GitHub settings dialog opened');
   }
 
@@ -42,21 +51,27 @@ export class GitHubDialog {
    */
   hide() {
     if (!this.isOpen) return;
-    
+
     this.isOpen = false;
     document.body.style.overflow = 'auto';
-    
+
+    // Deactivate focus trap before removing modal
+    if (this.focusTrap) {
+      this.focusTrap.deactivate();
+      this.focusTrap = null;
+    }
+
     // Remove escape key listener
     if (this.handleEscape) {
       document.removeEventListener('keydown', this.handleEscape);
       this.handleEscape = null;
     }
-    
+
     const modal = document.getElementById('github-modal');
     if (modal) {
       modal.remove();
     }
-    
+
     console.log('GitHub settings dialog closed');
   }
 
@@ -68,13 +83,14 @@ export class GitHubDialog {
     modal.id = 'github-modal';
     modal.className = 'modal-overlay show';
     modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-labelledby', 'github-title');
-    
+
     modal.innerHTML = `
-      <div class="modal-dialog github-dialog">
+      <div class="modal-dialog github-dialog" role="document">
         <div class="modal-header">
           <h2 id="github-title" class="modal-title">GitHub Settings</h2>
-          <button class="modal-close" type="button" id="github-close">&times;</button>
+          <button class="modal-close" type="button" id="github-close" aria-label="Close dialog">&times;</button>
         </div>
         <div class="modal-content">
           <div class="settings-section">

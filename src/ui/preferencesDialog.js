@@ -1,4 +1,6 @@
-// File: src/ui/preferencesDialog.js 
+// File: src/ui/preferencesDialog.js
+
+import { createFocusTrap } from './focusTrap.js';
 
 /**
  * Keyboard shortcut preferences dialog
@@ -10,6 +12,7 @@ export class PreferencesDialog {
     this.editingAction = null;
     this.editingElement = null;
     this.keydownHandler = null;
+    this.focusTrap = null;
   }
 
   /**
@@ -17,20 +20,27 @@ export class PreferencesDialog {
    */
   show() {
     if (this.isOpen) return;
-    
+
     this.isOpen = true;
     document.body.style.overflow = 'hidden';
-    
+
     // Create and show modal
     const modal = this.createModalHTML();
     document.body.appendChild(modal);
-    
+
     // Populate with current shortcuts
     this.populateShortcuts();
-    
+
     // Setup event listeners
     this.setupEventListeners();
-    
+
+    // Activate focus trap for accessibility
+    const dialogContent = modal.querySelector('.modal-dialog');
+    if (dialogContent) {
+      this.focusTrap = createFocusTrap(dialogContent);
+      this.focusTrap.activate();
+    }
+
     console.log('Preferences dialog opened');
   }
 
@@ -39,10 +49,16 @@ export class PreferencesDialog {
    */
   hide() {
     if (!this.isOpen) return;
-    
+
     this.isOpen = false;
     document.body.style.overflow = 'auto';
-    
+
+    // Deactivate focus trap before removing modal
+    if (this.focusTrap) {
+      this.focusTrap.deactivate();
+      this.focusTrap = null;
+    }
+
     const modal = document.getElementById('preferences-modal');
     if (modal) {
       // Clean up event listeners
@@ -52,7 +68,7 @@ export class PreferencesDialog {
       }
       modal.remove();
     }
-    
+
     this.editingAction = null;
     this.editingElement = null;
     console.log('Preferences dialog closed');
@@ -66,13 +82,14 @@ export class PreferencesDialog {
     modal.id = 'preferences-modal';
     modal.className = 'modal-overlay show';
     modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-labelledby', 'preferences-title');
     
     modal.innerHTML = `
-      <div class="modal-dialog preferences-dialog">
+      <div class="modal-dialog preferences-dialog" role="document">
         <div class="modal-header">
           <h2 id="preferences-title" class="modal-title">Keyboard Shortcuts</h2>
-          <button class="modal-close" type="button">&times;</button>
+          <button class="modal-close" type="button" aria-label="Close dialog">&times;</button>
         </div>
         <div class="modal-content">
           <div class="preferences-actions">

@@ -20,14 +20,14 @@
   </div>
 
   <!-- Menu Bar -->
-  <div class="menu-bar">
-    <input type="text" class="document-title" value="Untitled Document" id="document-title">
-    
+  <div class="menu-bar" role="menubar" aria-label="Main menu">
+    <input type="text" class="document-title" value="Untitled Document" id="document-title" aria-label="Document title">
+
     <div class="menu-items">
       <!-- File Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="file">File</button>
-        <div class="dropdown-menu" id="file-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="file" role="menuitem" aria-haspopup="true" aria-expanded="false">File</button>
+        <div class="dropdown-menu" id="file-menu" role="menu" aria-label="File menu">
           <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
            <div class="dropdown-item" data-action="open">Open <span class="keyboard-shortcut">Ctrl+O</span></div>
           <div class="dropdown-item" data-action="make-copy">Make a copy</div>
@@ -48,9 +48,9 @@
       </div>
 
       <!-- Edit Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="edit">Edit</button>
-      <div class="dropdown-menu" id="edit-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="edit" role="menuitem" aria-haspopup="true" aria-expanded="false">Edit</button>
+      <div class="dropdown-menu" id="edit-menu" role="menu" aria-label="Edit menu">
       <div class="dropdown-item" data-action="undo">Undo <span class="keyboard-shortcut">Ctrl+Z</span></div>
       <div class="dropdown-item" data-action="redo">Redo <span class="keyboard-shortcut">Ctrl+Y</span></div>
       <div class="menu-section">
@@ -68,9 +68,9 @@
         </div>
       </div> 
       <!-- Format Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="format">Format</button>
-        <div class="dropdown-menu" id="format-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="format" role="menuitem" aria-haspopup="true" aria-expanded="false">Format</button>
+        <div class="dropdown-menu" id="format-menu" role="menu" aria-label="Format menu">
           <div class="dropdown-item" data-action="format-document">Format Document</div>
           <div class="dropdown-item" data-action="bold">Bold <span class="keyboard-shortcut">Ctrl+B</span></div>
           <div class="dropdown-item" data-action="italic">Italic <span class="keyboard-shortcut">Ctrl+I</span></div>
@@ -86,9 +86,9 @@
       </div>
 
       <!-- Tools Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="tools">Tools</button>
-        <div class="dropdown-menu" id="tools-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="tools" role="menuitem" aria-haspopup="true" aria-expanded="false">Tools</button>
+        <div class="dropdown-menu" id="tools-menu" role="menu" aria-label="Tools menu">
             <div class="dropdown-item" data-action="word-count">Word count <span class="keyboard-shortcut">Ctrl+Shift+C</span></div>
             <div class="dropdown-item" data-action="line-numbers">Toggle line numbers</div>
             <div class="menu-section">
@@ -105,9 +105,9 @@
 
 
       <!-- View Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="view">View</button>
-        <div class="dropdown-menu" id="view-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="view" role="menuitem" aria-haspopup="true" aria-expanded="false">View</button>
+        <div class="dropdown-menu" id="view-menu" role="menu" aria-label="View menu">
           <div class="dropdown-item" data-action="toggle-log">Toggle Activity Log</div>
           <div class="dropdown-item" data-action="toggle-toolbar">Toggle Toolbar</div>
           <div class="dropdown-item" data-action="toggle-markdown-preview">Toggle Markdown Preview <span class="keyboard-shortcut">Ctrl+M</span></div>
@@ -117,9 +117,9 @@
       </div>
 
       <!-- Help Menu -->
-      <div class="menu-item">
-        <button class="menu-button" data-menu="help">Help</button>
-        <div class="dropdown-menu" id="help-menu">
+      <div class="menu-item" role="none">
+        <button class="menu-button" data-menu="help" role="menuitem" aria-haspopup="true" aria-expanded="false">Help</button>
+        <div class="dropdown-menu" id="help-menu" role="menu" aria-label="Help menu">
           <div class="dropdown-item" data-action="about">About</div>
           <div class="dropdown-item" data-action="promisegrid-info">PromiseGrid Integration</div>
         </div>
@@ -128,55 +128,55 @@
   </div>
 
   <!-- Toolbar -->
-  <div class="toolbar" id="toolbar">
-    <div class="toolbar-group">
-      <button class="toolbar-button" id="bold-button" title="Bold (Ctrl+B)"><strong>B</strong></button>
-      <button class="toolbar-button" id="italic-button" title="Italic (Ctrl+I)"><em>I</em></button>
-      <button class="toolbar-button" id="underline-button" title="Underline (Ctrl+U)"><u>U</u></button>
-      <button class="toolbar-button" id="strike-button" title="Strikethrough"><s>S</s></button>
+  <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting toolbar">
+    <div class="toolbar-group" role="group" aria-label="Text formatting">
+      <button class="toolbar-button" id="bold-button" title="Bold (Ctrl+B)" aria-label="Bold"><strong>B</strong></button>
+      <button class="toolbar-button" id="italic-button" title="Italic (Ctrl+I)" aria-label="Italic"><em>I</em></button>
+      <button class="toolbar-button" id="underline-button" title="Underline (Ctrl+U)" aria-label="Underline"><u>U</u></button>
+      <button class="toolbar-button" id="strike-button" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
       
       <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
       
-      <button class="toolbar-button" id="heading1-button" title="Heading 1">H1</button>
-      <button class="toolbar-button" id="heading2-button" title="Heading 2">H2</button>
-      <button class="toolbar-button" id="heading3-button" title="Heading 3">H3</button>
-      
-      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
-      
-      <button class="toolbar-button" id="bullet-button" title="Bullet List">•</button>
-      <button class="toolbar-button" id="numbered-button" title="Numbered List">1.</button>
-      <button class="toolbar-button" id="link-button" title="Insert Link">🔗</button>
-      
-      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;"></div>
-      
-      <button class="toolbar-button" id="undo-button" title="Undo (Ctrl+Z)">↶</button>
-      <button class="toolbar-button" id="redo-button" title="Redo (Ctrl+Y)">↷</button>
-      <button class="toolbar-button" id="format-button" title="Format Document">⚡</button>
+      <button class="toolbar-button" id="heading1-button" title="Heading 1" aria-label="Heading level 1">H1</button>
+      <button class="toolbar-button" id="heading2-button" title="Heading 2" aria-label="Heading level 2">H2</button>
+      <button class="toolbar-button" id="heading3-button" title="Heading 3" aria-label="Heading level 3">H3</button>
+
+      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;" role="separator"></div>
+
+      <button class="toolbar-button" id="bullet-button" title="Bullet List" aria-label="Bullet list">•</button>
+      <button class="toolbar-button" id="numbered-button" title="Numbered List" aria-label="Numbered list">1.</button>
+      <button class="toolbar-button" id="link-button" title="Insert Link" aria-label="Insert link">🔗</button>
+
+      <div style="border-left: 1px solid #dadce0; height: 24px; margin: 0 4px;" role="separator"></div>
+
+      <button class="toolbar-button" id="undo-button" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+      <button class="toolbar-button" id="redo-button" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button>
+      <button class="toolbar-button" id="format-button" title="Format Document" aria-label="Format document">⚡</button>
     </div>
 
-    <div class="toolbar-group">
-      <input type="text" id="search-input" class="search-box" placeholder="Search document...">
-      <button class="toolbar-button" id="search-button">🔍</button>
-      <button class="toolbar-button" id="clear-search">✕</button>
+    <div class="toolbar-group" role="search" aria-label="Document search">
+      <input type="text" id="search-input" class="search-box" placeholder="Search document..." aria-label="Search document">
+      <button class="toolbar-button" id="search-button" aria-label="Search">🔍</button>
+      <button class="toolbar-button" id="clear-search" aria-label="Clear search">✕</button>
     </div>
   </div>
 
   <!-- User Settings -->
-  <div class="user-settings">
+  <div class="user-settings" role="region" aria-label="User settings">
     <label for="name-input">Name:</label>
-    <input type="text" id="name-input" placeholder="Your name" />
+    <input type="text" id="name-input" placeholder="Your name" aria-label="Your display name" />
 
     <label for="color-input">Color:</label>
-    <input type="color" id="color-input" />
-    <button class="toolbar-button" id="theme-toggle" title="Toggle dark mode" style="margin-left: 8px;">🌙</button>
+    <input type="color" id="color-input" aria-label="Your cursor color" />
+    <button class="toolbar-button" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="margin-left: 8px;">🌙</button>
     <div style="margin-left: auto;">
-      Doc: <strong id="document-name">?</strong>
+      Doc: <strong id="document-name" aria-label="Document ID">?</strong>
     </div>
 
   </div>
 
   <!-- Status Bar -->
-  <div class="status-bar">
+  <div class="status-bar" role="status" aria-label="Document status">
     <div class="status-group">
       <span id="document-stats">
         <span id="word-count">0 words</span> • 
@@ -209,8 +209,8 @@
 
   <!-- Editor -->
   <div class="editor-container">
-    <div id="editor"></div>
-    <div id="markdown-preview" class="markdown-preview"></div>
+    <div id="editor" aria-label="Document editor"></div>
+    <div id="markdown-preview" class="markdown-preview" aria-label="Markdown preview" aria-live="polite"></div>
   </div>
     <!-- Menu System Script -->
     <script type="module">
