@@ -231,12 +231,13 @@ async function initAppInternal() {
     // Display truncated document ID and setup copy functionality
   const docNameEl = document.querySelector('#document-name');
   if (docNameEl) {
-    // Show truncated ID (first 12 chars of the hash part)
-    const shortId = documentId.replace('automerge:', '').slice(0, 12) + '...';
+    // Show truncated ID (first 8 chars of the hash part)
+    const shortId = documentId.replace('automerge:', '').slice(0, 8);
     docNameEl.textContent = shortId;
-    docNameEl.title = 'Click to copy share URL';
+    // Show full URL on hover
+    docNameEl.title = `Click to copy: ${window.location.href}`;
     docNameEl.style.cursor = 'pointer';
-    
+
     docNameEl.addEventListener('click', () => {
       navigator.clipboard.writeText(window.location.href).then(() => {
         const original = docNameEl.textContent;

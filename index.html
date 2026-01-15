@@ -162,15 +162,15 @@
   </div>
 
   <!-- User Settings -->
-  <div class="user-settings" role="region" aria-label="User settings">
-    <label for="name-input">Name:</label>
-    <input type="text" id="name-input" placeholder="Your name" aria-label="Your display name" />
+  <div class="user-settings" role="region" aria-label="User settings" style="overflow: visible;">
+    <label for="name-input" style="flex-shrink: 0;">Name:</label>
+    <input type="text" id="name-input" placeholder="Your name" aria-label="Your display name" style="min-width: 80px; flex-shrink: 1;" />
 
-    <label for="color-input">Color:</label>
+    <label for="color-input" style="flex-shrink: 0;">Color:</label>
     <input type="color" id="color-input" aria-label="Your cursor color" />
-    <button class="toolbar-button" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="margin-left: 8px;">🌙</button>
-    <div style="margin-left: auto;">
-      Doc: <strong id="document-name" aria-label="Document ID">?</strong>
+    <button class="toolbar-button" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="margin-left: 8px; flex-shrink: 0;">🌙</button>
+    <div style="margin-left: auto; flex-shrink: 0; white-space: nowrap; overflow: visible;">
+      Doc: <strong id="document-name" aria-label="Document ID" title="Click to copy share URL" style="cursor: pointer;">?</strong>
     </div>
 
   </div>

@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 122 - Fix doc ID display cutoff in user settings (shorter ID, full URL in tooltip)
 - [x] 100 - Add ARIA labels and keyboard navigation for accessibility
 - [x] 101 - Add focus trap for modal dialogs (githubDialog, preferencesDialog)
 - [x] 004 - Rust backend: Validate file writes and error handling (atomic writes, validation)
