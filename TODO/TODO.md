@@ -41,6 +41,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 124 - Bug: Duplicate neovim usernames cause cursor display failure (`TODO/124-duplicate-name-cursor-bug.md`)
 - [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
 - [x] 123 - Persist document title to localStorage (keyed by document ID)
 - [x] 009 - Rust backend: Add basic logging (tracing with info/warn/error levels)

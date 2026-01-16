@@ -81,7 +81,7 @@ export function remoteCursorPlugin(awareness, clientID) {
             }
           });
 
-          return Decoration.set(decorations);
+          return Decoration.set(decorations, true);
         };
 
         // Dispatch with fresh positions to avoid race condition
