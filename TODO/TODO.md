@@ -11,6 +11,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 (none)
 
 ## High
+- [ ] 125 - Bug: Neovim click-selection not highlighted in other Neovim sessions (`TODO/125-neovim-click-selection-sync.md`)
 - [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
 
 ## Medium
