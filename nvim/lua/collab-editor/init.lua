@@ -221,11 +221,15 @@ function M.show_remote_cursor(user_id, name, color, anchor, head)
     })
   end
 
-  -- Create extmark with virtual text
+  -- Create extmark with virtual text and cursor highlight
   local display_name = shorten_label(name) or shorten_label(user_id) or "user"
+  local cursor_line = lines[cursor_row + 1] or ""
+  local cursor_end_col = math.min(cursor_byte_col + 1, #cursor_line)
   local mark_id = vim.api.nvim_buf_set_extmark(M.state.bufnr, M.state.cursor_ns, cursor_row, cursor_byte_col, {
     virt_text = {{ " " .. display_name .. " ", label_hl }},
     virt_text_pos = "overlay",
+    hl_group = select_hl,
+    end_col = cursor_end_col,
     hl_mode = 'combine',
     priority = 300,
   })
