@@ -74,7 +74,7 @@ export function remoteCursorPlugin(awareness, clientID) {
               const anchor = Math.max(0, Math.min(selection.anchor, currentDocLength));
               decorations.push(
                 Decoration.widget({
-                  widget: new CursorWidget(user.name, user.color),
+                  widget: new CursorWidget(user.name, user.color, id),
                   side: -1,
                 }).range(anchor)
               );

@@ -1,8 +1,9 @@
 // File: src/ui/cursorWidget.js
 export class CursorWidget {
-  constructor(name, color) {
+  constructor(name, color, clientID) {
     this.name = name || 'User';
     this.color = color || '#000';
+    this.clientID = clientID || '';
   }
 
   toDOM() {
@@ -20,8 +21,8 @@ export class CursorWidget {
   }
 
   ignoreEvent() { return true; }
-  eq(other) { return this.name === other.name && this.color === other.color; }
-  compare(other) { return this.name === other.name && this.color === other.color; }
+  eq(other) { return this.clientID === other.clientID; }
+  compare(other) { return this.clientID === other.clientID; }
   destroy() {}
   coordsAt() { return null; }
 }
