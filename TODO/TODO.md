@@ -41,6 +41,9 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 128 - Neovim: Create neovim-commands.md quick reference (`docs/neovim-commands.md`)
+- [x] 127 - Neovim: Replace :CollabSetColor with :CollabUserColor color picker (`TODO/127-neovim-collabusercolor-picker.md`)
+- [x] 126 - Neovim: Rename :CollabSetName to :CollabUserName (`TODO/126-neovim-collabusername-command.md`)
 - [x] 125 - Bug: Neovim click-selection not highlighted in other Neovim sessions (`TODO/125-neovim-click-selection-sync.md`)
 - [x] 124 - Bug: Duplicate neovim usernames cause cursor display failure (`TODO/124-duplicate-name-cursor-bug.md`)
 - [x] 029 - Neovim: Offline editing browser freeze (`TODO/029-neovim-offline-freeze.md`)
