@@ -267,13 +267,13 @@ function M.setup_commands()
     M.show_info()
   end, { desc = 'Show connection info' })
 
-  vim.api.nvim_create_user_command('CollabSetName', function(opts)
+  vim.api.nvim_create_user_command('CollabUserName', function(opts)
     M.set_name(opts.args)
   end, { nargs = 1, desc = 'Set collaboration display name' })
 
-  vim.api.nvim_create_user_command('CollabSetColor', function(opts)
-    M.set_color(opts.args)
-  end, { nargs = 1, desc = 'Set collaboration display color (hex)' })
+  vim.api.nvim_create_user_command('CollabUserColor', function(opts)
+    M.set_color_by_name(opts.args)
+  end, { nargs = '?', desc = 'Set color by name (e.g., green, blue) or show picker if no arg' })
 
   -- Testing shortcut: connect (if needed) and open a doc in one step
   vim.api.nvim_create_user_command('CollabQuick', function(opts)
@@ -314,6 +314,90 @@ function M.set_color(color)
   if M.config.debug then
     vim.notify('[collab] Set color to ' .. color, vim.log.levels.DEBUG)
   end
+end
+
+-- Extended color palette for user selection
+-- Simple names (Red, Green, Blue, etc.) listed first for easy typing
+M.color_palette = {
+  -- Simple one-word colors
+  { name = "Red",           hex = "#FF6B6B" },
+  { name = "Orange",        hex = "#FFB703" },
+  { name = "Yellow",        hex = "#FFE66D" },
+  { name = "Green",         hex = "#06D6A0" },
+  { name = "Teal",          hex = "#4ECDC4" },
+  { name = "Blue",          hex = "#219EBC" },
+  { name = "Purple",        hex = "#8338EC" },
+  { name = "Pink",          hex = "#FF006E" },
+  -- Descriptive variants
+  { name = "Coral Red",     hex = "#E63946" },
+  { name = "Sunset Orange", hex = "#F4A261" },
+  { name = "Lime Green",    hex = "#2A9D8F" },
+  { name = "Mint",          hex = "#95E1D3" },
+  { name = "Ocean Blue",    hex = "#0077B6" },
+  { name = "Sky Blue",      hex = "#8ECAE6" },
+  { name = "Light Blue",    hex = "#A8D8EA" },
+  { name = "Lavender",      hex = "#AA96DA" },
+  { name = "Hot Pink",      hex = "#F72585" },
+  { name = "Soft Pink",     hex = "#FCBAD3" },
+}
+
+-- Find color by name (case-insensitive)
+function M.find_color_by_name(name)
+  local lower_name = name:lower()
+  for _, c in ipairs(M.color_palette) do
+    if c.name:lower() == lower_name then
+      return c
+    end
+  end
+  return nil
+end
+
+-- Set color by name or show picker if no name given
+function M.set_color_by_name(name)
+  if not name or name == '' then
+    M.show_color_picker()
+    return
+  end
+
+  -- Check if it's a hex color
+  if name:match('^#%x%x%x%x%x%x$') then
+    M.set_color(name)
+    vim.notify('[collab] Color set to ' .. name, vim.log.levels.INFO)
+    return
+  end
+
+  -- Try to find by name
+  local color = M.find_color_by_name(name)
+  if color then
+    M.set_color(color.hex)
+    vim.notify('[collab] Color set to ' .. color.name .. ' (' .. color.hex .. ')', vim.log.levels.INFO)
+  else
+    vim.notify('[collab] Unknown color: ' .. name .. '. Use :CollabUserColor to see options.', vim.log.levels.WARN)
+  end
+end
+
+-- Show color picker using vim.ui.select
+function M.show_color_picker()
+  local items = {}
+  local hex_lookup = {}
+  for _, c in ipairs(M.color_palette) do
+    local label = string.format("%s (%s)", c.name, c.hex)
+    table.insert(items, label)
+    hex_lookup[label] = c.hex
+  end
+
+  vim.ui.select(items, {
+    prompt = "Select cursor color:",
+    format_item = function(item)
+      return item
+    end,
+  }, function(choice)
+    if choice then
+      local hex = hex_lookup[choice]
+      M.set_color(hex)
+      vim.notify('[collab] Color set to ' .. choice, vim.log.levels.INFO)
+    end
+  end)
 end
 
 -- Connect to collaboration server

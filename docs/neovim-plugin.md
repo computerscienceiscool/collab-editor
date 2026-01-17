@@ -97,6 +97,17 @@ require('collab-editor').setup({
 " Disconnect from the server
 :CollabDisconnect
 
+" Set your display name (syncs with browser)
+:CollabUserName Alice
+
+" Set cursor color by name
+:CollabUserColor green
+:CollabUserColor blue
+:CollabUserColor Hot Pink
+
+" Or open color picker to choose from 20 colors
+:CollabUserColor
+
 " Testing-only shortcut: connect (if needed) and open a doc in one step
 :CollabQuick 4P1keYUPTG4Lt9bnv5TRdyrvGRZw
 ```
@@ -120,6 +131,8 @@ require('collab-editor').setup({
 | `:CollabOpen <id>` | Open an existing document by ID |
 | `:CollabClose` | Close the current collaborative document |
 | `:CollabInfo` | Display connection status and document info |
+| `:CollabUserName <name>` | Set your display name for collaboration |
+| `:CollabUserColor [color]` | Set cursor color by name (e.g., `green`, `blue`) or open picker |
 | `:CollabQuick <id>` | **Testing only**: Connect (if needed) and open doc in one step |
 
 ## Configuration
@@ -130,17 +143,33 @@ The plugin can be configured by passing options to the setup function:
 require('collab-editor').setup({
   -- WebSocket URL for document sync (Automerge)
   sync_url = 'ws://localhost:1234',
-  
+
   -- WebSocket URL for user presence/awareness
   awareness_url = 'ws://localhost:1235',
-  
+
   -- Path to Node.js helper (auto-detected by default)
   node_helper_path = nil,
-  
+
+  -- Your display name (shown to other collaborators)
+  user_name = 'Alice',
+
+  -- Your cursor color (use color name or hex code)
+  user_color = 'green',  -- or '#06D6A0'
+
   -- Enable debug logging (NOT recommended - causes message spam)
   debug = false,
 })
 ```
+
+### Available Colors
+
+When using `:CollabUserColor` or the `user_color` config option, you can use:
+
+**Simple colors:** `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `purple`, `pink`
+
+**Variants:** `coral red`, `sunset orange`, `lime green`, `mint`, `ocean blue`, `sky blue`, `light blue`, `lavender`, `hot pink`, `soft pink`
+
+**Hex codes:** Any valid hex color like `#FF6B6B`
 
 ### Remote Server Configuration
 
