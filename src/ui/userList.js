@@ -8,7 +8,7 @@ let backupInterval = null;
  * Sets up the live user list display in the top toolbar.
  * Uses named handler to prevent duplicate listeners on re-initialization.
  *
- * @param {Object} awareness - Custom awareness instance (not Yjs)
+ * @param {Object} awareness - Custom awareness instance
  */
 export function setupUserList(awareness) {
   const userList = document.getElementById('user-list');

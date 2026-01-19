@@ -10,7 +10,7 @@ The menu system is implemented as a modular JavaScript class (`MenuSystem`) embe
 - **HTML Structure**: Menu bar with dropdown menus
 - **MenuSystem Class**: Handles menu interactions and actions
 - **Action Handlers**: Methods that execute menu item functionality
-- **Integration Layer**: Connects to WASM, CodeMirror, and Yjs
+- **Integration Layer**: Connects to WASM, CodeMirror, and Automerge
 
 ### File Locations
 - **Menu HTML**: `index.html` (menu bar and dropdown structures)

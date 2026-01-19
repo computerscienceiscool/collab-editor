@@ -407,8 +407,6 @@ Click the **Save** button in the toolbar to export your work. Choose the format 
 | **.json**              | Saves the current CodeMirror editor state (can include styling info). |
 | **.cbor**             | Saves the document state in CBOR format. Useful for syncing or restoring later. |
 | **PromiseGrid CBOR**   | **NEW**: Saves document as authentic PromiseGrid protocol message with official 'grid' tag. |
-| ~~**.ysnap**~~             | ~~Binary format snapshot of the full Yjs document. Useful for restoring or syncing state later.~~ |
-| ~~**.json (Yjs Update)**~~ | ~~JSON array of bytes representing a Yjs update. Useful for debugging or syncing between sessions.~~ |
 | **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
 
 ---

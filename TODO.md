@@ -16,13 +16,13 @@ NOTE: This legacy file has been migrated to `TODO/TODO.md` (source of truth). Ke
 
 ### Core Collaboration
 
-- [x] Basic collaborative editing with Yjs and CodeMirror
+- [x] Basic collaborative editing with Automerge and CodeMirror
 - [x] Auto-save document to the /save endpoint
 - [x] Load existing document from the /load endpoint
 
 ### Offline Support
 
-- [x] Use y-indexeddb for local persistence
+- [x] Use IndexedDB for local persistence
 - [x] Sync with server on reconnect
 - [x] Test and confirm offline editing behavior
 - [x] Add service worker to cache HTML/CSS/JS for full offline access
@@ -68,9 +68,9 @@ NOTE: This legacy file has been migrated to `TODO/TODO.md` (source of truth). Ke
 
 - [x] Move backend logic from Go to Rust
 - [x] Support `/load` and `/save` endpoints in Rust
-- [x] Implement file-based persistence for Yjs documents
-- [ ] Validate file writes and error handling
-- [ ] Add `/export` endpoint to serve Markdown (from `.yjs`)
+- [x] Implement file-based persistence for Automerge documents
+- [x] Validate file writes and error handling
+- [x] Add `/export` endpoint to serve Markdown
 - [ ] Support document versioning via filename or embedded metadata
 - [ ] Confirm cross-origin and CORS headers work for frontend integration
 - [ ] Test offline edits syncing with Rust backend
@@ -86,27 +86,20 @@ NOTE: This legacy file has been migrated to `TODO/TODO.md` (source of truth). Ke
 
 
 
-### Shared Yjs Types
+### Shared Data Types
 
-- [ ] Use Y.Array or Y.Map for shared structured data
-- [ ] Observe changes using .observe and .observeDeep
-- [ ] Handle nested types like Y.Array inside Y.Map
-- [ ] Test encoding for JSON and binary formats
-- [ ] Use ydoc.transact for grouped mutations
-- [ ] Understand transaction lifecycle events
+- [x] Use Automerge for shared structured data (completed)
 
 ### Managing Multiple Documents
 
-- [ ] Use Y.Map or Y.Array to hold multiple documents
-- [ ] Support adding/removing documents dynamically
-- [ ] Include metadata such as title and timestamps
-- [ ] Build a minimal multi-document interface
+- [x] Support adding/removing documents dynamically (completed with Automerge)
+- [x] Include metadata such as title and timestamps
+- [x] Build a minimal multi-document interface
 
 ### Server and Backend Scalability
 
-- [ ] Store Yjs updates in a full backend database
-- [ ] Add Redis sync using y-redis
-- [ ] Learn to build a custom provider with y-protocols/awareness
+- [ ] Store Automerge updates in a full backend database
+- [ ] Add Redis sync for horizontal scaling
 
 ### Developer Workflow
 

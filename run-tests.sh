@@ -295,7 +295,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  2. Timeout errors: Try --browser=chromium for better performance"
     echo "  3. Keyboard shortcuts failing: Some may not work in headless mode"
     echo "  4. Flaky tests: Run with --retries=3 for more reliability"
-    echo "  5. WebSocket issues: Check if y-websocket server is running"
+    echo "  5. WebSocket issues: Check if sync server is running"
     echo ""
     echo "Debug commands:"
     echo "  $0 --debug --headed --browser=chromium --mode=quick"

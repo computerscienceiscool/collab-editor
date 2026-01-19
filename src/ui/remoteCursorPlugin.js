@@ -7,7 +7,7 @@ import { CursorWidget } from './cursorWidget.js';
 /**
  * Creates a CodeMirror extension for displaying remote cursors.
  *
- * @param {Object} awareness - Custom awareness instance (not Yjs)
+ * @param {Object} awareness - Custom awareness instance
  * @param {string} clientID - Local client ID
  * @returns {Extension} - CodeMirror extension
  */

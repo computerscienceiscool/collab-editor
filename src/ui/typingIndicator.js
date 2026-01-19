@@ -8,7 +8,7 @@ let changeHandler = null;
  * Sets up typing indicator for remote users.
  * Uses named handler to prevent duplicate listeners on re-initialization.
  *
- * @param {Object} awareness - Custom awareness instance (not Yjs)
+ * @param {Object} awareness - Custom awareness instance
  */
 export function setupTypingIndicator(awareness) {
   const indicator = document.getElementById('typing-indicator');

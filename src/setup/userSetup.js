@@ -3,7 +3,7 @@
 /**
  * Sets up user name/color input listeners and updates awareness state.
  * 
- * @param {Object} awareness - Custom awareness object (not Yjs awareness)
+ * @param {Object} awareness - Custom awareness object
  */
 export function setupUserControls(awareness) {
   const nameInput = document.querySelector('#name-input');

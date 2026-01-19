@@ -166,9 +166,20 @@ Object.getOwnPropertyNames(Object.getPrototypeOf(window.automergeHandle));
 
 ### Editor → Automerge (Local Changes)
 
+Uses CodeMirror's transaction annotations to detect remote changes (race-condition-free):
+
 ```javascript
+// Define annotation at module level
+const isRemoteChange = Annotation.define();
+
 EditorView.updateListener.of((update) => {
-  if (update.docChanged && !isRemoteChange) {
+  // Check if any transaction is marked as a remote change
+  const hasRemoteChange = update.transactions.some(
+    tr => tr.annotation(isRemoteChange)
+  );
+  if (hasRemoteChange) return;
+
+  if (update.docChanged) {
     const newText = update.state.doc.toString();
     handle.change(d => {
       updateText(d, ['content'], newText);
@@ -183,22 +194,21 @@ EditorView.updateListener.of((update) => {
 handle.on('change', ({ doc }) => {
   const remoteText = doc.content || '';
   const currentText = view.state.doc.toString();
-  
+
   if (remoteText !== currentText) {
-    isRemoteChange = true;
     view.dispatch({
       changes: {
         from: 0,
         to: currentText.length,
         insert: remoteText
-      }
+      },
+      annotations: isRemoteChange.of(true)
     });
-    isRemoteChange = false;
   }
 });
 ```
 
-**Important:** The `isRemoteChange` flag prevents infinite loops where a remote change triggers a local change event.
+**Important:** The `isRemoteChange` annotation (not a mutable flag) prevents infinite loops. Using per-transaction annotations instead of a shared flag eliminates race conditions when concurrent updates occur.
 
 ---
 
@@ -463,7 +473,7 @@ const binary = save(doc);  // Returns Uint8Array
 
 1. Verify both users have same document URL
 2. Check sync server logs
-3. Look for `isRemoteChange` flag issues in editorSetup.js
+3. Check `isRemoteChange` annotation usage in editorSetup.js
 4. Confirm WebSocket connected in Network tab
 
 ### Handle Methods Not Available

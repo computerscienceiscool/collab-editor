@@ -112,7 +112,7 @@ The copy is completely independent - it has its own document ID and does not syn
 
 ### Why Not Room Names?
 
-The previous implementation (Yjs-based) used human-readable room names:
+The previous implementation used human-readable room names:
 ```
 http://localhost:8080/?room=my-team
 ```

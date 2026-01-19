@@ -1,6 +1,6 @@
 # Playwright Test Information
 
-> **TODO: Update Playwright tests to include neovim-plugin and change from Yjs to Automerge CRDT.**
+> **TODO: Update Playwright tests to include neovim-plugin tests.**
 
 Complete documentation for the Playwright testing setup in the Collaborative Text Editor project.
 
@@ -12,7 +12,7 @@ This document describes the comprehensive Playwright testing infrastructure impl
 
 ### Technology Stack
 - **Frontend**: Vanilla JavaScript with CodeMirror 6, Vite bundler
-- **Real-time Collaboration**: Yjs CRDTs with y-websocket for synchronization
+- **Real-time Collaboration**: Automerge CRDTs with WebSocket synchronization
 - **Text Processing**: Rust WebAssembly (WASM) for high-performance formatting
 - **Protocol Integration**: PromiseGrid CBOR messaging for decentralized computing
 - **Backend Options**: Rust server (Axum) or Go server for persistence
@@ -63,29 +63,22 @@ collab-editor/
 **Purpose**: Main Playwright configuration
 
 **Key Features**:
-- **Base URL**: `http://localhost:8080/?room=test` (consistent test room)
+- **Base URL**: `http://localhost:8080`
 - **Multi-browser testing**: Chrome, Firefox, Safari, Mobile Chrome
-- **Auto-server startup**: Automatically starts y-websocket and frontend servers
+- **Auto-server startup**: Automatically starts frontend server
 - **Test artifacts**: Screenshots, videos, traces for debugging
-- **Parallel execution**: Full parallel test execution for speed
+- **Sequential execution**: Single worker to avoid conflicts
 
 ```javascript
 export default defineConfig({
-  testDir: './tests/e2e',
-  baseURL: 'http://localhost:8080/?room=test',
-  fullyParallel: true,
-  webServer: [
-    {
-      command: 'npx y-websocket --port 1234',
-      port: 1234,
-      reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: 'npm run serve',
-      port: 8080,
-      reuseExistingServer: !process.env.CI,
-    }
-  ],
+  testDir: './tests',
+  baseURL: 'http://localhost:8080',
+  fullyParallel: false,
+  webServer: {
+    command: 'npm run serve',
+    url: 'http://localhost:8080',
+    reuseExistingServer: !process.env.CI,
+  },
   // ... additional configuration
 });
 ```
@@ -408,7 +401,7 @@ export const testRooms = {
 ### Common Issues
 
 1. **WASM not loaded**: Check console for initialization errors
-2. **WebSocket connection fails**: Ensure y-websocket server is running on port 1234
+2. **WebSocket connection fails**: Ensure the Automerge sync server is running
 3. **Tests timing out**: Increase timeout values in playwright.config.js
 4. **Selection not working**: Verify editor has focus before applying formatting
 

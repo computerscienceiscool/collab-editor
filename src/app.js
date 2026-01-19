@@ -486,7 +486,7 @@ async function initAppInternal() {
     view.dom.addEventListener('keyup', debouncedUpdate);
     view.dom.addEventListener('paste', debouncedUpdate);
     
-    // Listen to Automerge changes instead of Yjs
+    // Listen to Automerge changes
     handle.on('change', debouncedUpdate);
     
     view.dispatch = (() => {

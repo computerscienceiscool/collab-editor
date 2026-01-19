@@ -36,7 +36,7 @@ public/style.css
 rust-server/target/
 
 # Vite dev server & IndexedDB docs
-doc.yjs
+doc.automerge
 
 # Editor/IDE temp files
 *.swp

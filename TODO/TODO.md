@@ -5,7 +5,7 @@ Rules:
 - Sort this file by priority, not number.
 - Mark completion with checkboxes (`- [ ] 005 - ...` → `- [x] 005 - ...`).
 
-This list was migrated from the legacy `TODO.md` at the repo root; some items reference older Yjs-based work.
+This list was migrated from the legacy `TODO.md` at the repo root.
 
 ## Critical
 (none)
@@ -20,7 +20,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [ ] 104 - Fix content sync race conditions (isRemoteChange flag misses concurrent updates)
+- [x] 104 - Fix content sync race conditions (use transaction annotations instead of mutable flag)
 - [ ] 105 - Add user-visible error messages for all failure modes
 
 ## Low (Features)
@@ -87,11 +87,11 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 037 - Remove users from UI on disconnect
 - [x] 038 - Display user count in the toolbar
 
-- [x] 039 - Basic collaborative editing with Yjs and CodeMirror
+- [x] 039 - Basic collaborative editing with Automerge and CodeMirror
 - [x] 040 - Auto-save document to the `/save` endpoint
 - [x] 041 - Load existing document from the `/load` endpoint
 
-- [x] 042 - Use y-indexeddb for local persistence
+- [x] 042 - Use IndexedDB for local persistence
 - [x] 043 - Sync with server on reconnect
 - [x] 044 - Test and confirm offline editing behavior
 - [x] 045 - Add service worker to cache HTML/CSS/JS for full offline access
@@ -119,7 +119,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 
 - [x] 061 - Move backend logic from Go to Rust
 - [x] 062 - Support `/load` and `/save` endpoints in Rust
-- [x] 063 - Implement file-based persistence for Yjs documents
+- [x] 063 - Implement file-based persistence for Automerge documents
 
 - [x] 064 - Separate development and production builds
 - [x] 065 - Add automated unit or DOM tests
@@ -134,7 +134,7 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [x] 074 - Neovim: Allow setting name/color from client and reflect in browser badges
 - [x] 075 - Neovim: Deprecate/remove legacy Go helper and protocol.lua references
 - [x] 076 - Consolidate Neovim plugin docs into docs/neovim-plugin.md and remove nvim/README.md
-- [x] 011 - Legacy (Yjs): Use `Y.Array` or `Y.Map` for shared structured data
+- [x] 011 - Legacy: Shared structured data types (completed with Automerge)
 - [x] 026 - Add dark mode toggle
 - [x] 073 - Neovim: Show browser usernames next to remote cursor in Neovim
 - [x] 077 - Fix search functionality in browser and Neovim plugin; add coverage

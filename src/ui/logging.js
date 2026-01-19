@@ -10,7 +10,7 @@ let previousStates = new Map();
  * Sets up user join/leave logging in the activity sidebar.
  * Uses named handler to prevent duplicate listeners on re-initialization.
  *
- * @param {Object} awareness - Custom awareness instance (not Yjs)
+ * @param {Object} awareness - Custom awareness instance
  */
 export function setupUserLogging(awareness) {
   const logContainer = document.getElementById('log-entries');

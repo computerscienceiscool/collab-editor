@@ -45,7 +45,7 @@ When a browser hits `/load`:
 
 1. `main.rs` routes the request to `handlers::load_document`.
 2. `load_document` calls `storage::load_from_file`.
-3. File contents are read from disk (e.g. `docs/doc.yjs`) and returned.
+3. File contents are read from disk (e.g. `docs/doc.automerge`) and returned.
 4. Response is serialized to JSON and sent back to the client.
 
 When the browser sends a `POST` to `/save`:

@@ -17,7 +17,7 @@ func handleSave(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read body", 500)
 		return
 	}
-	err = os.WriteFile("doc.yjs", body, 0644)
+	err = os.WriteFile("doc.automerge", body, 0644)
 	if err != nil {
 		http.Error(w, "Failed to write file", 500)
 		return
@@ -30,7 +30,7 @@ func handleLoad(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	data, err := os.ReadFile("doc.yjs")
+	data, err := os.ReadFile("doc.automerge")
 	if err != nil {
 		http.Error(w, "File not found", 404)
 		return

@@ -2,7 +2,7 @@ AWARENESS_PORT=1235  # for awareness WebSocket
 SHELL := /bin/bash
 BACKEND_PORT=3000  # for Rust or Go backend
 PORT=8080
-WS_PORT=1234  # for Yjs websocket server
+WS_PORT=1234  # for sync websocket server
 # Define the branch too use the branch already in use by the machine
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 export TAG = 0.$(shell date +%Y.%m.%d.%H%M)
@@ -28,7 +28,7 @@ help:
 	@echo "Build Commands:"
 	@echo "  make build       - Build frontend using Vite (including WASM)"
 	@echo "  make serve       - Start Vite dev server at http://localhost:$(PORT)"
-	@echo "  make ws          - Start Yjs websocket server at ws://localhost:$(WS_PORT)"
+	@echo "  make ws          - Start Automerge sync server at ws://localhost:$(WS_PORT)"
 	@echo "  make run         - Start Rust backend server (default)"
 	@echo "  make run-go      - Start Go backend server"
 	@echo "  make run-rust    - Start Rust backend server"

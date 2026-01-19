@@ -1,6 +1,6 @@
 // File: src/setup/editorSetup.js
 import { EditorView, minimalSetup } from 'codemirror';
-import { EditorState, Compartment } from '@codemirror/state';
+import { EditorState, Compartment, Annotation } from '@codemirror/state';
 import { remoteCursorPlugin } from '../ui/remoteCursorPlugin.js';
 import { history, undo, redo } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
@@ -8,6 +8,13 @@ import { lineNumbers } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
 import { next as Automerge } from '@automerge/automerge';
 import { getClientID } from '../utils/clientId.js';
+
+/**
+ * Annotation to mark transactions as originating from remote changes.
+ * Using annotations instead of a mutable flag prevents race conditions
+ * when concurrent updates occur.
+ */
+const isRemoteChange = Annotation.define();
 
 /**
  * Initializes the CodeMirror editor with Automerge integration.
@@ -38,26 +45,31 @@ export function setupEditor(repo, handle, awareness) {
     }
   });
 
-  // Flag to prevent update loops between editor and Automerge
-  let isRemoteChange = false;
   let currentDoc = null;
   let lastSyncedContent = '';
 
   // Create update listener for local changes BEFORE creating state
+  // Uses transaction annotations to detect remote changes (race-condition-free)
   const updateListener = EditorView.updateListener.of((update) => {
-    if (isRemoteChange) return;
+    // Check if any transaction in this update is marked as a remote change
+    // This is race-condition-free since annotations are per-transaction
+    const hasRemoteChange = update.transactions.some(
+      tr => tr.annotation(isRemoteChange)
+    );
+    if (hasRemoteChange) return;
+
     if (!update.docChanged) return;
-    
+
     const newText = update.state.doc.toString();
-    
+
     // Only update if content actually changed
     if (newText === lastSyncedContent) return;
-    
+
     // Update Automerge document
     handle.change(d => {
       Automerge.updateText(d, ['content'], newText);
     });
-    
+
     lastSyncedContent = newText;
     console.log('[Editor] Synced to Automerge:', newText.length, 'chars');
   });
@@ -94,41 +106,40 @@ export function setupEditor(repo, handle, awareness) {
   });
 
   // Handle remote changes (from other users) -> Update CodeMirror
+  // Uses transaction annotations instead of mutable flag for race-condition-free sync
   handle.on('change', ({ doc }) => {
     if (!doc || doc.content === undefined) {
       console.warn('[Editor] Document or content is undefined');
       return;
     }
-    
+
     // Convert content to string (handles both string and Text types)
     const newText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
     const oldText = view.state.doc.toString();
-    
+
     // Only update if content actually changed
     if (newText !== oldText) {
-      isRemoteChange = true;
-      
       // Save cursor position and clamp to valid range
       const selection = view.state.selection.main;
       const newAnchor = Math.min(selection.anchor, newText.length);
       const newHead = Math.min(selection.head, newText.length);
-      
-      // Update editor content
+
+      // Update editor content with remote change annotation
+      // The annotation marks this transaction so updateListener ignores it
       view.dispatch({
         changes: {
           from: 0,
           to: oldText.length,
           insert: newText
         },
-        selection: { anchor: newAnchor, head: newHead }
+        selection: { anchor: newAnchor, head: newHead },
+        annotations: isRemoteChange.of(true)
       });
-      
+
       // Update last synced content
       lastSyncedContent = newText;
-      
-      isRemoteChange = false;
     }
-    
+
     currentDoc = doc;
   });
 
@@ -138,16 +149,15 @@ export function setupEditor(repo, handle, awareness) {
     if (doc && doc.content !== undefined) {
       const initialText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
       if (initialText.length > 0) {
-        isRemoteChange = true;
         view.dispatch({
           changes: {
             from: 0,
             to: 0,
             insert: initialText
-          }
+          },
+          annotations: isRemoteChange.of(true)
         });
         lastSyncedContent = initialText;
-        isRemoteChange = false;
         console.log('[Editor] Loaded initial content:', initialText.length, 'chars');
       }
       currentDoc = doc;
