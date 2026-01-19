@@ -11,10 +11,9 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 (none)
 
 ## High
-- [ ] 007 - Rust backend: Confirm cross-origin and CORS headers work for frontend integration
+(none)
 
 ## Medium
-- [ ] 003 - Allow user to switch/select different rooms/documents
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
 - [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
@@ -40,6 +39,8 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 007 - Add CORS headers to Rust backend (tower-http cors layer)
+- [x] 003 - Add "Open Recent" submenu to switch between visited documents (localStorage registry)
 - [x] 102 - OBSOLETE: Rust backend /load and /save endpoints are legacy (unused). Automerge sync server handles multi-doc by ID.
 - [x] 128 - Neovim: Create neovim-commands.md quick reference (`docs/neovim-commands.md`)
 - [x] 127 - Neovim: Replace :CollabSetColor with :CollabUserColor color picker (`TODO/127-neovim-collabusercolor-picker.md`)

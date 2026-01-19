@@ -14,6 +14,7 @@ use std::{env, fs};
 use std::fs::File;
 use std::io::Write;
 use std::net::SocketAddr;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::{info, warn, error, debug};
 
@@ -82,6 +83,12 @@ async fn main() {
     // Serve static files from ./public with fallback to index.html
     let static_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
 
+    // Configure CORS to allow frontend integration from any origin
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
+
     // Set up the router
     let app = Router::new()
         .nest_service("/", static_dir) // Serve index.html and static assets
@@ -90,6 +97,7 @@ async fn main() {
         .route("/save-cbor", post(save_cbor_handler)) // API route for saving CBOR data
         .route("/load-cbor", get(load_cbor_handler)) // API route for loading CBOR data
         .route("/export", get(export_handler)) // Export document as markdown
+        .layer(cors)
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // Set max upload size to 10MB
 
 
