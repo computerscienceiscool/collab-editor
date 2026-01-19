@@ -47,6 +47,66 @@ function deobfuscate(str) {
 // Fields that contain sensitive data and should be obfuscated
 const SENSITIVE_FIELDS = ['token', 'grokkerApiKey'];
 
+// Valid GitHub token prefixes (https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/)
+const GITHUB_TOKEN_PREFIXES = ['ghp_', 'github_pat_', 'gho_', 'ghu_', 'ghs_', 'ghr_'];
+const MIN_TOKEN_LENGTH = 40;
+
+/**
+ * Validate GitHub token format before making API calls.
+ * This catches obvious errors early without wasting network requests.
+ *
+ * @param {string} token - Token to validate
+ * @returns {{valid: boolean, error: string|null}} Validation result
+ */
+function validateTokenFormat(token) {
+  if (!token || typeof token !== 'string') {
+    return { valid: false, error: 'Token cannot be empty' };
+  }
+
+  const trimmed = token.trim();
+  if (trimmed.length === 0) {
+    return { valid: false, error: 'Token cannot be empty or whitespace' };
+  }
+
+  if (trimmed.length < MIN_TOKEN_LENGTH) {
+    return { valid: false, error: `Token appears too short (minimum ${MIN_TOKEN_LENGTH} characters, got ${trimmed.length})` };
+  }
+
+  const hasValidPrefix = GITHUB_TOKEN_PREFIXES.some(prefix => trimmed.startsWith(prefix));
+  if (!hasValidPrefix) {
+    return {
+      valid: false,
+      error: `Token must start with a valid prefix (${GITHUB_TOKEN_PREFIXES.slice(0, 2).join(', ')}, etc.)`
+    };
+  }
+
+  return { valid: true, error: null };
+}
+
+/**
+ * Validate Grokker API key format.
+ * Basic validation to catch empty or obviously invalid keys.
+ *
+ * @param {string} apiKey - API key to validate
+ * @returns {{valid: boolean, error: string|null}} Validation result
+ */
+function validateGrokkerKeyFormat(apiKey) {
+  if (!apiKey || typeof apiKey !== 'string') {
+    return { valid: false, error: 'Grokker API key cannot be empty' };
+  }
+
+  const trimmed = apiKey.trim();
+  if (trimmed.length === 0) {
+    return { valid: false, error: 'Grokker API key cannot be empty or whitespace' };
+  }
+
+  if (trimmed.length < 10) {
+    return { valid: false, error: 'Grokker API key appears too short' };
+  }
+
+  return { valid: true, error: null };
+}
+
 export class GitHubService {
   constructor() {
     this.settings = this.loadSettings();
@@ -119,6 +179,12 @@ export class GitHubService {
    * @throws {Error} If token is invalid
    */
   async validateToken(token) {
+    // Validate format first to catch obvious errors without network call
+    const formatCheck = validateTokenFormat(token);
+    if (!formatCheck.valid) {
+      throw new Error(formatCheck.error);
+    }
+
     try {
       const response = await fetch('https://api.github.com/user', {
         headers: {
@@ -128,55 +194,63 @@ export class GitHubService {
       });
 
       if (!response.ok) {
-        throw new Error('Invalid token or API error');
+        if (response.status === 401) {
+          throw new Error('Token is invalid or has been revoked');
+        } else if (response.status === 403) {
+          throw new Error('Token lacks required permissions or rate limit exceeded');
+        }
+        throw new Error(`GitHub API error (${response.status})`);
       }
 
       const userData = await response.json();
       return userData;
     } catch (error) {
       console.error('Token validation failed:', error);
-      throw new Error('GitHub token validation failed: ' + error.message);
+      throw new Error(error.message.startsWith('Token') ? error.message : 'GitHub token validation failed: ' + error.message);
     }
   }
 
-    /**
-     * Generate commit message using Grokker
-     * @param {string} content - Document content to analyze
-     * @returns {Promise<string>} Generated commit message
-     */
-    async generateCommitMessage(content) {
-      if (!this.settings.grokkerApiKey) {
-        throw new Error('Grokker API key not configured');
-      }
-      
-      try {
-        // Check if WASM function is available
-        if (typeof window.generateCommitMessage !== 'function') {
-          console.warn('Grokker WASM not available, falling back to simulation');
-          return this.executeGrokCommand(content);
-        }
-        
-        // Call the WASM implementation
-        const result = await window.generateCommitMessage({
-          content: content,
-          apiKey: this.settings.grokkerApiKey,
-          model: "grokker"
-        });
-        
-        return result.fullMessage || result.title + "\n\n" + result.body;
-      } catch (error) {
-        console.error('Failed to generate commit message:', error);
-        throw new Error('Failed to generate commit message: ' + error.message);
-      }
+  /**
+   * Generate commit message using Grokker
+   * @param {string} content - Document content to analyze
+   * @returns {Promise<string>} Generated commit message
+   */
+  async generateCommitMessage(content) {
+    // Validate API key format first
+    const keyCheck = validateGrokkerKeyFormat(this.settings.grokkerApiKey);
+    if (!keyCheck.valid) {
+      throw new Error(keyCheck.error);
     }
+
+    try {
+      // Check if WASM function is available
+      if (typeof window.generateCommitMessage !== 'function') {
+        console.warn('Grokker WASM not available, falling back to simulation');
+        return this.executeGrokCommand(content);
+      }
+
+      // Call the WASM implementation
+      const result = await window.generateCommitMessage({
+        content: content,
+        apiKey: this.settings.grokkerApiKey,
+        model: "grokker"
+      });
+
+      return result.fullMessage || result.title + "\n\n" + result.body;
+    } catch (error) {
+      console.error('Failed to generate commit message:', error);
+      throw new Error('Failed to generate commit message: ' + error.message);
+    }
+  }
 
   /**
    * Fetch user repositories
    * @returns {Promise<Array>} List of repositories
    */
   async fetchRepositories() {
-    if (!this.settings.token) {
-      throw new Error('GitHub token not configured');
+    const formatCheck = validateTokenFormat(this.settings.token);
+    if (!formatCheck.valid) {
+      throw new Error(formatCheck.error);
     }
 
     try {
@@ -218,8 +292,13 @@ export class GitHubService {
    * @returns {Promise<Object>} Commit result
    */
   async commitFile(content, filePath, commitMessage, coAuthors = []) {
-    if (!this.settings.token || !this.settings.selectedRepo) {
-      throw new Error('GitHub settings not configured');
+    const formatCheck = validateTokenFormat(this.settings.token);
+    if (!formatCheck.valid) {
+      throw new Error(formatCheck.error);
+    }
+
+    if (!this.settings.selectedRepo) {
+      throw new Error('No repository selected');
     }
 
     const selectedRepo = this.settings.repos.find(r => r.fullName === this.settings.selectedRepo);
@@ -342,13 +421,14 @@ export class GitHubService {
   }
 
   /**
-   *  Execute grok command directly (fallback for local development)
+   * Execute grok command directly (fallback for local development)
    * @param {string} content - Content to analyze
    * @returns {Promise<string>} Generated commit message
    */
   async executeGrokCommand(content) {
-    if (!this.settings.grokkerApiKey) {
-      throw new Error('Grokker API key not configured');
+    const keyCheck = validateGrokkerKeyFormat(this.settings.grokkerApiKey);
+    if (!keyCheck.valid) {
+      throw new Error(keyCheck.error);
     }
 
     try {
@@ -393,8 +473,9 @@ Added real-time collaboration features using Automerge CRDTs.
    * @returns {Promise<string>} File content
    */
   async getFileContent(repo, path) {
-    if (!this.settings.token) {
-      throw new Error('GitHub token not configured');
+    const formatCheck = validateTokenFormat(this.settings.token);
+    if (!formatCheck.valid) {
+      throw new Error(formatCheck.error);
     }
 
     try {

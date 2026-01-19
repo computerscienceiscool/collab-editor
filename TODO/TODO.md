@@ -11,7 +11,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-- [ ] 130 - Production logging cleanup: Remove or wrap 900+ console.log() calls with debug mode check. Currently logs document content, user data, and sync state which could leak sensitive info. Use existing logger.js utility with localStorage debug flag.
+(none)
 
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
@@ -25,7 +25,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
 - [ ] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
 - [ ] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
-- [ ] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Currently accepts any string which causes confusing API errors downstream.
+- [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Validates prefix (ghp_, github_pat_, etc.) and minimum length.
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -47,6 +47,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 140 - Performance guide: Document optimization strategies in docs/performance.md: debouncing settings, IndexedDB cleanup, WASM module loading, large document handling, memory management for long sessions.
 - [ ] 141 - GitHub docs expansion: Expand docs/github.md with token permissions required, rate limiting handling, error recovery, and workflow examples for common use cases.
 - [ ] 142 - Docker infrastructure: Complete Makefile docker targets (push/pull partially defined). Add docker-compose.yml for full stack (sync server, awareness server, Rust backend). Document in docs/deployment.md.
+- [ ] 130 - (Pre-production) Logging cleanup: Remove or wrap 900+ console.log() calls with debug mode check. Use existing logger.js utility with localStorage debug flag.
 
 ## Done
 - [x] 120 - Add /health endpoint to Rust backend
