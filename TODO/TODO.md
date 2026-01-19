@@ -11,7 +11,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-(none)
+- [ ] 130 - Production logging cleanup: Remove or wrap 900+ console.log() calls with debug mode check. Currently logs document content, user data, and sync state which could leak sensitive info. Use existing logger.js utility with localStorage debug flag.
 
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
@@ -22,6 +22,10 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 - [x] 104 - Fix content sync race conditions (use transaction annotations instead of mutable flag)
 - [ ] 105 - Add user-visible error messages for all failure modes
+- [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
+- [ ] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
+- [ ] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
+- [ ] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Currently accepts any string which causes confusing API errors downstream.
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -35,6 +39,14 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 117 - Add production monitoring/error tracking (Sentry integration)
 - [ ] 118 - Add Docker support for deployment
 - [ ] 119 - Add environment-specific config (.env support)
+- [ ] 133 - TypeScript migration: Add tsconfig.json and incrementally convert ~7,580 lines of JavaScript to TypeScript. Start with utility modules (utils/, config.js) then expand to UI components. Enables compile-time type checking and better IDE support.
+- [ ] 134 - ESLint setup: Add .eslintrc.js with rules for unused variables, consistent imports, and code style. Integrate with Vite build and add pre-commit hook. Currently no linting enforced.
+- [ ] 135 - CI/CD pipeline: Create .github/workflows for automated testing (Playwright), linting, and build verification on PRs. Add deployment workflow for Docker registry push.
+- [ ] 138 - Rust API docs: Document /health, /export, /load, /save endpoints in docs/api.md. Include request/response formats, error codes, and curl examples. Currently undocumented.
+- [ ] 139 - Troubleshooting guide: Create docs/troubleshooting.md covering common issues: WebSocket connection failures, IndexedDB quota, WASM loading errors, sync conflicts, Neovim plugin setup problems.
+- [ ] 140 - Performance guide: Document optimization strategies in docs/performance.md: debouncing settings, IndexedDB cleanup, WASM module loading, large document handling, memory management for long sessions.
+- [ ] 141 - GitHub docs expansion: Expand docs/github.md with token permissions required, rate limiting handling, error recovery, and workflow examples for common use cases.
+- [ ] 142 - Docker infrastructure: Complete Makefile docker targets (push/pull partially defined). Add docker-compose.yml for full stack (sync server, awareness server, Rust backend). Document in docs/deployment.md.
 
 ## Done
 - [x] 120 - Add /health endpoint to Rust backend
