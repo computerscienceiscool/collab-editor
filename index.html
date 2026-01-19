@@ -29,7 +29,13 @@
         <button class="menu-button" data-menu="file" role="menuitem" aria-haspopup="true" aria-expanded="false">File</button>
         <div class="dropdown-menu" id="file-menu" role="menu" aria-label="File menu">
           <div class="dropdown-item" data-action="new">New Document <span class="keyboard-shortcut">Ctrl+N</span></div>
-           <div class="dropdown-item" data-action="open">Open <span class="keyboard-shortcut">Ctrl+O</span></div>
+          <div class="dropdown-item has-submenu" data-action="open-recent">
+            Open Recent
+            <span class="submenu-arrow">&#9656;</span>
+            <div class="submenu" id="recent-docs-menu" role="menu">
+              <div class="submenu-placeholder">No recent documents</div>
+            </div>
+          </div>
           <div class="dropdown-item" data-action="make-copy">Make a copy</div>
           <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
@@ -217,10 +223,12 @@
     // Import the shortcut manager
     import { shortcutManager } from './src/ui/shortcutManager.js';
     import { preferencesDialog } from './src/ui/preferencesDialog.js';
-   
+    import { getRecentDocuments, formatShortId, formatRelativeTime } from './src/utils/documentRegistry.js';
+
     // Make them available globally so MenuSystem can use them
     window.shortcutManager = shortcutManager;
     window.preferencesDialog = preferencesDialog;
+    window.documentRegistry = { getRecentDocuments, formatShortId, formatRelativeTime };
 
     // Initialize preferences dialog on page load
     document.addEventListener('DOMContentLoaded', () => {
@@ -243,6 +251,78 @@
             this.setupKeyboardShortcuts();
             this.setupClickOutside();
             this.setupOrientationHandler();
+            this.setupRecentDocsMenu();
+          }
+
+          setupRecentDocsMenu() {
+            const recentMenuItem = document.querySelector('[data-action="open-recent"]');
+            if (!recentMenuItem) return;
+
+            // Populate submenu when hovering over "Open Recent"
+            recentMenuItem.addEventListener('mouseenter', () => {
+              this.populateRecentDocsMenu();
+            });
+
+            // Also populate when the File menu opens
+            const fileMenuButton = document.querySelector('[data-menu="file"]');
+            if (fileMenuButton) {
+              fileMenuButton.addEventListener('click', () => {
+                setTimeout(() => this.populateRecentDocsMenu(), 0);
+              });
+            }
+          }
+
+          populateRecentDocsMenu() {
+            const submenu = document.getElementById('recent-docs-menu');
+            if (!submenu || !window.documentRegistry) return;
+
+            const { getRecentDocuments, formatShortId, formatRelativeTime } = window.documentRegistry;
+            const docs = getRecentDocuments(10);
+
+            // Get current document ID to exclude it from the list
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentDocId = urlParams.get('doc');
+
+            // Filter out current document
+            const otherDocs = docs.filter(d => d.id !== currentDocId);
+
+            if (otherDocs.length === 0) {
+              submenu.innerHTML = '<div class="submenu-placeholder">No recent documents</div>';
+              return;
+            }
+
+            submenu.innerHTML = otherDocs.map(doc => `
+              <div class="submenu-item" data-doc-id="${doc.id}" title="${doc.id}">
+                <div class="submenu-item-title">${this.escapeHtml(doc.title)}</div>
+                <div class="submenu-item-meta">
+                  <span class="submenu-item-id">${formatShortId(doc.id)}</span>
+                  <span class="submenu-item-time">${formatRelativeTime(doc.lastOpened)}</span>
+                </div>
+              </div>
+            `).join('');
+
+            // Add click handlers for each document
+            submenu.querySelectorAll('.submenu-item').forEach(item => {
+              item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const docId = item.dataset.docId;
+                if (docId) {
+                  this.openDocument(docId);
+                }
+              });
+            });
+          }
+
+          escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+          }
+
+          openDocument(docId) {
+            this.closeAllMenus();
+            const url = `${window.location.origin}${window.location.pathname}?doc=${encodeURIComponent(docId)}`;
+            window.location.href = url;
           }
 
           // Close menus on orientation change / resize

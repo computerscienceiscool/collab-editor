@@ -13,6 +13,7 @@ import { setupUserList } from './ui/userList.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 import { showErrorBanner } from './ui/errors.js';
+import { addDocument, getDocTitle, updateTitle } from './utils/documentRegistry.js';
 
 // 0. Version storage functions
 async function saveVersionToIndexedDB(content, timestamp, docId) {
@@ -210,6 +211,9 @@ async function initAppInternal() {
     return;
   }
   startLastSavedTicker();
+
+  // Register this document in the recent documents registry
+  addDocument(documentId, getDocTitle(documentId));
   
   // If new document, log the shareable URL
   if (isNew) {
@@ -259,6 +263,8 @@ async function initAppInternal() {
     }
     titleInput.addEventListener('input', () => {
       localStorage.setItem(titleKey, titleInput.value);
+      // Also update the document registry
+      updateTitle(documentId, titleInput.value);
     });
   }
 
