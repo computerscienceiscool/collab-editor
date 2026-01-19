@@ -16,7 +16,6 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
 - [ ] 008 - Rust backend: Test offline edits syncing with Rust backend
-- [ ] 010 - Rust backend: Add command-line config for port and storage path (optional)
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
@@ -36,9 +35,10 @@ This list was migrated from the legacy `TODO.md` at the repo root; some items re
 - [ ] 117 - Add production monitoring/error tracking (Sentry integration)
 - [ ] 118 - Add Docker support for deployment
 - [ ] 119 - Add environment-specific config (.env support)
-- [ ] 120 - Add health check endpoints for Rust backend
 
 ## Done
+- [x] 120 - Add /health endpoint to Rust backend
+- [x] 010 - Add STORAGE_PATH env var config for Rust backend
 - [x] 007 - Add CORS headers to Rust backend (tower-http cors layer)
 - [x] 003 - Add "Open Recent" submenu to switch between visited documents (localStorage registry)
 - [x] 102 - OBSOLETE: Rust backend /load and /save endpoints are legacy (unused). Automerge sync server handles multi-doc by ID.

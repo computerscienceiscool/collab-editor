@@ -31,6 +31,17 @@ struct DocumentMetadata {
     format: String,
 }
 
+/// Get the storage directory path from STORAGE_PATH env var or default to current dir
+fn get_storage_path() -> String {
+    env::var("STORAGE_PATH").unwrap_or_else(|_| ".".to_string())
+}
+
+/// Get full path for a document file
+fn doc_path(filename: &str) -> String {
+    let storage = get_storage_path();
+    format!("{}/{}", storage, filename)
+}
+
 /// Atomically write data to a file using temp file + rename pattern.
 /// This prevents data corruption if the process crashes mid-write.
 fn atomic_write(path: &str, data: &[u8]) -> Result<(), String> {
@@ -80,6 +91,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
     info!("Rust server starting at http://{}", addr);
+    info!("Storage path: {}", get_storage_path());
     // Serve static files from ./public with fallback to index.html
     let static_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
 
@@ -97,6 +109,7 @@ async fn main() {
         .route("/save-cbor", post(save_cbor_handler)) // API route for saving CBOR data
         .route("/load-cbor", get(load_cbor_handler)) // API route for loading CBOR data
         .route("/export", get(export_handler)) // Export document as markdown
+        .route("/health", get(health_handler)) // Health check endpoint
         .layer(cors)
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024)); // Set max upload size to 10MB
 
@@ -109,7 +122,7 @@ async fn main() {
 // Handle GET /load -> Return the Yjs document if it exists
 async fn load_handler() -> impl IntoResponse {
     debug!("GET /load - Loading Yjs document");
-    match fs::read("doc.yjs") {
+    match fs::read(doc_path("doc.yjs")) {
         Ok(contents) => {
             if contents.is_empty() {
                 warn!("GET /load - Document is empty");
@@ -143,7 +156,7 @@ async fn save_handler(body: Bytes) -> impl IntoResponse {
     }
 
     // Use atomic write to prevent corruption
-    match atomic_write("doc.yjs", &body) {
+    match atomic_write(&doc_path("doc.yjs"), &body) {
         Ok(_) => {
             info!("POST /save - Saved {} bytes", body.len());
             StatusCode::OK.into_response()
@@ -197,7 +210,7 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
     };
 
     // Use atomic write to prevent corruption
-    match atomic_write("doc.cbor", &cbor_bytes) {
+    match atomic_write(&doc_path("doc.cbor"), &cbor_bytes) {
         Ok(_) => {
             info!("POST /save-cbor - Saved {} bytes (room: {})", cbor_bytes.len(), doc_data.metadata.room_id);
             StatusCode::OK.into_response()
@@ -212,7 +225,7 @@ async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
 // Handle GET /load-cbor -> Load document from CBOR
 async fn load_cbor_handler() -> impl IntoResponse {
     debug!("GET /load-cbor - Loading CBOR document");
-    let cbor_bytes = match fs::read("doc.cbor") {
+    let cbor_bytes = match fs::read(doc_path("doc.cbor")) {
         Ok(bytes) => bytes,
         Err(e) => {
             let msg = match e.kind() {
@@ -264,7 +277,7 @@ async fn load_cbor_handler() -> impl IntoResponse {
 async fn export_handler() -> impl IntoResponse {
     debug!("GET /export - Exporting document as markdown");
     // Try CBOR first (preferred format with structured data)
-    if let Ok(cbor_bytes) = fs::read("doc.cbor") {
+    if let Ok(cbor_bytes) = fs::read(doc_path("doc.cbor")) {
         if let Ok(doc_data) = serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
             info!("GET /export - Exported {} chars", doc_data.content.len());
             return Response::builder()
@@ -277,7 +290,7 @@ async fn export_handler() -> impl IntoResponse {
 
     // Fallback: try to read raw text from doc.yjs (legacy format - raw bytes)
     // Note: doc.yjs contains Yjs binary, not plain text, so this is limited
-    if let Ok(_) = fs::read("doc.yjs") {
+    if let Ok(_) = fs::read(doc_path("doc.yjs")) {
         warn!("GET /export - Only binary doc.yjs available");
         return (
             StatusCode::UNPROCESSABLE_ENTITY,
@@ -287,4 +300,9 @@ async fn export_handler() -> impl IntoResponse {
 
     warn!("GET /export - No document found");
     (StatusCode::NOT_FOUND, "No document found. Save a document first.").into_response()
+}
+
+// Handle GET /health -> Simple health check for monitoring
+async fn health_handler() -> impl IntoResponse {
+    (StatusCode::OK, "OK")
 }
