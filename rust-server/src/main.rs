@@ -104,10 +104,8 @@ async fn main() {
     // Set up the router
     let app = Router::new()
         .nest_service("/", static_dir) // Serve index.html and static assets
-        .route("/load", get(load_handler)) // API route
-        .route("/save", post(save_handler)) // API route
-        .route("/save-cbor", post(save_cbor_handler)) // API route for saving CBOR data
-        .route("/load-cbor", get(load_cbor_handler)) // API route for loading CBOR data
+        .route("/save-cbor", post(save_cbor_handler)) // Save document as CBOR
+        .route("/load-cbor", get(load_cbor_handler)) // Load document from CBOR
         .route("/export", get(export_handler)) // Export document as markdown
         .route("/health", get(health_handler)) // Health check endpoint
         .layer(cors)
@@ -118,57 +116,6 @@ async fn main() {
         .await
         .unwrap();
 }
-
-// Handle GET /load -> Return the Yjs document if it exists
-async fn load_handler() -> impl IntoResponse {
-    debug!("GET /load - Loading Yjs document");
-    match fs::read(doc_path("doc.yjs")) {
-        Ok(contents) => {
-            if contents.is_empty() {
-                warn!("GET /load - Document is empty");
-                return (StatusCode::NO_CONTENT, "Document is empty").into_response();
-            }
-            info!("GET /load - Loaded {} bytes", contents.len());
-            Response::builder()
-                .header("Content-Type", "application/octet-stream")
-                .body(Body::from(contents))
-                .unwrap()
-        },
-        Err(e) => {
-            let msg = match e.kind() {
-                std::io::ErrorKind::NotFound => "Document not found. Create a new document first.".to_string(),
-                std::io::ErrorKind::PermissionDenied => "Permission denied reading document".to_string(),
-                _ => format!("Failed to read document: {}", e),
-            };
-            warn!("GET /load - {}", msg);
-            (StatusCode::NOT_FOUND, msg).into_response()
-        },
-    }
-}
-
-// Handle POST /save -> Save the document (Yjs binary format)
-async fn save_handler(body: Bytes) -> impl IntoResponse {
-    debug!("POST /save - Saving Yjs document ({} bytes)", body.len());
-    // Validate payload
-    if body.is_empty() {
-        warn!("POST /save - Empty payload rejected");
-        return (StatusCode::BAD_REQUEST, "Empty payload").into_response();
-    }
-
-    // Use atomic write to prevent corruption
-    match atomic_write(&doc_path("doc.yjs"), &body) {
-        Ok(_) => {
-            info!("POST /save - Saved {} bytes", body.len());
-            StatusCode::OK.into_response()
-        },
-        Err(err) => {
-            error!("POST /save - Failed: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, err).into_response()
-        },
-    }
-}
-
-
 
 // Handle POST /save-cbor -> Save document as CBOR
 async fn save_cbor_handler(body: Bytes) -> impl IntoResponse {
@@ -276,30 +223,28 @@ async fn load_cbor_handler() -> impl IntoResponse {
 // Handle GET /export -> Export document content as markdown/text
 async fn export_handler() -> impl IntoResponse {
     debug!("GET /export - Exporting document as markdown");
-    // Try CBOR first (preferred format with structured data)
-    if let Ok(cbor_bytes) = fs::read(doc_path("doc.cbor")) {
-        if let Ok(doc_data) = serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
-            info!("GET /export - Exported {} chars", doc_data.content.len());
-            return Response::builder()
-                .header("Content-Type", "text/markdown; charset=utf-8")
-                .header("Content-Disposition", "attachment; filename=\"document.md\"")
-                .body(Body::from(doc_data.content))
-                .unwrap();
+    match fs::read(doc_path("doc.cbor")) {
+        Ok(cbor_bytes) => {
+            match serde_cbor::from_slice::<DocumentData>(&cbor_bytes) {
+                Ok(doc_data) => {
+                    info!("GET /export - Exported {} chars", doc_data.content.len());
+                    Response::builder()
+                        .header("Content-Type", "text/markdown; charset=utf-8")
+                        .header("Content-Disposition", "attachment; filename=\"document.md\"")
+                        .body(Body::from(doc_data.content))
+                        .unwrap()
+                },
+                Err(err) => {
+                    error!("GET /export - CBOR parsing failed: {}", err);
+                    (StatusCode::INTERNAL_SERVER_ERROR, "Document corrupted").into_response()
+                }
+            }
+        },
+        Err(_) => {
+            warn!("GET /export - No document found");
+            (StatusCode::NOT_FOUND, "No document found. Save a document first.").into_response()
         }
     }
-
-    // Fallback: try to read raw text from doc.yjs (legacy format - raw bytes)
-    // Note: doc.yjs contains Yjs binary, not plain text, so this is limited
-    if let Ok(_) = fs::read(doc_path("doc.yjs")) {
-        warn!("GET /export - Only binary doc.yjs available");
-        return (
-            StatusCode::UNPROCESSABLE_ENTITY,
-            "doc.yjs contains binary data. Use /load endpoint or save as CBOR first.",
-        ).into_response();
-    }
-
-    warn!("GET /export - No document found");
-    (StatusCode::NOT_FOUND, "No document found. Save a document first.").into_response()
 }
 
 // Handle GET /health -> Simple health check for monitoring
