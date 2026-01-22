@@ -48,6 +48,9 @@ export function setupEditor(repo, handle, awareness) {
 
   let currentDoc = null;
   let lastSyncedContent = '';
+  // Flag to track when we're syncing a local change to Automerge
+  // This prevents the handle.on('change') from re-applying our own changes
+  let isSyncingLocalChange = false;
 
   // Create update listener for local changes BEFORE creating state
   // Uses transaction annotations to detect remote changes (race-condition-free)
@@ -61,6 +64,9 @@ export function setupEditor(repo, handle, awareness) {
     if (hasRemoteChange) return;
 
     if (!update.docChanged) return;
+
+    // Set flag to prevent handle.on('change') from re-applying our changes
+    isSyncingLocalChange = true;
 
     // Apply each change to Automerge with exact position info
     // This gives Automerge precise user intent for better concurrent edit merging
@@ -76,6 +82,8 @@ export function setupEditor(repo, handle, awareness) {
         fromA, deleteCount, insertText.length);
     });
 
+    // Clear the flag after sync is complete
+    isSyncingLocalChange = false;
     lastSyncedContent = update.state.doc.toString();
   });
 
@@ -114,6 +122,13 @@ export function setupEditor(repo, handle, awareness) {
   // Uses patches for precise updates instead of full document replacement
   // Falls back to full replacement if patches unavailable
   handle.on('change', ({ doc, patches }) => {
+    // Skip if this is our own local change being echoed back
+    if (isSyncingLocalChange) {
+      console.log('[Editor] Skipping local change echo');
+      currentDoc = doc;
+      return;
+    }
+
     if (!doc || doc.content === undefined) {
       console.warn('[Editor] Document or content is undefined');
       return;
