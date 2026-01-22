@@ -15,6 +15,55 @@ import { githubService } from './github/githubService.js';
 import { showErrorBanner } from './ui/errors.js';
 import { addDocument, getDocTitle, updateTitle } from './utils/documentRegistry.js';
 
+/**
+ * Sanitize HTML to prevent XSS attacks.
+ * Removes dangerous elements and attributes using browser DOM APIs.
+ */
+function sanitizeHtml(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button'];
+  const dangerousAttrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'];
+
+  const walk = (node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      // Remove dangerous elements entirely
+      if (dangerousTags.includes(node.tagName.toLowerCase())) {
+        node.remove();
+        return;
+      }
+
+      // Remove dangerous attributes
+      for (const attr of dangerousAttrs) {
+        node.removeAttribute(attr);
+      }
+
+      // Sanitize href/src attributes (remove javascript: URLs)
+      for (const attr of ['href', 'src', 'action']) {
+        const value = node.getAttribute(attr);
+        if (value && value.trim().toLowerCase().startsWith('javascript:')) {
+          node.removeAttribute(attr);
+        }
+      }
+
+      // Remove style attributes that could be dangerous
+      const style = node.getAttribute('style');
+      if (style && /expression|javascript|behavior/i.test(style)) {
+        node.removeAttribute('style');
+      }
+    }
+
+    // Recurse into children
+    for (const child of Array.from(node.childNodes)) {
+      walk(child);
+    }
+  };
+
+  walk(template.content);
+  return template.innerHTML;
+}
+
 // 0. Version storage functions
 async function saveVersionToIndexedDB(content, timestamp, docId) {
   try {
@@ -462,7 +511,7 @@ async function initAppInternal() {
         setTimeout(() => {
           const content = view.state.doc.toString();
           const html = convertMarkdownToHtml(content);
-          previewElement.innerHTML = html;
+          previewElement.innerHTML = sanitizeHtml(html);
           editorContainer.classList.remove('loading');
           previewElement.classList.remove('loading');
           console.log('Markdown preview updated');

@@ -8,7 +8,7 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root.
 
 ## Critical
-- [ ] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465. Use DOMPurify or textContent instead of raw innerHTML for rendered markdown.
+- [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465. Use DOMPurify or textContent instead of raw innerHTML for rendered markdown.
 
 ## High
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
