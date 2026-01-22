@@ -4,6 +4,8 @@
  * This handles loading the diff.wasm file and setting up the diff functions
  */
 
+import { showErrorBanner } from '../ui/errors.js';
+
 let diffWasmReady = false;
 
 export async function initDiffWasm() {
@@ -47,9 +49,11 @@ export async function initDiffWasm() {
     }
     
   } catch (error) {
+    diffWasmReady = false;
     console.error("Failed to load diff WASM:", error);
     console.log("Make sure to run: make diff-wasm");
-    throw error;
+    showErrorBanner("Diff viewer unavailable. Run 'make diff-wasm' to enable.", 8000);
+    return false;
   }
 }
 
@@ -88,11 +92,19 @@ export function testDiffWasm() {
 }
 
 // Auto-initialize when this module is imported
-// But don't block if it fails
+// Gracefully handle failures without crashing
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initDiffWasm, 2000); // Wait for other WASM modules
+    setTimeout(() => {
+      initDiffWasm().catch(() => {
+        console.warn("Diff WASM auto-init failed (non-fatal)");
+      });
+    }, 2000);
   });
 } else {
-  setTimeout(initDiffWasm, 2000);
+  setTimeout(() => {
+    initDiffWasm().catch(() => {
+      console.warn("Diff WASM auto-init failed (non-fatal)");
+    });
+  }, 2000);
 }

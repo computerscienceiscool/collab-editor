@@ -17,6 +17,7 @@ import {
   getCurrentSessionInfo
 } from '../wasm/initWasm.js';
 import { showErrorBanner } from '../ui/errors.js';
+import { sanitizeFilename, getDocumentFilename } from '../utils/sanitizeFilename.js';
 
 import { undo, redo } from '@codemirror/commands';
 
@@ -297,32 +298,7 @@ async function handleFormat(handle, view) {
 
 
 
- // Strict filename sanitizer
-function sanitizeFilename(raw, fallback = 'document.txt') {
-  if (!raw || typeof raw !== 'string') return fallback;
-  
-  const cleaned = String(raw)
-    // Remove Unicode control chars including RTL override (U+202E) that caused the crash
-    .replace(/[\u0000-\u001F\u007F-\u009F\u200E-\u202E]/g, '')
-    // Remove path separators and shell metacharacters
-    .replace(/[\/\\<>:"|?*`$&;(){}[\]]/g, '_')
-    // Handle Windows reserved names
-    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)/i, 'safe_$1$2')
-    // Normalize whitespace and trim
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 100);
-  
-  if (!cleaned || cleaned === '.' || cleaned === '..') return fallback;
-  if (!/\.[a-z0-9]{1,5}$/i.test(cleaned)) return cleaned + '.txt';
-  return cleaned;
-}
-function getDocumentFilename(extension) {
-   const titleInput = document.getElementById('document-title');
-   const base = sanitizeFilename(titleInput && titleInput.value);
-   const ext  = String(extension || '').replace(/[^a-z0-9]/gi, '').toLowerCase() || 'txt';
-   return `${base}.${ext}`;
-}
+// sanitizeFilename and getDocumentFilename imported from '../utils/sanitizeFilename.js'
 
 /**
  * Gets the PromiseGrid filename based on the title input
@@ -750,29 +726,7 @@ document.addEventListener('keydown', (e) => {
   if (window.__safeTxtExportPatchApplied) return;
   window.__safeTxtExportPatchApplied = true;
 
-  function sanitizeFilename(input, fallback = 'document.txt') {
-    const str = String(input ?? '').slice(0, 255);
-    let clean = str
-      // remove path separators
-      .replace(/[\/\\]+/g, '-')
-      // strip control chars (incl. NUL)
-      .replace(/[\x00-\x1F\x7F]/g, '')
-      // block dangerous punctuation frequently used in injection
-      .replace(/[<>:"|?*`$&;]+/g, '-')
-      // normalize whitespace
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // collapse repeated dashes; trim trailing dots/spaces (Windows rules)
-    clean = clean.replace(/-+/g, '-').replace(/[.\s]+$/g, '');
-
-    if (!clean || clean === '.' || clean === '..') clean = fallback;
-    // ensure .txt extension (avoid extension-less or dotfiles)
-    if (!/\.[A-Za-z0-9]{1,8}$/.test(clean)) clean += '.txt';
-    return clean;
-  }
-
-  // Handle only the TXT export action; avoid navigation-based downloads
+  // Handle only the TXT export action (uses imported sanitizeFilename); avoid navigation-based downloads
   document.addEventListener('click', function safeTxtExportHandler(e) {
     const btn = e.target.closest?.('[data-action="save-txt"]');
     if (!btn) return;
@@ -907,25 +861,7 @@ document.addEventListener('keydown', (e) => {
   if (window.__safeTextExportInstalled) return;
   window.__safeTextExportInstalled = true;
 
-  function sanitizeFilename(name, fallback = 'document.txt') {
-    try {
-      if (!name || typeof name !== 'string') return fallback;
-      // Strip dangerous/separator chars, collapse spaces, trim dots, cap length
-      let cleaned = name
-        .replace(/[/\\?%*:|"<>]/g, '_')
-        .replace(/\s+/g, ' ')
-        .replace(/^\.+|\.+$/g, '')
-        .trim();
-
-      if (!cleaned) cleaned = 'document';
-      // Ensure .txt extension for this action
-      if (!/\.[a-z0-9]{1,8}$/i.test(cleaned)) cleaned += '.txt';
-      if (cleaned.length > 120) cleaned = cleaned.slice(0, 120);
-      return cleaned;
-    } catch {
-      return fallback;
-    }
-  }
+  // Uses imported sanitizeFilename from utils/sanitizeFilename.js
 
   async function exportTextSafely() {
     try {

@@ -5,6 +5,7 @@ import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
 import { config } from '../config.js'
 import { getClientID } from '../utils/clientId.js'
+import { showErrorBanner } from '../ui/errors.js'
 
 /**
  * Initializes the Automerge repository and document.
@@ -53,6 +54,7 @@ if (documentId) {
       
     } catch (err) {
       console.error('[Automerge] Failed to load document:', err);
+      showErrorBanner('Failed to load document. It may not exist or the network may be unavailable.', 10000);
       throw new Error(`Could not load document: ${documentId}`);
     }
   }

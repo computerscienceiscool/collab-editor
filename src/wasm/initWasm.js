@@ -1,8 +1,8 @@
-import init, { 
+import init, {
   // Your existing functions
-  export_to_markdown, 
-  compress_document, 
-  decompress_document, 
+  export_to_markdown,
+  compress_document,
+  decompress_document,
   format_text,
   toggle_bold,
   toggle_italic,
@@ -10,9 +10,9 @@ import init, {
   toggle_strikethrough,
   toggle_heading,
   toggle_list,
-  calculate_document_stats, 
+  calculate_document_stats,
   convert_url_to_markdown,
-  
+
   // NEW: PromiseGrid functions
   create_promisegrid_edit_message,
   create_promisegrid_stats_message,
@@ -22,44 +22,64 @@ import init, {
   search_document
 } from '../../rust-wasm/pkg/rust_wasm.js';
 
+import { showErrorBanner } from '../ui/errors.js';
+
+// Track WASM initialization state
+let wasmReady = false;
+
+export function isWasmReady() {
+  return wasmReady;
+}
+
 export async function initWasm() {
-  await init();
-  
-  // Test the existing function
-  const output = export_to_markdown("**Hello world**");
-  console.log("WASM Markdown Output:", output);
-  
-  // Test WASM compression (NEW - this will prove WASM compression works)
-  const testData = "This is a long document that should compress well. ".repeat(100);
-  console.log("RUST WASM COMPRESSION TEST:");
-  console.log(" Original size:", testData.length, "bytes");
-  
-  const compressed = compress_document(testData);
-  console.log(" WASM compressed size:", compressed.length, "bytes");
-  console.log(" WASM compression ratio:", ((testData.length - compressed.length) / testData.length * 100).toFixed(1) + "%");
-  
-  const decompressed = decompress_document(compressed);
-  console.log(" WASM decompression successful:", decompressed === testData);
-  
-  // NEW: Test PromiseGrid CBOR functionality
-  console.log("PROMISEGRID CBOR TEST:");
   try {
-    const testMessage = create_promisegrid_edit_message(
-      "test-doc", 
-      "insert", 
-      0, 
-      "Hello PromiseGrid!", 
-      "test-user"
-    );
-    console.log(" PromiseGrid CBOR message created:", testMessage.length, "bytes");
-    log_promisegrid_message(testMessage);
+    await init();
+    wasmReady = true;
+
+    // Test the existing function
+    const output = export_to_markdown("**Hello world**");
+    console.log("WASM Markdown Output:", output);
+
+    // Test WASM compression
+    const testData = "This is a long document that should compress well. ".repeat(100);
+    console.log("RUST WASM COMPRESSION TEST:");
+    console.log(" Original size:", testData.length, "bytes");
+
+    const compressed = compress_document(testData);
+    console.log(" WASM compressed size:", compressed.length, "bytes");
+    console.log(" WASM compression ratio:", ((testData.length - compressed.length) / testData.length * 100).toFixed(1) + "%");
+
+    const decompressed = decompress_document(compressed);
+    console.log(" WASM decompression successful:", decompressed === testData);
+
+    // Test PromiseGrid CBOR functionality
+    console.log("PROMISEGRID CBOR TEST:");
+    try {
+      const testMessage = create_promisegrid_edit_message(
+        "test-doc",
+        "insert",
+        0,
+        "Hello PromiseGrid!",
+        "test-user"
+      );
+      console.log(" PromiseGrid CBOR message created:", testMessage.length, "bytes");
+      log_promisegrid_message(testMessage);
+    } catch (pgError) {
+      console.log(" PromiseGrid test failed:", pgError);
+    }
+
+    console.log("WASM SEARCH TEST:");
+    const testText = "The quick brown fox jumps over the lazy dog. The fox is quick.";
+    const searchResults = search_document(testText, "fox", false);
+    console.log(" Search results for 'fox':", searchResults);
+
+    console.log("WASM initialization complete");
   } catch (error) {
-    console.log(" PromiseGrid test failed:", error);
+    wasmReady = false;
+    console.error("Failed to initialize Rust WASM:", error);
+    showErrorBanner("Text formatting features unavailable. Try running 'make wasm' and refresh.", 10000);
+    throw error; // Re-throw so app.js knows init failed
   }
-  console.log("WASM SEARCH TEST:");
-  const testText = "The quick brown fox jumps over the lazy dog. The fox is quick.";
-  const searchResults = search_document(testText, "fox", false);
-  console.log(" Search results for 'fox':", searchResults);
 }
 
 
