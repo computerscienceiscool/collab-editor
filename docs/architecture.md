@@ -95,12 +95,13 @@ Documents are simple JavaScript objects:
 }
 ```
 
-**Text operations use `Automerge.updateText()`:**
+**Text operations use `Automerge.splice()` for precise CRDT sync:**
 ```javascript
-import { updateText } from '@automerge/automerge';
+import { splice } from '@automerge/automerge';
 
+// Apply character-level changes for optimal CRDT merging
 handle.change(d => {
-  updateText(d, ['content'], newText);
+  splice(d, ['content'], position, deleteCount, insertText);
 });
 ```
 
@@ -166,7 +167,8 @@ Object.getOwnPropertyNames(Object.getPrototypeOf(window.automergeHandle));
 
 ### Editor → Automerge (Local Changes)
 
-Uses CodeMirror's transaction annotations to detect remote changes (race-condition-free):
+Uses CodeMirror's transaction annotations to detect remote changes (race-condition-free).
+Uses `splice()` to give Automerge exact change positions for optimal CRDT merging:
 
 ```javascript
 // Define annotation at module level
@@ -180,9 +182,11 @@ EditorView.updateListener.of((update) => {
   if (hasRemoteChange) return;
 
   if (update.docChanged) {
-    const newText = update.state.doc.toString();
-    handle.change(d => {
-      updateText(d, ['content'], newText);
+    // Apply each change with exact position info
+    update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+      handle.change(d => {
+        Automerge.splice(d, ['content'], fromA, toA - fromA, inserted.toString());
+      });
     });
   }
 });
@@ -190,18 +194,35 @@ EditorView.updateListener.of((update) => {
 
 ### Automerge → Editor (Remote Changes)
 
+Uses Automerge patches for precise updates instead of full document replacement:
+
 ```javascript
-handle.on('change', ({ doc }) => {
+handle.on('change', ({ doc, patches }) => {
+  // Apply patches for precise, efficient updates
+  if (patches && patches.length > 0) {
+    const changes = [];
+    for (const patch of patches) {
+      if (patch.path[0] === 'content' && patch.action === 'splice') {
+        const index = patch.path[1];
+        changes.push({
+          from: index,
+          to: index + (patch.length || 0),
+          insert: patch.value || ''
+        });
+      }
+    }
+    if (changes.length > 0) {
+      view.dispatch({ changes, annotations: isRemoteChange.of(true) });
+      return;
+    }
+  }
+
+  // Fallback: full document replacement if no usable patches
   const remoteText = doc.content || '';
   const currentText = view.state.doc.toString();
-
   if (remoteText !== currentText) {
     view.dispatch({
-      changes: {
-        from: 0,
-        to: currentText.length,
-        insert: remoteText
-      },
+      changes: { from: 0, to: currentText.length, insert: remoteText },
       annotations: isRemoteChange.of(true)
     });
   }

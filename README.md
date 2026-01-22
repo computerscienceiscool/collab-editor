@@ -225,9 +225,9 @@ For information about document URLs and sharing, see [docs/user-docs.md](docs/us
 ## Tech Stack
 
 ### Core Technologies
-- Automerge - Collaborative editing with CRDTs
+- Automerge - Collaborative editing with CRDTs (using `splice()` for precise character-level sync)
 - Automerge Repo - Repository system with networking and storage adapters
-- CodeMirror 6 - Advanced text editing
+- CodeMirror 6 - Advanced text editing with transaction annotations for race-condition-free sync
 - WebSocket - Real-time synchronization
 - IndexedDB - Local document persistence
 - Vanilla JS / HTML / CSS - Frontend
@@ -258,7 +258,7 @@ For information about document URLs and sharing, see [docs/user-docs.md](docs/us
 ### Core Documentation
 - [User Guide](docs/user-guide.md) — How to use the editor and its features 
 - [Document URLs](docs/user-docs.md) — How document IDs work and how to share documents
-- [Github Integration](docs/github-integration.md) — How to connect to GitHub repositories
+- [Github Integration](docs/github.md) — How to connect to GitHub repositories
 - [Formatting Spec](docs/formatting-spec.md) — Planned document structure and export formats
 - [Rust Developer Notes](docs/rust-developer-notes.md) — Architecture and data flow for the Rust backend (for Go developers)
 - [docs/makefile-usage.md](docs/makefile-usage.md) — How to use the Makefile for building and running the Rust or Go server

@@ -2,7 +2,6 @@
 # Collaborative Text Editor Installation Guide
 
 This guide will walk you through setting up and running the Collaborative Text Editor, a real-time collaborative document editor built with Automerge, CodeMirror 6, WebAssembly, and modern web technologies.
-This needs to be tested
 
 ## Prerequisites
 
@@ -143,5 +142,3 @@ npm run test:e2e
 ```
 
 
-## Troubleshooting
-If you encounter issues during setup or usage, please check the make file for detailed commands and options.

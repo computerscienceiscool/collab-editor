@@ -201,8 +201,7 @@ If you want to remove your GitHub token and settings:
 ### GitHub Token Security
 
 - Your GitHub token is stored in your browser's localStorage with obfuscation
-- Tokens are not stored in plaintext - they are encoded to prevent casual inspection
-- Note: This is obfuscation, not encryption - it deters casual snooping but is not cryptographically secure
+- Tokens are encoded to prevent casual inspection
 - The token never leaves your browser except when making API calls directly to GitHub
 - For security, use a token with only the necessary 'repo' scope
 - If you're on a shared computer, remember to clear settings when finished
