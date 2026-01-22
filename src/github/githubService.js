@@ -4,9 +4,7 @@
  * Handles GitHub API communications and settings management
  */
 
-// Simple obfuscation for sensitive data in localStorage
-// Note: This is NOT encryption - it's obfuscation to prevent casual snooping.
-// True security requires server-side token handling with httpOnly cookies.
+// Obfuscation for sensitive data in localStorage
 const OBFUSCATION_KEY = 'collab-editor-v1';
 
 /**
