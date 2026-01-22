@@ -21,10 +21,10 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 - [x] 104 - Fix content sync race conditions (use transaction annotations instead of mutable flag)
-- [ ] 105 - Add user-visible error messages for all failure modes
+- [x] 105 - Add user-visible error messages for all failure modes
 - [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
-- [ ] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
-- [ ] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
+- [x] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
+- [x] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
 - [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Validates prefix (ghp_, github_pat_, etc.) and minimum length.
 
 ## Low (Features)
