@@ -8,7 +8,7 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root.
 
 ## Critical
-- [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465. Use DOMPurify or textContent instead of raw innerHTML for rendered markdown.
+(none)
 
 ## High
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
@@ -22,12 +22,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
-- [x] 104 - Fix content sync race conditions (use transaction annotations instead of mutable flag)
-- [x] 105 - Add user-visible error messages for all failure modes
 - [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
-- [x] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
-- [x] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
-- [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Validates prefix (ghp_, github_pat_, etc.) and minimum length.
 - [ ] 147 - Performance: Remove arbitrary 1-second delay in app.js:182. Use Promise.all() or proper event coordination instead of setTimeout workaround.
 - [ ] 148 - Neovim: Add cursor update debouncing in buffer.lua:211 (has TODO comment). Every keystroke sends cursor position - add 300-500ms debounce.
 - [ ] 149 - Code quality: Extract magic numbers (timeouts, intervals) to named constants. Hardcoded values scattered across automergeSetup.js, app.js, etc.
@@ -61,6 +56,12 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465
+- [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js
+- [x] 136 - WASM error handling: Add user-visible feedback when WASM modules fail to load
+- [x] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility
+- [x] 105 - Add user-visible error messages for all failure modes
+- [x] 104 - Fix content sync race conditions (use transaction annotations instead of mutable flag)
 - [x] 120 - Add /health endpoint to Rust backend
 - [x] 010 - Add STORAGE_PATH env var config for Rust backend
 - [x] 007 - Add CORS headers to Rust backend (tower-http cors layer)
