@@ -8,10 +8,12 @@ Rules:
 This list was migrated from the legacy `TODO.md` at the repo root.
 
 ## Critical
-(none)
+- [ ] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465. Use DOMPurify or textContent instead of raw innerHTML for rendered markdown.
 
 ## High
-(none)
+- [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
+- [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
+- [ ] 146 - GitHub API: Add AbortController with 30s timeout to all fetch calls in githubService.js. Currently requests can hang indefinitely.
 
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
@@ -26,6 +28,13 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [x] 132 - Refactor export/handlers.js: Consolidate 3 separate sanitizeFilename() definitions into single utility. File is 967 lines with duplicated validation logic.
 - [x] 136 - WASM error handling: Add user-visible feedback when grokker.wasm, diff.wasm, or rust_wasm.js fail to load. Currently fails silently leaving features broken without explanation. Check initWasm.js and diffWasm.js.
 - [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js. Validates prefix (ghp_, github_pat_, etc.) and minimum length.
+- [ ] 147 - Performance: Remove arbitrary 1-second delay in app.js:182. Use Promise.all() or proper event coordination instead of setTimeout workaround.
+- [ ] 148 - Neovim: Add cursor update debouncing in buffer.lua:211 (has TODO comment). Every keystroke sends cursor position - add 300-500ms debounce.
+- [ ] 149 - Code quality: Extract magic numbers (timeouts, intervals) to named constants. Hardcoded values scattered across automergeSetup.js, app.js, etc.
+- [ ] 150 - Performance: Use Promise.allSettled() for parallel WASM init instead of sequential loading in app.js:150-180. Reduces startup time.
+- [ ] 151 - Testing: Add unit tests for utility modules (clientId.js, timeUtils.js, documentRegistry.js, sanitizeFilename.js). Currently no unit test coverage.
+- [ ] 152 - Docs: Document awareness-server.js with JSDoc and usage examples. No comments or documentation for this critical component.
+- [ ] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export (app.js:81). Dead code exposed globally.
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -48,6 +57,8 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 141 - GitHub docs expansion: Expand docs/github.md with token permissions required, rate limiting handling, error recovery, and workflow examples for common use cases.
 - [ ] 142 - Docker infrastructure: Complete Makefile docker targets (push/pull partially defined). Add docker-compose.yml for full stack (sync server, awareness server, Rust backend). Document in docs/deployment.md.
 - [ ] 130 - (Pre-production) Logging cleanup: Remove or wrap 900+ console.log() calls with debug mode check. Use existing logger.js utility with localStorage debug flag.
+- [ ] 154 - Cleanup: Remove test-only window exports in initWasm.js:88-100 or gate behind DEBUG flag. Exposes internal functions to console.
+- [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
 - [x] 120 - Add /health endpoint to Rust backend
