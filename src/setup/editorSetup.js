@@ -18,11 +18,12 @@ const isRemoteChange = Annotation.define();
 
 /**
  * Initializes the CodeMirror editor with Automerge integration.
- * 
- * CRITICAL: Automerge 2.x requires Automerge.updateText() for text operations
- * 
+ *
+ * Uses Automerge.splice() for precise character-level sync, giving the CRDT
+ * exact user intent for optimal concurrent edit merging.
+ *
  * @param {Repo} repo - The Automerge repository
- * @param {DocHandle} handle - The Automerge document handle  
+ * @param {DocHandle} handle - The Automerge document handle
  * @param {Object} awareness - Custom awareness implementation
  * @returns {EditorView} - The initialized CodeMirror editor view
  */
@@ -50,6 +51,7 @@ export function setupEditor(repo, handle, awareness) {
 
   // Create update listener for local changes BEFORE creating state
   // Uses transaction annotations to detect remote changes (race-condition-free)
+  // Uses splice() to give Automerge exact change info for better CRDT merging
   const updateListener = EditorView.updateListener.of((update) => {
     // Check if any transaction in this update is marked as a remote change
     // This is race-condition-free since annotations are per-transaction
@@ -60,18 +62,21 @@ export function setupEditor(repo, handle, awareness) {
 
     if (!update.docChanged) return;
 
-    const newText = update.state.doc.toString();
+    // Apply each change to Automerge with exact position info
+    // This gives Automerge precise user intent for better concurrent edit merging
+    update.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+      const deleteCount = toA - fromA;
+      const insertText = inserted.toString();
 
-    // Only update if content actually changed
-    if (newText === lastSyncedContent) return;
+      handle.change(d => {
+        Automerge.splice(d, ['content'], fromA, deleteCount, insertText);
+      });
 
-    // Update Automerge document
-    handle.change(d => {
-      Automerge.updateText(d, ['content'], newText);
+      console.log('[Editor] Splice to Automerge: pos=%d, del=%d, ins=%d chars',
+        fromA, deleteCount, insertText.length);
     });
 
-    lastSyncedContent = newText;
-    console.log('[Editor] Synced to Automerge:', newText.length, 'chars');
+    lastSyncedContent = update.state.doc.toString();
   });
 
   const state = EditorState.create({
@@ -106,26 +111,61 @@ export function setupEditor(repo, handle, awareness) {
   });
 
   // Handle remote changes (from other users) -> Update CodeMirror
-  // Uses transaction annotations instead of mutable flag for race-condition-free sync
-  handle.on('change', ({ doc }) => {
+  // Uses patches for precise updates instead of full document replacement
+  // Falls back to full replacement if patches unavailable
+  handle.on('change', ({ doc, patches }) => {
     if (!doc || doc.content === undefined) {
       console.warn('[Editor] Document or content is undefined');
       return;
     }
 
-    // Convert content to string (handles both string and Text types)
+    currentDoc = doc;
+
+    // Try to apply patches for precise, efficient updates
+    if (patches && patches.length > 0) {
+      const changes = [];
+
+      for (const patch of patches) {
+        // Only handle content changes
+        if (patch.path[0] !== 'content') continue;
+
+        if (patch.action === 'splice') {
+          // patch.path[1] is the start index for text splices
+          const index = typeof patch.path[1] === 'number' ? patch.path[1] : 0;
+          const deleteCount = patch.length || 0;
+          const insertText = patch.value || '';
+
+          changes.push({
+            from: index,
+            to: index + deleteCount,
+            insert: insertText
+          });
+
+          console.log('[Editor] Remote splice: pos=%d, del=%d, ins=%d chars',
+            index, deleteCount, insertText.length);
+        }
+      }
+
+      if (changes.length > 0) {
+        view.dispatch({
+          changes,
+          annotations: isRemoteChange.of(true)
+        });
+        lastSyncedContent = view.state.doc.toString();
+        return;
+      }
+    }
+
+    // Fallback: full document replacement if no usable patches
     const newText = typeof doc.content === 'string' ? doc.content : doc.content.toString();
     const oldText = view.state.doc.toString();
 
-    // Only update if content actually changed
     if (newText !== oldText) {
       // Save cursor position and clamp to valid range
       const selection = view.state.selection.main;
       const newAnchor = Math.min(selection.anchor, newText.length);
       const newHead = Math.min(selection.head, newText.length);
 
-      // Update editor content with remote change annotation
-      // The annotation marks this transaction so updateListener ignores it
       view.dispatch({
         changes: {
           from: 0,
@@ -136,11 +176,9 @@ export function setupEditor(repo, handle, awareness) {
         annotations: isRemoteChange.of(true)
       });
 
-      // Update last synced content
       lastSyncedContent = newText;
+      console.log('[Editor] Remote full sync: %d chars', newText.length);
     }
-
-    currentDoc = doc;
   });
 
   // Load initial content when document is ready
