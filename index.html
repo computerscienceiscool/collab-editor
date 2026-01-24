@@ -919,7 +919,7 @@ async handleViewDiffs() {
 
           // Tables - allow leading whitespace
           result = result.replace(/^\s*(\|.+\|)\s*\n\s*(\|[-:| ]+\|)\s*\n((?:\s*\|.+\|\s*\n?)+)/gm, (match, header, sep, body) => {
-            const headers = header.split('|').map(h => `<th>${h.trim()}</th>`).join('');
+            const headers = header.split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('');
             const rows = body.trim().split('\n').map(row => {
               const cells = row.replace(/^\||\|$/g, '').split('|').map(c => `<td>${c.trim()}</td>`).join('');
               return `<tr>${cells}</tr>`;

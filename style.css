@@ -672,6 +672,7 @@ html, body {
 .markdown-preview th {
   background: #f5f5f5;
   font-weight: bold;
+  border-bottom: 2px solid #999;
 }
 
 /* User Activity Log */
@@ -1271,6 +1272,7 @@ html, body {
 .theme-dark .markdown-preview th {
   background: #111827;
   border-color: #1f2937;
+  border-bottom: 2px solid #4b5563;
   color: #e5e7eb;
 }
 
@@ -1282,6 +1284,12 @@ html, body {
 .theme-dark .markdown-preview code {
   background: #0f172a;
   color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview h1,
+.theme-dark .markdown-preview h2,
+.theme-dark .markdown-preview h3 {
+  color: #f9fafb;
 }
 
 .theme-dark .markdown-preview h4,
