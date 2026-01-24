@@ -53,6 +53,8 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 179 - Dark mode: Menu items barely readable - fix text/background contrast
+- [x] 178 - Markdown preview: Fixed multiple tables merging into one (use [ \t]* instead of \s* to stop at blank lines)
 - [x] 177 - Markdown preview: Added dark mode styles for h1, h2, h3 headings
 - [x] 176 - Markdown preview: Added thick border under table headers (light and dark mode)
 - [x] 175 - Markdown preview: Fixed table header empty cells (added .slice(1,-1) to strip pipe delimiters)

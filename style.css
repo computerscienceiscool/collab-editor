@@ -1180,8 +1180,20 @@ html, body {
   color: #e5e7eb;
 }
 
+.theme-dark .dropdown-item {
+  color: #e5e7eb;
+}
+
 .theme-dark .dropdown-item:hover {
   background: #1f2937;
+}
+
+.theme-dark .dropdown-item.disabled {
+  color: #6b7280;
+}
+
+.theme-dark .keyboard-shortcut {
+  color: #9ca3af;
 }
 
 .theme-dark .submenu {

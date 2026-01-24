@@ -40,8 +40,8 @@ function markdownToHtml(markdown) {
     return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
   });
 
-  // Tables
-  result = result.replace(/^\s*(\|.+\|)\s*\n\s*(\|[-:| ]+\|)\s*\n((?:\s*\|.+\|\s*\n?)+)/gm, (match, header, separator, body) => {
+  // Tables - use [ \t]* for body rows to stop at blank lines
+  result = result.replace(/^[ \t]*(\|.+\|)[ \t]*\n[ \t]*(\|[-:| ]+\|)[ \t]*\n((?:[ \t]*\|.+\|[ \t]*\n?)+)/gm, (match, header, separator, body) => {
     const headerCells = header.split('|').slice(1, -1).map(cell => `<th>${cell.trim()}</th>`).join('');
     const bodyRows = body.trim().split('\n').map(row => {
       const cells = row.split('|').slice(1, -1).map(cell => `<td>${cell.trim()}</td>`).join('');
