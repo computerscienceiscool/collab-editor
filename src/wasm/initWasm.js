@@ -10,6 +10,7 @@ import init, {
   toggle_strikethrough,
   toggle_heading,
   toggle_list,
+  toggle_numbered_list,
   calculate_document_stats,
   convert_url_to_markdown,
 
@@ -87,6 +88,7 @@ export async function initWasm() {
 // TEMP: expose for console testing
 window.toggle_heading = toggle_heading;
 window.toggle_list = toggle_list;
+window.toggle_numbered_list = toggle_numbered_list;
 window.toggle_bold = toggle_bold;
 window.toggle_italic = toggle_italic;
 window.toggle_underline = toggle_underline;
@@ -107,6 +109,7 @@ export {
   toggle_strikethrough,
   toggle_heading,
   toggle_list,
+  toggle_numbered_list,
   calculate_document_stats,
   convert_url_to_markdown,
   search_document

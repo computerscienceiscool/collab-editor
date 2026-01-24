@@ -487,10 +487,11 @@ async function initAppInternal() {
           .replace(/_(.*?)_/g, '<em>$1</em>')
           .replace(/~~(.*?)~~/g, '<del>$1</del>')
           .replace(/`(.*?)`/g, '<code>$1</code>')
-          .replace(/^\s*- (.*$)/gim, '<li>$1</li>')
-          .replace(/((^<li>.*<\/li>\n)+)/gm, '<ul>$1</ul>')
-          .replace(/^\s*\d+\. (.*$)/gim, '<li>$1</li>')
-          .replace(/((^<li>.*<\/li>\n)+)/gm, '<ol>$1</ol>')
+          .replace(/^\s*[-*+] (.*$)/gim, '<li class="bullet">$1</li>')
+          .replace(/((?:^<li class="bullet">.*<\/li>\n?)+)/gm, '<ul>$1</ul>')
+          .replace(/^\s*\d+\. (.*$)/gim, '<li class="numbered">$1</li>')
+          .replace(/((?:^<li class="numbered">.*<\/li>\n?)+)/gm, '<ol>$1</ol>')
+          .replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">')
           .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
           .replace(/\n/g, '<br>');
       }

@@ -195,22 +195,94 @@ pub fn toggle_heading(text: &str, level: u8) -> String {
     }
 }
 
-/// Toggle markdown bullet list (add/remove `- ` at the start of each line)
+/// Check if a line starts with a bullet marker (-, *, or +)
+fn is_bullet_line(line: &str) -> bool {
+    let trimmed = line.trim_start();
+    trimmed.starts_with("- ") || trimmed.starts_with("* ") || trimmed.starts_with("+ ")
+}
+
+/// Remove bullet marker from a line
+fn remove_bullet(line: &str) -> String {
+    let trimmed = line.trim_start();
+    if trimmed.starts_with("- ") {
+        trimmed[2..].to_string()
+    } else if trimmed.starts_with("* ") {
+        trimmed[2..].to_string()
+    } else if trimmed.starts_with("+ ") {
+        trimmed[2..].to_string()
+    } else {
+        line.to_string()
+    }
+}
+
+/// Toggle markdown bullet list (add/remove `- `, `* `, or `+ ` at the start of each line)
 #[wasm_bindgen]
 pub fn toggle_list(text: &str) -> String {
     let lines: Vec<&str> = text.lines().collect();
-    let is_list = lines.iter().all(|line| line.trim_start().starts_with("- "));
+    let is_list = lines.iter().all(|line| is_bullet_line(line));
 
     if is_list {
-        // Remove `- ` from each line
+        // Remove bullet marker from each line
         lines.iter()
-            .map(|line| line.trim_start().trim_start_matches("- ").to_string())
+            .map(|line| remove_bullet(line))
             .collect::<Vec<String>>()
             .join("\n")
     } else {
         // Add `- ` to each line
         lines.iter()
             .map(|line| format!("- {}", line.trim()))
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+}
+
+/// Check if a line starts with a number marker (1., 2., etc.)
+fn is_numbered_line(line: &str) -> bool {
+    let trimmed = line.trim_start();
+    // Match digits followed by . and space
+    let mut chars = trimmed.chars().peekable();
+    let mut has_digit = false;
+    while let Some(c) = chars.next() {
+        if c.is_ascii_digit() {
+            has_digit = true;
+        } else if c == '.' && has_digit {
+            return chars.next() == Some(' ');
+        } else {
+            return false;
+        }
+    }
+    false
+}
+
+/// Remove number marker from a line
+fn remove_number(line: &str) -> String {
+    let trimmed = line.trim_start();
+    if let Some(pos) = trimmed.find(". ") {
+        let prefix = &trimmed[..pos];
+        if prefix.chars().all(|c| c.is_ascii_digit()) {
+            return trimmed[pos + 2..].to_string();
+        }
+    }
+    line.to_string()
+}
+
+/// Toggle markdown numbered list (add/remove `1. `, `2. `, etc. at the start of each line)
+#[wasm_bindgen]
+pub fn toggle_numbered_list(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let is_list = lines.iter().all(|line| is_numbered_line(line));
+
+    if is_list {
+        // Remove number marker from each line
+        lines.iter()
+            .map(|line| remove_number(line))
+            .collect::<Vec<String>>()
+            .join("\n")
+    } else {
+        // Add numbered markers to each line
+        lines.iter()
+            .enumerate()
+            .map(|(i, line)| format!("{}. {}", i + 1, line.trim()))
             .collect::<Vec<String>>()
             .join("\n")
     }
