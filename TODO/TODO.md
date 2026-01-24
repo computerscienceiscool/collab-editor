@@ -20,6 +20,11 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 162 - Markdown preview: Missing horizontal rule support (`---`, `***`, `___`).
 - [ ] 163 - Markdown preview: Missing image support (`![alt](url)`).
 - [ ] 164 - Heading regex bug: lib.rs:182 has double backslash `\\s` which may not match whitespace correctly.
+- [ ] 165 - Markdown preview: Missing fenced code blocks support (``` code ```).
+- [ ] 166 - Markdown preview: Missing table support (`| col1 | col2 |`).
+- [ ] 167 - Markdown preview: Missing task list support (`- [ ]` unchecked, `- [x]` checked).
+- [ ] 168 - Markdown preview: Missing autolinked URLs (bare `https://...` should become clickable).
+- [ ] 169 - Markdown preview: Missing escape character support (`\*` should render as literal `*`).
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
