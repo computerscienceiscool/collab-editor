@@ -478,6 +478,23 @@ Although rarely needed, you can still manually refresh the preview:
 - Watch the preview as you edit to ensure your formatting looks as expected
 - The preview shows exactly how your document will appear when exported as markdown
 
+### Supported Markdown Features
+- **Headings**: # through ###### (H1-H6)
+- **Bold**: **text** or __text__
+- **Italic**: *text* or _text_
+- **Strikethrough**: ~~text~~
+- **Links**: [text](url)
+- **Images**: ![alt](url)
+- **Bullet lists**: -, *, or +
+- **Numbered lists**: 1. 2. 3.
+- **Task lists**: - [ ] unchecked, - [x] checked
+- **Tables**: | col | col |
+- **Code**: `inline` and ```fenced```
+- **Blockquotes**: > text
+- **Horizontal rules**: --- or *** or ___
+- **Autolinked URLs**: bare https://... links
+- **Escape characters**: \* renders as literal *
+
 ---
 
 ## User Activity Log
