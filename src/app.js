@@ -839,6 +839,7 @@ async function initAppInternal() {
   window.automergeHandle = handle;
   window.automergeRepo = repo;
   window.awareness = awareness;
+  window.getLatestVersionFromIndexedDB = getLatestVersionFromIndexedDB;
 
   // Initialize GitHub integration if token exists
   if (githubService.settings.token) {

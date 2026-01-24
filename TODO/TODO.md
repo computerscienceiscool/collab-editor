@@ -53,6 +53,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 181 - Bug: Restore window.getLatestVersionFromIndexedDB export (needed by diff viewer, removed prematurely in TODO 153)
 - [x] 180 - Dark mode: Dialog inputs/labels unreadable - add styles for settings-input, settings-section, input-group labels
 - [x] 179 - Dark mode: Menu items barely readable - fix text/background contrast
 - [x] 178 - Markdown preview: Fixed multiple tables merging into one (use [ \t]* instead of \s* to stop at blank lines)
@@ -79,7 +80,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [x] 158 - Markdown preview: Fixed regex order (`__` before `_`)
 - [x] 157 - Markdown preview: `__text__` now renders as bold
 - [x] 156 - Markdown preview: `_text_` now renders as italic
-- [x] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export
+- [x] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export (REVERTED in TODO 181 - still needed by diff viewer)
 - [x] 146 - GitHub API: Add AbortController with 30s timeout to all fetch calls
 - [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465
 - [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js
