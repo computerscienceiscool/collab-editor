@@ -146,17 +146,18 @@ pub fn toggle_italic(text: &str) -> String {
 }
 
 // Toggle underline formatting on selected text
+// Uses HTML <u> tags since Markdown has no native underline syntax
 #[wasm_bindgen]
 pub fn toggle_underline(text: &str) -> String {
     let trimmed = text.trim();
-    
-    // Check if text is already underlined (wrapped in __)
-    if trimmed.starts_with("__") && trimmed.ends_with("__") && trimmed.len() > 4 {
+
+    // Check if text is already underlined (wrapped in <u></u>)
+    if trimmed.starts_with("<u>") && trimmed.ends_with("</u>") && trimmed.len() > 7 {
         // Remove underline formatting
-        trimmed[2..trimmed.len()-2].to_string()
+        trimmed[3..trimmed.len()-4].to_string()
     } else {
         // Add underline formatting
-        format!("__{}__", trimmed)
+        format!("<u>{}</u>", trimmed)
     }
 }
 
