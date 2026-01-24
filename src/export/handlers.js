@@ -22,6 +22,140 @@ import { sanitizeFilename, getDocumentFilename } from '../utils/sanitizeFilename
 import { undo, redo } from '@codemirror/commands';
 
 /**
+ * Convert markdown to HTML for export
+ */
+function markdownToHtml(markdown) {
+  // Store escaped characters to restore later
+  const escapeMap = [];
+  let result = markdown.replace(/\\([\\`*_{}[\]()#+\-.!>|])/g, (match, char) => {
+    const placeholder = `\x00ESC${escapeMap.length}\x00`;
+    escapeMap.push(char);
+    return placeholder;
+  });
+
+  // Fenced code blocks
+  result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
+  });
+
+  // Tables
+  result = result.replace(/^\s*(\|.+\|)\s*\n\s*(\|[-:| ]+\|)\s*\n((?:\s*\|.+\|\s*\n?)+)/gm, (match, header, separator, body) => {
+    const headerCells = header.split('|').slice(1, -1).map(cell => `<th>${cell.trim()}</th>`).join('');
+    const bodyRows = body.trim().split('\n').map(row => {
+      const cells = row.split('|').slice(1, -1).map(cell => `<td>${cell.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+    return `<table><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+  });
+
+  // Blockquotes
+  result = result.replace(/^\s*> (.*$)/gim, '<blockquote>$1</blockquote>');
+  result = result.replace(/<\/blockquote>\n<blockquote>/g, '\n');
+
+  // Horizontal rules
+  result = result.replace(/^\s*(?:[-*_]){3,}\s*$/gm, '<hr>');
+
+  // Headings
+  result = result
+    .replace(/^\s*###### (.*$)/gim, '<h6>$1</h6>')
+    .replace(/^\s*##### (.*$)/gim, '<h5>$1</h5>')
+    .replace(/^\s*#### (.*$)/gim, '<h4>$1</h4>')
+    .replace(/^\s*### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^\s*## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^\s*# (.*$)/gim, '<h1>$1</h1>');
+
+  // Task lists
+  result = result
+    .replace(/^\s*[-*+] \[x\] (.*$)/gim, '<li class="task task-done"><input type="checkbox" checked disabled> $1</li>')
+    .replace(/^\s*[-*+] \[ \] (.*$)/gim, '<li class="task"><input type="checkbox" disabled> $1</li>');
+  result = result.replace(/((?:^<li class="task[^"]*">.*<\/li>\n?)+)/gm, '<ul class="task-list">$1</ul>');
+
+  // Bold, italic, strikethrough
+  result = result
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.*?)__/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/_(.*?)_/g, '<em>$1</em>')
+    .replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+  // Inline code
+  result = result.replace(/`(.*?)`/g, '<code>$1</code>');
+
+  // Bullet lists
+  result = result.replace(/^\s*[-*+] (.*$)/gim, '<li class="bullet">$1</li>');
+  result = result.replace(/((?:^<li class="bullet">.*<\/li>\n?)+)/gm, '<ul>$1</ul>');
+
+  // Numbered lists
+  result = result.replace(/^\s*\d+\. (.*$)/gim, '<li class="numbered">$1</li>');
+  result = result.replace(/((?:^<li class="numbered">.*<\/li>\n?)+)/gm, '<ol>$1</ol>');
+
+  // Images
+  result = result.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">');
+
+  // Links
+  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+  // Autolinked URLs
+  result = result.replace(/(?<!href="|src="|">)(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>');
+
+  // Restore escaped characters
+  escapeMap.forEach((char, i) => {
+    result = result.replace(`\x00ESC${i}\x00`, char);
+  });
+
+  // Line breaks
+  result = result.replace(/\n/g, '<br>');
+
+  return result;
+}
+
+/**
+ * Generate a full HTML document with styling for export
+ */
+function generateHtmlDocument(title, htmlContent) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; }
+    h1 { font-size: 2em; border-bottom: 2px solid #eee; padding-bottom: 0.3em; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+    pre { background: #f4f4f4; padding: 16px; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; padding: 0; }
+    blockquote { border-left: 4px solid #ddd; margin: 1em 0; padding-left: 1em; color: #666; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; font-weight: bold; }
+    ul, ol { padding-left: 2em; }
+    .task-list { list-style: none; padding-left: 0; }
+    .task { display: flex; align-items: flex-start; gap: 0.5em; }
+    .task input { margin-top: 0.3em; }
+    .task-done { color: #666; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+    a { color: #0366d6; }
+    img { max-width: 100%; }
+  </style>
+</head>
+<body>
+${htmlContent}
+</body>
+</html>`;
+}
+
+/**
  * Sets up handlers for the export buttons in the UI.
  * 
  * @param {DocHandle} handle - The Automerge document handle
@@ -390,6 +524,36 @@ async function handleSave(format, handle, view) {
         blob = new Blob([content], { type: 'application/json' });
         filename = getDocumentFilename('json');
         break;
+      }
+
+      case 'html': {
+        // Convert markdown to styled HTML document
+        const htmlBody = markdownToHtml(textContent);
+        const title = document.title || 'Document';
+        content = generateHtmlDocument(title, htmlBody);
+        blob = new Blob([content], { type: 'text/html' });
+        filename = getDocumentFilename('html');
+        break;
+      }
+
+      case 'pdf': {
+        // Open print dialog for PDF export
+        const htmlBody = markdownToHtml(textContent);
+        const title = document.title || 'Document';
+        const fullHtml = generateHtmlDocument(title, htmlBody);
+
+        // Open in new window and trigger print
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(fullHtml);
+          printWindow.document.close();
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        } else {
+          showErrorBanner('Pop-up blocked. Please allow pop-ups to export PDF.');
+        }
+        return; // Don't call downloadBlob
       }
 
       default:

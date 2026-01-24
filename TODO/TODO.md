@@ -11,7 +11,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-- [ ] 164 - Heading regex bug: lib.rs:182 has double backslash `\\s` which may not match whitespace correctly.
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
@@ -37,7 +36,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 112 - Add comment/annotation system for specific text passages
 - [ ] 113 - Add user permissions model (reader/editor/owner roles)
 - [ ] 114 - Add mention system (@username notifications)
-- [ ] 115 - Add export as HTML/PDF (not just plaintext)
 - [ ] 116 - Add document templates (start from pre-built formats)
 - [ ] 117 - Add production monitoring/error tracking (Sentry integration)
 - [ ] 118 - Add Docker support for deployment
@@ -55,6 +53,8 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 115 - Export as HTML/PDF: Added HTML download and PDF via print dialog
+- [x] 164 - Heading regex: Verified lib.rs uses raw strings correctly (`r"\s"` is valid Rust regex)
 - [x] 174 - WASM: Added toggle_numbered_list function for `1. item` style lists
 - [x] 173 - WASM toggle_list: Now recognizes `* ` and `+ ` when toggling off
 - [x] 172 - Markdown preview: List wrapping fixed (no longer requires trailing newline)
