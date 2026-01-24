@@ -28,8 +28,15 @@ function sanitizeHtml(html) {
 
   const walk = (node) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
-      // Remove dangerous elements entirely
-      if (dangerousTags.includes(node.tagName.toLowerCase())) {
+      const tagName = node.tagName.toLowerCase();
+
+      // Allow disabled checkbox inputs for task lists
+      const isAllowedInput = tagName === 'input' &&
+        node.getAttribute('type') === 'checkbox' &&
+        node.hasAttribute('disabled');
+
+      // Remove dangerous elements entirely (but allow safe checkboxes)
+      if (dangerousTags.includes(tagName) && !isAllowedInput) {
         node.remove();
         return;
       }
@@ -476,24 +483,89 @@ async function initAppInternal() {
         console.log("Using menu system prototype's markdown converter");
         return window.menuSystem.prototype.markdownToHtml(markdown);
       } else {
-        console.log("Using fallback markdown converter");
-        return markdown
-          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        // Store escaped characters to restore later
+        const escapeMap = [];
+        let result = markdown.replace(/\\([\\`*_{}[\]()#+\-.!>|])/g, (match, char) => {
+          const placeholder = `\x00ESC${escapeMap.length}\x00`;
+          escapeMap.push(char);
+          return placeholder;
+        });
+
+        // Fenced code blocks (must be before inline code)
+        result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+          const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
+        });
+
+        // Tables (must be before other line-based processing) - allow leading whitespace
+        result = result.replace(/^\s*(\|.+\|)\s*\n\s*(\|[-:| ]+\|)\s*\n((?:\s*\|.+\|\s*\n?)+)/gm, (match, header, separator, body) => {
+          const headerCells = header.split('|').slice(1, -1).map(cell => `<th>${cell.trim()}</th>`).join('');
+          const bodyRows = body.trim().split('\n').map(row => {
+            const cells = row.split('|').slice(1, -1).map(cell => `<td>${cell.trim()}</td>`).join('');
+            return `<tr>${cells}</tr>`;
+          }).join('');
+          return `<table><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+        });
+
+        // Blockquotes - allow leading whitespace
+        result = result.replace(/^\s*> (.*$)/gim, '<blockquote>$1</blockquote>');
+        result = result.replace(/<\/blockquote>\n<blockquote>/g, '\n'); // Merge consecutive
+
+        // Horizontal rules (must be before list processing) - allow leading whitespace
+        result = result.replace(/^\s*(?:[-*_]){3,}\s*$/gm, '<hr>');
+
+        // Headings (H6 to H1, longest match first) - allow leading whitespace
+        result = result
+          .replace(/^\s*###### (.*$)/gim, '<h6>$1</h6>')
+          .replace(/^\s*##### (.*$)/gim, '<h5>$1</h5>')
+          .replace(/^\s*#### (.*$)/gim, '<h4>$1</h4>')
+          .replace(/^\s*### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^\s*## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^\s*# (.*$)/gim, '<h1>$1</h1>');
+
+        // Task lists (must be before regular bullet lists)
+        result = result
+          .replace(/^\s*[-*+] \[x\] (.*$)/gim, '<li class="task task-done"><input type="checkbox" checked disabled> $1</li>')
+          .replace(/^\s*[-*+] \[ \] (.*$)/gim, '<li class="task"><input type="checkbox" disabled> $1</li>');
+        result = result.replace(/((?:^<li class="task[^"]*">.*<\/li>\n?)+)/gm, '<ul class="task-list">$1</ul>');
+
+        // Bold, italic, strikethrough
+        result = result
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           .replace(/__(.*?)__/g, '<strong>$1</strong>')
           .replace(/\*(.*?)\*/g, '<em>$1</em>')
           .replace(/_(.*?)_/g, '<em>$1</em>')
-          .replace(/~~(.*?)~~/g, '<del>$1</del>')
-          .replace(/`(.*?)`/g, '<code>$1</code>')
-          .replace(/^\s*[-*+] (.*$)/gim, '<li class="bullet">$1</li>')
-          .replace(/((?:^<li class="bullet">.*<\/li>\n?)+)/gm, '<ul>$1</ul>')
-          .replace(/^\s*\d+\. (.*$)/gim, '<li class="numbered">$1</li>')
-          .replace(/((?:^<li class="numbered">.*<\/li>\n?)+)/gm, '<ol>$1</ol>')
-          .replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">')
-          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-          .replace(/\n/g, '<br>');
+          .replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+        // Inline code (after fenced blocks)
+        result = result.replace(/`(.*?)`/g, '<code>$1</code>');
+
+        // Bullet lists
+        result = result.replace(/^\s*[-*+] (.*$)/gim, '<li class="bullet">$1</li>');
+        result = result.replace(/((?:^<li class="bullet">.*<\/li>\n?)+)/gm, '<ul>$1</ul>');
+
+        // Numbered lists
+        result = result.replace(/^\s*\d+\. (.*$)/gim, '<li class="numbered">$1</li>');
+        result = result.replace(/((?:^<li class="numbered">.*<\/li>\n?)+)/gm, '<ol>$1</ol>');
+
+        // Images (before links to avoid conflict)
+        result = result.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%">');
+
+        // Links
+        result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        // Autolinked URLs (bare URLs not already in links)
+        result = result.replace(/(?<!href="|src="|">)(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+        // Restore escaped characters
+        escapeMap.forEach((char, i) => {
+          result = result.replace(`\x00ESC${i}\x00`, char);
+        });
+
+        // Line breaks
+        result = result.replace(/\n/g, '<br>');
+
+        return result;
       }
     };
    

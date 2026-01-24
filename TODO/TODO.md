@@ -11,21 +11,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-- [ ] 160 - Markdown preview: Missing H4-H6 headings support (####, #####, ######).
-- [ ] 161 - Markdown preview: Missing blockquote support (`> text`).
-- [ ] 162 - Markdown preview: Missing horizontal rule support (`---`, `***`, `___`).
-- [ ] 163 - Markdown preview: Missing image support (`![alt](url)`).
 - [ ] 164 - Heading regex bug: lib.rs:182 has double backslash `\\s` which may not match whitespace correctly.
-- [ ] 165 - Markdown preview: Missing fenced code blocks support (``` code ```).
-- [ ] 166 - Markdown preview: Missing table support (`| col1 | col2 |`).
-- [ ] 167 - Markdown preview: Missing task list support (`- [ ]` unchecked, `- [x]` checked).
-- [ ] 168 - Markdown preview: Missing autolinked URLs (bare `https://...` should become clickable).
-- [ ] 169 - Markdown preview: Missing escape character support (`\*` should render as literal `*`).
-- [x] 170 - Markdown preview: `![alt](url)` shows `!` before link instead of image. Image regex must run BEFORE link regex.
-- [x] 171 - Markdown preview: Bullet lists only handle `- `, should also support `* ` and `+ ` per GFM.
-- [x] 172 - Markdown preview: List wrapping regex requires trailing newline, so last list item may not wrap in `<ul>`/`<ol>`.
-- [x] 173 - WASM toggle_list: Only handles `- ` bullets, should recognize `* ` and `+ ` when toggling off.
-- [x] 174 - WASM: Missing toggle_numbered_list function for `1. item` style lists.
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
@@ -69,6 +55,20 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 174 - WASM: Added toggle_numbered_list function for `1. item` style lists
+- [x] 173 - WASM toggle_list: Now recognizes `* ` and `+ ` when toggling off
+- [x] 172 - Markdown preview: List wrapping fixed (no longer requires trailing newline)
+- [x] 171 - Markdown preview: Bullet lists now support `* ` and `+ ` per GFM
+- [x] 170 - Markdown preview: Image regex runs before link regex (no more `!` before links)
+- [x] 169 - Markdown preview: Escape characters now work
+- [x] 168 - Markdown preview: Autolinked URLs now work
+- [x] 167 - Markdown preview: Task lists now work (fixed sanitizer removing checkboxes)
+- [x] 166 - Markdown preview: Tables now work (fixed trailing whitespace handling)
+- [x] 165 - Markdown preview: Fenced code blocks now work
+- [x] 163 - Markdown preview: Images now work
+- [x] 162 - Markdown preview: Horizontal rules now work (fixed leading whitespace)
+- [x] 161 - Markdown preview: Blockquotes now work (fixed leading whitespace)
+- [x] 160 - Markdown preview: H4-H6 headings now work (fixed leading whitespace)
 - [x] 159 - Underline formatting: Use HTML `<u>text</u>` instead of `__` (GFM compliant)
 - [x] 158 - Markdown preview: Fixed regex order (`__` before `_`)
 - [x] 157 - Markdown preview: `__text__` now renders as bold
