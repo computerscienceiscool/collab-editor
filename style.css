@@ -1196,6 +1196,43 @@ html, body {
   color: #9ca3af;
 }
 
+/* Dark mode dialog/settings styles */
+.theme-dark .settings-section {
+  border-color: #1f2937;
+}
+
+.theme-dark .settings-section h3 {
+  color: #e5e7eb;
+}
+
+.theme-dark .settings-help {
+  color: #9ca3af;
+}
+
+.theme-dark .input-group label {
+  color: #e5e7eb;
+}
+
+.theme-dark .settings-input {
+  background: #0b1224;
+  color: #e5e7eb;
+  border-color: #1f2937;
+}
+
+.theme-dark .settings-input::placeholder {
+  color: #6b7280;
+}
+
+.theme-dark .settings-button {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.theme-dark .settings-button:hover {
+  background: #374151;
+}
+
 .theme-dark .submenu {
   background: #111827;
   border-color: #1f2937;
