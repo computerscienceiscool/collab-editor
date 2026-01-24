@@ -11,10 +11,15 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-- [ ] 156 - Markdown preview: `_text_` renders as underline instead of italic (app.js:486). Per Markdown spec, single underscore is italic like single asterisk.
-- [ ] 157 - Markdown preview: `__text__` renders as underline instead of bold (app.js:487). Per Markdown spec, double underscore is bold like double asterisk.
-- [ ] 158 - Markdown preview: Regex order wrong - `__` processed after `_` so `__text__` breaks. Must process `__` before `_`.
-- [ ] 159 - Underline formatting: toggle_underline (rust-wasm/lib.rs:150) uses `__text__` which is bold in standard Markdown. Consider using HTML `<u>text</u>` instead.
+- [ ] 156 - Markdown preview: `_text_` renders as underline instead of italic (app.js:486). Per GFM, single underscore is italic.
+- [ ] 157 - Markdown preview: `__text__` renders as underline instead of bold (app.js:487). Per GFM, double underscore is bold.
+- [ ] 158 - Markdown preview: Regex order wrong - `__` processed after `_` so `__text__` never matches correctly.
+- [ ] 159 - Underline formatting: toggle_underline (rust-wasm/lib.rs:150) uses `__` which is bold in GFM. Use HTML `<u>text</u>` instead.
+- [ ] 160 - Markdown preview: Missing H4-H6 headings support (####, #####, ######).
+- [ ] 161 - Markdown preview: Missing blockquote support (`> text`).
+- [ ] 162 - Markdown preview: Missing horizontal rule support (`---`, `***`, `___`).
+- [ ] 163 - Markdown preview: Missing image support (`![alt](url)`).
+- [ ] 164 - Heading regex bug: lib.rs:182 has double backslash `\\s` which may not match whitespace correctly.
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
