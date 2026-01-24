@@ -11,6 +11,10 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
+- [ ] 156 - Markdown preview: `_text_` renders as underline instead of italic (app.js:486). Per Markdown spec, single underscore is italic like single asterisk.
+- [ ] 157 - Markdown preview: `__text__` renders as underline instead of bold (app.js:487). Per Markdown spec, double underscore is bold like double asterisk.
+- [ ] 158 - Markdown preview: Regex order wrong - `__` processed after `_` so `__text__` breaks. Must process `__` before `_`.
+- [ ] 159 - Underline formatting: toggle_underline (rust-wasm/lib.rs:150) uses `__text__` which is bold in standard Markdown. Consider using HTML `<u>text</u>` instead.
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
