@@ -88,9 +88,12 @@ The editor provides comprehensive functionality through its Google Docs-style me
 **Export Options:**
 All exports automatically use your document title for the filename:
 - **Download as Text (.txt)**: Plain text version
+- **Download as Markdown (.md)**: Markdown source file
+- **Download as HTML (.html)**: Styled HTML document with rendered markdown
 - **Download as CodeMirror State (.json)**: Complete editor state
 - **Download as CBOR (.cbor)**: Structured document with metadata
 - **Download as PromiseGrid CBOR**: Protocol-compliant decentralized computing format
+- **Download as Automerge (.automerge)**: Binary Automerge document for sync/restore
 
 **Sharing:**
 - **Share**: Use native browser sharing or copy URL with message
@@ -404,10 +407,12 @@ Click the **Save** button in the toolbar to export your work. Choose the format 
 | Format Option         | Description |
 |------------------------|-------------|
 | **.txt**               | Saves the plain text contents of the document. |
+| **.md**                | Saves as Markdown source file. |
+| **.html**              | Exports as styled HTML with rendered markdown (headings, lists, tables, code blocks, etc.). |
 | **.json**              | Saves the current CodeMirror editor state (can include styling info). |
-| **.cbor**             | Saves the document state in CBOR format. Useful for syncing or restoring later. |
-| **PromiseGrid CBOR**   | **NEW**: Saves document as authentic PromiseGrid protocol message with official 'grid' tag. |
-| **.md**                | Git-compatible Markdown format (WIP; powered by Rust backend). |
+| **.cbor**              | Saves the document state in CBOR format. Useful for syncing or restoring later. |
+| **PromiseGrid CBOR**   | Saves document as authentic PromiseGrid protocol message with official 'grid' tag. |
+| **.automerge**         | Binary Automerge document for sync/restore across sessions. |
 
 ---
 
