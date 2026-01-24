@@ -342,6 +342,13 @@ async function handleSave(format, handle, view) {
         break;
       }
 
+      case 'md': {
+        content = textContent;
+        blob = new Blob([content], { type: 'text/markdown' });
+        filename = getDocumentFilename('md');
+        break;
+      }
+
       case 'json': {
         content = JSON.stringify(view.state.toJSON(), null, 2);
         blob = new Blob([content], { type: 'application/json' });

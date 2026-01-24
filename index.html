@@ -38,6 +38,7 @@
           </div>
           <div class="dropdown-item" data-action="make-copy">Make a copy</div>
           <div class="dropdown-item" data-action="save-txt">Download as Text (.txt)</div>
+          <div class="dropdown-item" data-action="save-md">Download as Markdown (.md)</div>
           <div class="dropdown-item" data-action="save-json">Download as CodeMirror State (.json)</div>
           <div class="dropdown-item" data-action="save-cbor">Download as CBOR (.cbor)</div>
           <div class="dropdown-item" data-action="save-promisegrid">Download as PromiseGrid CBOR</div>
@@ -204,6 +205,7 @@
   <div style="display: none;">
     <select id="save-format">
       <option value="txt">Export as .txt</option>
+      <option value="md">Export as .md (Markdown)</option>
       <option value="json">Export Codemirror State</option>
       <option value="cbor">Save as .cbor</option>
       <option value="promisegrid">PromiseGrid CBOR (.cbor)</option>
@@ -473,6 +475,7 @@ async handleViewDiffs() {
             }
             break;
           case 'save-txt':
+          case 'save-md':
           case 'save-json':
           case 'save-cbor':
           case 'save-promisegrid':

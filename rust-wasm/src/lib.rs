@@ -180,7 +180,7 @@ pub fn toggle_heading(text: &str, level: u8) -> String {
     let trimmed = text.trim();
 
     // Compile regex safely
-    let re = Regex::new(r"^(#{1,6})\\s+(.*)$");
+    let re = Regex::new(r"^(#{1,6})\s+(.*)$");
     if re.is_err() {
         return format!("<!-- regex compile failed -->\n{}", text);
     }
