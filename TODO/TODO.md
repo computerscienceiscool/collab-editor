@@ -13,7 +13,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 ## High
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
-- [ ] 146 - GitHub API: Add AbortController with 30s timeout to all fetch calls in githubService.js. Currently requests can hang indefinitely.
 
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
@@ -29,7 +28,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 150 - Performance: Use Promise.allSettled() for parallel WASM init instead of sequential loading in app.js:150-180. Reduces startup time.
 - [ ] 151 - Testing: Add unit tests for utility modules (clientId.js, timeUtils.js, documentRegistry.js, sanitizeFilename.js). Currently no unit test coverage.
 - [ ] 152 - Docs: Document awareness-server.js with JSDoc and usage examples. No comments or documentation for this critical component.
-- [ ] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export (app.js:81). Dead code exposed globally.
 
 ## Low (Features)
 - [ ] 109 - Add real-time conflict indication (show unmerged changes)
@@ -56,6 +54,8 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export
+- [x] 146 - GitHub API: Add AbortController with 30s timeout to all fetch calls
 - [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465
 - [x] 137 - GitHub token validation: Add format/length validation before API calls in githubService.js
 - [x] 136 - WASM error handling: Add user-visible feedback when WASM modules fail to load

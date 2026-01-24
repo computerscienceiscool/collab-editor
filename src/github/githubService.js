@@ -48,6 +48,31 @@ const SENSITIVE_FIELDS = ['token', 'grokkerApiKey'];
 // Valid GitHub token prefixes (https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/)
 const GITHUB_TOKEN_PREFIXES = ['ghp_', 'github_pat_', 'gho_', 'ghu_', 'ghs_', 'ghr_'];
 const MIN_TOKEN_LENGTH = 40;
+const FETCH_TIMEOUT_MS = 30000;
+
+/**
+ * Fetch with timeout using AbortController.
+ * @param {string} url - URL to fetch
+ * @param {RequestInit} options - Fetch options
+ * @param {number} timeout - Timeout in milliseconds (default 30s)
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeout = FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
  * Validate GitHub token format before making API calls.
@@ -184,7 +209,7 @@ export class GitHubService {
     }
 
     try {
-      const response = await fetch('https://api.github.com/user', {
+      const response = await fetchWithTimeout('https://api.github.com/user', {
         headers: {
           'Authorization': `token ${token}`,
           'Accept': 'application/vnd.github.v3+json'
@@ -252,7 +277,7 @@ export class GitHubService {
     }
 
     try {
-      const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
+      const response = await fetchWithTimeout('https://api.github.com/user/repos?sort=updated&per_page=100', {
         headers: {
           'Authorization': `token ${this.settings.token}`,
           'Accept': 'application/vnd.github.v3+json'
@@ -314,7 +339,7 @@ export class GitHubService {
       
       try {
         console.log(`Checking if file exists: ${filePath}`);
-        const fileResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
+        const fileResponse = await fetchWithTimeout(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
           headers: {
             'Authorization': `token ${this.settings.token}`,
             'Accept': 'application/vnd.github.v3+json'
@@ -382,7 +407,7 @@ export class GitHubService {
       console.log('Sending commit request to GitHub API');
       
       // Make the commit API request
-      const commitResponse = await fetch(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
+      const commitResponse = await fetchWithTimeout(`https://api.github.com/repos/${this.settings.selectedRepo}/contents/${filePath}`, {
         method: 'PUT',
         headers: {
           'Authorization': `token ${this.settings.token}`,
@@ -477,7 +502,7 @@ Added real-time collaboration features using Automerge CRDTs.
     }
 
     try {
-      const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      const response = await fetchWithTimeout(`https://api.github.com/repos/${repo}/contents/${path}`, {
         headers: {
           'Authorization': `token ${this.settings.token}`,
           'Accept': 'application/vnd.github.v3+json'

@@ -127,7 +127,6 @@ async function getLatestVersionFromIndexedDB(docId) {
     request.onerror = () => resolve('');
   });
 }
-window.getLatestVersionFromIndexedDB = getLatestVersionFromIndexedDB;
 
 // 1. Initialize Grokker WASM
 async function initGrokkerWasm() {
