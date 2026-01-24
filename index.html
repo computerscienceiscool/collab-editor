@@ -44,7 +44,6 @@
           <div class="dropdown-item" data-action="save-promisegrid">Download as PromiseGrid CBOR</div>
           <div class="dropdown-item" data-action="save-automerge">Download as Automerge (.automerge)</div>
           <div class="dropdown-item" data-action="save-html">Download as HTML (.html)</div>
-          <div class="dropdown-item" data-action="save-pdf">Export as PDF (Print)</div>
           <div class="dropdown-item" data-action="share">Share</div>
           <div class="dropdown-item" data-action="email">Email</div>
           <div class="dropdown-item" data-action="copy-url">Copy Document URL</div>
@@ -213,7 +212,6 @@
       <option value="promisegrid">PromiseGrid CBOR (.cbor)</option>
       <option value="automerge">Export Automerge (.automerge)</option>
       <option value="html">Export as .html</option>
-      <option value="pdf">Export as PDF (Print)</option>
     </select>
     <button id="save-button">Save</button>
     <button id="toggle-log">Log</button>
@@ -485,7 +483,6 @@ async handleViewDiffs() {
           case 'save-promisegrid':
           case 'save-automerge':
           case 'save-html':
-          case 'save-pdf':
               this.triggerSave(action.replace('save-', ''));
               break;
           case 'keyboard-shortcuts':
@@ -915,8 +912,8 @@ async handleViewDiffs() {
           let result = markdown;
 
           // Fenced code blocks (must be first)
-          result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-            const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          result = result.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+            const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             return `<pre><code class="language-${lang || 'text'}">${escaped}</code></pre>`;
           });
 

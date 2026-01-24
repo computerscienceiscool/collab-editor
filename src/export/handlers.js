@@ -33,9 +33,10 @@ function markdownToHtml(markdown) {
     return placeholder;
   });
 
-  // Fenced code blocks
-  result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-    const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Fenced code blocks - match ``` with optional language, content, and closing ```
+  // Handles both ```lang\ncode``` and ```\ncode``` formats
+  result = result.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
   });
 
@@ -534,26 +535,6 @@ async function handleSave(format, handle, view) {
         blob = new Blob([content], { type: 'text/html' });
         filename = getDocumentFilename('html');
         break;
-      }
-
-      case 'pdf': {
-        // Open print dialog for PDF export
-        const htmlBody = markdownToHtml(textContent);
-        const title = document.title || 'Document';
-        const fullHtml = generateHtmlDocument(title, htmlBody);
-
-        // Open in new window and trigger print
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          printWindow.document.write(fullHtml);
-          printWindow.document.close();
-          printWindow.onload = () => {
-            printWindow.print();
-          };
-        } else {
-          showErrorBanner('Pop-up blocked. Please allow pop-ups to export PDF.');
-        }
-        return; // Don't call downloadBlob
       }
 
       default:

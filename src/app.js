@@ -492,8 +492,8 @@ async function initAppInternal() {
         });
 
         // Fenced code blocks (must be before inline code)
-        result = result.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-          const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        result = result.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+          const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
           return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
         });
 

@@ -53,7 +53,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
-- [x] 115 - Export as HTML/PDF: Added HTML download and PDF via print dialog
+- [x] 115 - Export as HTML: Added HTML download (PDF removed - print dialog was broken)
 - [x] 164 - Heading regex: Verified lib.rs uses raw strings correctly (`r"\s"` is valid Rust regex)
 - [x] 174 - WASM: Added toggle_numbered_list function for `1. item` style lists
 - [x] 173 - WASM toggle_list: Now recognizes `* ` and `+ ` when toggling off
