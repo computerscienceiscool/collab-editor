@@ -11,10 +11,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 (none)
 
 ## High
-- [x] 156 - Markdown preview: `_text_` renders as underline instead of italic (app.js:486). Per GFM, single underscore is italic.
-- [x] 157 - Markdown preview: `__text__` renders as underline instead of bold (app.js:487). Per GFM, double underscore is bold.
-- [x] 158 - Markdown preview: Regex order wrong - `__` processed after `_` so `__text__` never matches correctly.
-- [x] 159 - Underline formatting: toggle_underline (rust-wasm/lib.rs:150) uses `__` which is bold in GFM. Use HTML `<u>text</u>` instead.
 - [ ] 160 - Markdown preview: Missing H4-H6 headings support (####, #####, ######).
 - [ ] 161 - Markdown preview: Missing blockquote support (`> text`).
 - [ ] 162 - Markdown preview: Missing horizontal rule support (`---`, `***`, `___`).
@@ -68,6 +64,10 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 159 - Underline formatting: Use HTML `<u>text</u>` instead of `__` (GFM compliant)
+- [x] 158 - Markdown preview: Fixed regex order (`__` before `_`)
+- [x] 157 - Markdown preview: `__text__` now renders as bold
+- [x] 156 - Markdown preview: `_text_` now renders as italic
 - [x] 153 - Cleanup: Remove unused window.getLatestVersionFromIndexedDB export
 - [x] 146 - GitHub API: Add AbortController with 30s timeout to all fetch calls
 - [x] 143 - XSS: Sanitize markdown HTML before innerHTML assignment in app.js:465
