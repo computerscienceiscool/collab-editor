@@ -596,7 +596,8 @@ html, body {
   height: 100%;
 }
 
-.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3,
+.markdown-preview h4, .markdown-preview h5, .markdown-preview h6 {
   color: #333;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -1281,6 +1282,32 @@ html, body {
 .theme-dark .markdown-preview code {
   background: #0f172a;
   color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview h4,
+.theme-dark .markdown-preview h5 {
+  color: #e5e7eb;
+}
+
+.theme-dark .markdown-preview h6 {
+  color: #9ca3af;
+}
+
+.theme-dark .markdown-preview .task-done {
+  color: #9ca3af;
+}
+
+.theme-dark .markdown-preview blockquote {
+  border-left-color: #374151;
+  color: #9ca3af;
+}
+
+.theme-dark .markdown-preview hr {
+  border-color: #374151;
+}
+
+.theme-dark .markdown-preview pre {
+  background: #0f172a;
 }
 
 .theme-dark .modal-overlay {
@@ -2053,6 +2080,50 @@ textarea.settings-input {
 .markdown-preview h3 {
   font-size: 1.3em;
   color: #24292e;
+}
+
+.markdown-preview h4 {
+  font-size: 1.1em;
+  color: #24292e;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.markdown-preview h5 {
+  font-size: 1em;
+  color: #24292e;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+}
+
+.markdown-preview h6 {
+  font-size: 0.9em;
+  color: #6a737d;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+}
+
+/* Task lists */
+.markdown-preview .task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-preview .task {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  margin-bottom: 0.3em;
+}
+
+.markdown-preview .task input[type="checkbox"] {
+  margin-top: 0.3em;
+  width: 1em;
+  height: 1em;
+}
+
+.markdown-preview .task-done {
+  color: #6a737d;
 }
 
 /* Better paragraphs */
