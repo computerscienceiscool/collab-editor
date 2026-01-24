@@ -21,6 +21,11 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 167 - Markdown preview: Missing task list support (`- [ ]` unchecked, `- [x]` checked).
 - [ ] 168 - Markdown preview: Missing autolinked URLs (bare `https://...` should become clickable).
 - [ ] 169 - Markdown preview: Missing escape character support (`\*` should render as literal `*`).
+- [ ] 170 - Markdown preview: `![alt](url)` shows `!` before link instead of image. Image regex must run BEFORE link regex.
+- [ ] 171 - Markdown preview: Bullet lists only handle `- `, should also support `* ` and `+ ` per GFM.
+- [ ] 172 - Markdown preview: List wrapping regex requires trailing newline, so last list item may not wrap in `<ul>`/`<ol>`.
+- [ ] 173 - WASM toggle_list: Only handles `- ` bullets, should recognize `* ` and `+ ` when toggling off.
+- [ ] 174 - WASM: Missing toggle_numbered_list function for `1. item` style lists.
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
 - [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
