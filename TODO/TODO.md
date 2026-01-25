@@ -12,7 +12,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 
 ## High
 - [ ] 144 - Security: GitHub token XOR obfuscation (githubService.js:15-23) is trivially reversible. Consider not storing tokens, using sessionStorage, or proper encryption.
-- [ ] 145 - Memory leak: Event listeners not cleaned up on component destruction. SearchInput (handlers.js:61), preferencesDialog keydown, menu-system handlers need lifecycle cleanup.
 
 ## Medium
 - [ ] 006 - Rust backend: Support document versioning via filename or embedded metadata
@@ -22,7 +21,6 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 087 - Develop unit test strategy for the app
 - [ ] 078 - Add Neovim plugin tests for cursor and Automerge sync flows
 - [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
-- [ ] 147 - Performance: Remove arbitrary 1-second delay in app.js:182. Use Promise.all() or proper event coordination instead of setTimeout workaround.
 - [ ] 148 - Neovim: Add cursor update debouncing in buffer.lua:211 (has TODO comment). Every keystroke sends cursor position - add 300-500ms debounce.
 - [ ] 149 - Code quality: Extract magic numbers (timeouts, intervals) to named constants. Hardcoded values scattered across automergeSetup.js, app.js, etc.
 - [ ] 150 - Performance: Use Promise.allSettled() for parallel WASM init instead of sequential loading in app.js:150-180. Reduces startup time.
@@ -53,6 +51,8 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 155 - Robustness: Add null checks for DOM elements in export handlers (handlers.js:335,743). Silent failures when elements missing.
 
 ## Done
+- [x] 147 - Performance: Removed arbitrary 1-second delay in app.js. WASM init functions already await completion.
+- [x] 145 - Memory leak: Added event listener cleanup registry and beforeunload cleanup.
 - [x] 181 - Bug: Restore window.getLatestVersionFromIndexedDB export (needed by diff viewer, removed prematurely in TODO 153)
 - [x] 180 - Dark mode: Dialog inputs/labels unreadable - add styles for settings-input, settings-section, input-group labels
 - [x] 179 - Dark mode: Menu items barely readable - fix text/background contrast

@@ -233,11 +233,9 @@ async function initAppInternal() {
     showErrorBanner("Failed to load diff engine. Run `make diff-wasm` and reload.");
   }
   
-  // Add a delay to ensure everything is ready
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  console.log("All WASM modules should now be ready");  
-    
-// 3a. Parse document ID from URL
+  console.log("All WASM modules ready");
+
+  // 3a. Parse document ID from URL
   const urlParams = new URLSearchParams(window.location.search);
   const docParam = urlParams.get('doc');
   
