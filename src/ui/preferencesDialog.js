@@ -75,6 +75,15 @@ export class PreferencesDialog {
   }
 
   /**
+   * Complete cleanup for page unload
+   * Ensures no listeners remain attached to document
+   */
+  destroy() {
+    this.hide();
+    // Additional cleanup if needed in future
+  }
+
+  /**
    * Create the modal HTML structure
    */
   createModalHTML() {

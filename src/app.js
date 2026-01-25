@@ -5,7 +5,7 @@ import { initDiffWasm } from './wasm/diffWasm.js';
 import { setupDocumentStats } from './ui/documentStats.js';
 import { setupEditor } from './setup/editorSetup.js';
 import { setupAutomerge } from './setup/automergeSetup.js';
-import { setupExportHandlers } from './export/handlers.js';
+import { setupExportHandlers, cleanupAllListeners } from './export/handlers.js';
 import { setupUserControls } from './setup/userSetup.js';
 import { setupUserLogging } from './ui/logging.js';
 import { setupTypingIndicator } from './ui/typingIndicator.js';
@@ -856,6 +856,22 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   console.error('[App] Unhandled promise rejection:', event.reason);
   showErrorBanner('An unexpected error occurred. Some features may not work correctly.');
+});
+
+// Cleanup on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+  // Clean up registered event listeners from handlers.js
+  cleanupAllListeners();
+
+  // Clean up menu system if available
+  if (window.menuSystem?.destroy) {
+    window.menuSystem.destroy();
+  }
+
+  // Clean up preferences dialog if available
+  if (window.preferencesDialog?.destroy) {
+    window.preferencesDialog.destroy();
+  }
 });
 
 // Run initialization immediately if DOM is ready, otherwise wait

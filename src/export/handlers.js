@@ -22,6 +22,28 @@ import { sanitizeFilename, getDocumentFilename } from '../utils/sanitizeFilename
 import { undo, redo } from '@codemirror/commands';
 
 /**
+ * Event listener cleanup registry
+ * Tracks all registered listeners for proper cleanup on page unload
+ */
+const registeredListeners = [];
+
+function registerListener(element, event, handler, options = {}) {
+  element.addEventListener(event, handler, options);
+  registeredListeners.push({ element, event, handler, options });
+}
+
+/**
+ * Clean up all registered event listeners
+ * Should be called on page unload or component destruction
+ */
+export function cleanupAllListeners() {
+  for (const { element, event, handler, options } of registeredListeners) {
+    element.removeEventListener(event, handler, options);
+  }
+  registeredListeners.length = 0;
+}
+
+/**
  * Convert markdown to HTML for export
  */
 function markdownToHtml(markdown) {
@@ -193,7 +215,7 @@ export function setupExportHandlers(handle, view) {
 
   // Allow Enter key in search input
   if (searchInput) {
-    searchInput.addEventListener('keypress', (e) => {
+    registerListener(searchInput, 'keypress', (e) => {
       if (e.key === 'Enter') {
         handleSearch(view);
       }
@@ -758,12 +780,12 @@ function clearHighlights(view) {
     toolbar.setAttribute('aria-hidden', String(nowHidden));
   }
 
-  document.addEventListener('keydown', (e) => {
+  registerListener(document, 'keydown', (e) => {
     // Add check for shortcuts enabled
     if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
       return; // Exit early if shortcuts are disabled
     }
-    
+
     const mod = isMac ? e.metaKey : e.ctrlKey;
 
     // Layout-safe: prefer code, then key
@@ -805,12 +827,12 @@ async function copyDocumentUrlToClipboard() {
 }
 
 // Add/adjust your keyboard handler to detect Ctrl/Meta + Shift + U
-document.addEventListener('keydown', (e) => {
+registerListener(document, 'keydown', (e) => {
   // Add check for shortcuts enabled
   if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
     return; // Exit early if shortcuts are disabled
   }
-  
+
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
   const mod = isMac ? e.metaKey : e.ctrlKey;
   if (mod && e.shiftKey && (e.key === 'u' || e.key === 'U' || e.code === 'KeyU')) {
@@ -857,12 +879,12 @@ document.addEventListener('keydown', (e) => {
     }
   }
 
-  document.addEventListener('keydown', (e) => {
+  registerListener(document, 'keydown', (e) => {
     // Add check for shortcuts enabled
     if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
       return; // Exit early if shortcuts are disabled
     }
-    
+
     const mod = isMac ? e.metaKey : e.ctrlKey;
     const isU = e.key === 'u' || e.key === 'U' || e.code === 'KeyU';
     if (mod && e.shiftKey && isU) {
@@ -879,7 +901,7 @@ document.addEventListener('keydown', (e) => {
   window.__safeTxtExportPatchApplied = true;
 
   // Handle only the TXT export action (uses imported sanitizeFilename); avoid navigation-based downloads
-  document.addEventListener('click', function safeTxtExportHandler(e) {
+  registerListener(document, 'click', function safeTxtExportHandler(e) {
     const btn = e.target.closest?.('[data-action="save-txt"]');
     if (!btn) return;
 
@@ -967,12 +989,12 @@ document.addEventListener('keydown', (e) => {
     alert('Document URL copied to clipboard');
   }
 
-  document.addEventListener('keydown', (e) => {
+  registerListener(document, 'keydown', (e) => {
     // Check if shortcuts are enabled
     if (window.shortcutManager && !window.shortcutManager.isEnabled()) {
       return; // Exit early if shortcuts are disabled
     }
-    
+
     // Normalize key
     const key = e.key?.toLowerCase();
 
@@ -1046,7 +1068,7 @@ document.addEventListener('keydown', (e) => {
   }
 
   // Override/wire menu action for "Download as Text (.txt)"
-  document.addEventListener('click', (e) => {
+  registerListener(document, 'click', (e) => {
     const el = e.target && e.target.closest?.('[data-action="save-txt"]');
     if (!el) return;
     e.preventDefault(); // prevent any old default that might navigate
