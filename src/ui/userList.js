@@ -48,7 +48,10 @@ export function setupUserList(awareness) {
           // Create user element
           const span = document.createElement('span');
           span.className = 'user';
-          span.textContent = state.user.name || `User ${id}`;
+          // Show name with short ID to distinguish users with same name
+          const shortId = String(id).slice(-6);
+          const name = state.user.name || 'User';
+          span.textContent = `${name} (${shortId})`;
           span.style.backgroundColor = state.user.color || '#ccc';
           
           userElements.push(span);
