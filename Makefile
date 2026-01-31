@@ -78,9 +78,8 @@ awareness-ws:
 	@echo "Starting awareness WebSocket server on ws://localhost:$(AWARENESS_PORT)"
 	npx ws --port $(AWARENESS_PORT)
 
-nvim-helper:
-	@echo "Starting Neovim helper..."
-	cd nvim/node-helper && node index.js
+# Vimbeam (Neovim plugin) connects to the ws and awareness servers
+# See: https://github.com/computerscienceiscool/vimbeam
 
 
 # Grokker WASM
@@ -156,10 +155,14 @@ serve:
 	@echo "Starting Vite dev server at http://localhost:$(PORT)"
 	npx vite --port $(PORT) --strictPort --no-open
 
+# Sync server - used by browser AND Vimbeam (Neovim plugin)
+# Vimbeam: https://github.com/computerscienceiscool/vimbeam
 ws:
 	@echo "Starting Automerge sync server on ws://localhost:$(WS_PORT)"
 	PORT=$(WS_PORT) npx @automerge/automerge-repo-sync-server
 
+# Awareness server - used by browser AND Vimbeam for cursor/presence sync
+# Vimbeam: https://github.com/computerscienceiscool/vimbeam
 awareness:
 	@echo "Starting awareness server on ws://localhost:$(AWARENESS_PORT)"
 	node awareness-server.js
