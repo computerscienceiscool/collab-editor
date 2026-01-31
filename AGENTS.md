@@ -6,7 +6,7 @@
 - `rust-server/` is the Rust backend (`cargo run`) started via `make run`.
 - `rust-wasm/` contains Rust WASM built with `wasm-pack` (outputs to `rust-wasm/pkg/`).
 - `main.go` is an optional Go backend; other Go tools/prototypes live in `go-diff/` and `v3/`.
-- `nvim/` contains the Neovim plugin and helper binaries.
+- Neovim plugin moved to separate repo: [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)
 - `tests/` contains Playwright suites; `docs/` contains architecture and usage documentation.
 - `x/` (if present) is reserved for experimental prototypes.
 
