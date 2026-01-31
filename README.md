@@ -274,6 +274,7 @@ For information about document URLs and sharing, see [docs/user-docs.md](docs/us
 - [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
 - [docs/diff-view.md](docs/diff-view.md) — How the diff view feature works 
 - [Vimbeam Plugin](https://github.com/computerscienceiscool/vimbeam) — Real-time collaborative editing from Neovim (external repository)
+- [Vimbeam Commands](docs/vimbeam-commands.md) — Complete command reference for the Vimbeam Neovim plugin
 
 ---
 
