@@ -12,13 +12,14 @@ For an end-to-end view of browser/Neovim sync and presence channels, see `docs/m
 
 ## Features
 ### Core Collaboration
-- Real-time collaborative editing
-- Shared cursors and user awareness
+- Real-time collaborative editing via Automerge CRDTs
+- Shared cursors and user awareness (via [@collab-editor/awareness](https://github.com/computerscienceiscool/collab-awareness))
 - Custom usernames and color indicators
 - Document sharing via URL (e.g., `?doc=automerge:abc123...`)
 - Typing indicators and presence tracking
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
+- Cross-platform collaboration with Neovim users via [vimbeam](https://github.com/computerscienceiscool/vimbeam)
 
 ### Document Style Menu System
 - **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
