@@ -8,8 +8,8 @@ import { setupAutomerge } from './setup/automergeSetup.js';
 import { setupExportHandlers, cleanupAllListeners } from './export/handlers.js';
 import { setupUserControls } from './setup/userSetup.js';
 import { setupUserLogging } from './ui/logging.js';
-import { setupTypingIndicator } from './ui/typingIndicator.js';
-import { setupUserList } from './ui/userList.js';
+import { createTypingIndicator, createUserList } from '@collab-editor/awareness';
+import { getClientID } from './utils/clientId.js';
 import { handleDocumentCopy } from './setup/documentCopy.js';
 import { githubService } from './github/githubService.js';
 import { showErrorBanner } from './ui/errors.js';
@@ -362,10 +362,16 @@ async function initAppInternal() {
   setupUserLogging(awareness);
 
   // 3f. Show typing indicator in UI
-  setupTypingIndicator(awareness);
+  createTypingIndicator(awareness, {
+    element: document.getElementById('typing-indicator'),
+    localId: getClientID()
+  });
 
   // 3g. Update user list in the toolbar
-  setupUserList(awareness);
+  createUserList(awareness, {
+    listElement: document.getElementById('user-list'),
+    countElement: document.getElementById('user-count')
+  });
 
   // 3h. Theme toggle
   const root = document.documentElement;

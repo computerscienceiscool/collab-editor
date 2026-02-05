@@ -29,6 +29,7 @@
     "setup:test": "./scripts/setup-test-env.sh"
   },
   "dependencies": {
+    "@collab-editor/awareness": "file:../collab-awareness",
     "@automerge/automerge": "^2.2.8",
     "@automerge/automerge-repo": "^2.5.1",
     "@automerge/automerge-repo-network-websocket": "^2.5.1",
