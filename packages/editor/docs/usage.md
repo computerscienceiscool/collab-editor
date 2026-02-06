@@ -1,5 +1,9 @@
 # @collab-editor/editor Usage Guide
 
+> **Note**: This package has been moved to its own standalone repository at
+> **https://github.com/computerscienceiscool/collab-web-editor**.
+> For the latest usage documentation, refer to the new repository.
+
 ## Quick Start
 
 ### 1. Install Dependencies

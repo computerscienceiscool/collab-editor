@@ -1,5 +1,9 @@
 # @collab-editor/editor
 
+> **DEPRECATED**: This package has been moved to its own standalone repository at
+> **https://github.com/computerscienceiscool/collab-web-editor**.
+> This copy is no longer maintained. Please use the new repository for the latest code and updates.
+
 Browser-based collaborative text editor built on [Automerge CRDTs](https://automerge.org/) and [CodeMirror 6](https://codemirror.net/).
 
 Real-time multi-user editing with automatic conflict resolution, cursor synchronization, and offline support.

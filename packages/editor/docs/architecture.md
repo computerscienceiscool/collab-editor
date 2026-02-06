@@ -1,5 +1,9 @@
 # @collab-editor/editor Architecture
 
+> **Note**: This package has been moved to its own standalone repository at
+> **https://github.com/computerscienceiscool/collab-web-editor**.
+> For the latest architecture documentation, refer to the new repository.
+
 ## Overview
 
 `@collab-editor/editor` is a browser-based collaborative text editor built on Automerge CRDTs and CodeMirror 6. It provides real-time multi-user editing with automatic conflict resolution, cursor synchronization, and offline support.
