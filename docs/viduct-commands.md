@@ -1,20 +1,20 @@
-# Vimbeam Commands Reference
+# Viduct Commands Reference
 
-Complete command reference for the Vimbeam Neovim plugin.
+Complete command reference for the Viduct Neovim plugin.
 
-**Plugin Repository**: [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)
+**Plugin Repository**: [github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)
 
 ---
 
 ## Connection Commands
 
-### :BeamConnect
+### :DuctConnect
 
 Connect to the collaboration servers.
 
 **Usage:**
 ```vim
-:BeamConnect
+:DuctConnect
 ```
 
 **Description:**
@@ -22,18 +22,18 @@ Establishes WebSocket connections to both the sync server (port 1234) and awaren
 
 **Output:**
 ```
-[vimbeam] Connected as beam-a7f2k9x1
+[viduct] Connected as duct-a7f2k9x1
 ```
 
 ---
 
-### :BeamDisconnect
+### :DuctDisconnect
 
 Disconnect from the collaboration servers.
 
 **Usage:**
 ```vim
-:BeamDisconnect
+:DuctDisconnect
 ```
 
 **Description:**
@@ -41,13 +41,13 @@ Closes all WebSocket connections and cleans up the session. Your cursor will dis
 
 ---
 
-### :BeamInfo
+### :DuctInfo
 
 Show current connection status and document information.
 
 **Usage:**
 ```vim
-:BeamInfo
+:DuctInfo
 ```
 
 **Description:**
@@ -55,20 +55,20 @@ Displays connection state, current document ID, and user information.
 
 **Output:**
 ```
-[vimbeam] Connected: true | Doc: automerge:4DbPtgHxqM6snzcLJRL3qV9khUym | User: Alice
+[viduct] Connected: true | Doc: automerge:4DbPtgHxqM6snzcLJRL3qV9khUym | User: Alice
 ```
 
 ---
 
 ## Document Commands
 
-### :BeamCreate
+### :DuctCreate
 
 Create a new collaborative document.
 
 **Usage:**
 ```vim
-:BeamCreate
+:DuctCreate
 ```
 
 **Description:**
@@ -76,23 +76,23 @@ Creates a new empty collaborative document and opens it in the current buffer. R
 
 **Output:**
 ```
-[vimbeam] Created document: automerge:4DbPtgHxqM6snzcLJRL3qV9khUym
+[viduct] Created document: automerge:4DbPtgHxqM6snzcLJRL3qV9khUym
 ```
 
 **Sharing:**
 Share the document ID with others. They can join via:
-- Neovim: `:BeamOpen 4DbPtgHxqM6snzcLJRL3qV9khUym`
+- Neovim: `:DuctOpen 4DbPtgHxqM6snzcLJRL3qV9khUym`
 - Browser: `http://localhost:8080?doc=4DbPtgHxqM6snzcLJRL3qV9khUym`
 
 ---
 
-### :BeamOpen
+### :DuctOpen
 
 Open an existing collaborative document by ID.
 
 **Usage:**
 ```vim
-:BeamOpen <doc_id>
+:DuctOpen <doc_id>
 ```
 
 **Arguments:**
@@ -102,8 +102,8 @@ Open an existing collaborative document by ID.
 
 **Examples:**
 ```vim
-:BeamOpen 4DbPtgHxqM6snzcLJRL3qV9khUym
-:BeamOpen automerge:4DbPtgHxqM6snzcLJRL3qV9khUym
+:DuctOpen 4DbPtgHxqM6snzcLJRL3qV9khUym
+:DuctOpen automerge:4DbPtgHxqM6snzcLJRL3qV9khUym
 ```
 
 **Description:**
@@ -111,13 +111,13 @@ Opens an existing document and loads its content into the current buffer. Change
 
 ---
 
-### :BeamClose
+### :DuctClose
 
 Close the current collaborative document.
 
 **Usage:**
 ```vim
-:BeamClose
+:DuctClose
 ```
 
 **Description:**
@@ -125,13 +125,13 @@ Stops syncing the current document but maintains the server connection. The buff
 
 ---
 
-### :BeamQuick
+### :DuctQuick
 
 Connect and open a document in one step.
 
 **Usage:**
 ```vim
-:BeamQuick <doc_id>
+:DuctQuick <doc_id>
 ```
 
 **Arguments:**
@@ -141,23 +141,23 @@ Connect and open a document in one step.
 
 **Example:**
 ```vim
-:BeamQuick 4DbPtgHxqM6snzcLJRL3qV9khUym
+:DuctQuick 4DbPtgHxqM6snzcLJRL3qV9khUym
 ```
 
 **Description:**
-Convenience command that combines `:BeamConnect` and `:BeamOpen`. If already connected, skips the connection step. Useful for quickly joining a collaboration session.
+Convenience command that combines `:DuctConnect` and `:DuctOpen`. If already connected, skips the connection step. Useful for quickly joining a collaboration session.
 
 ---
 
 ## User Commands
 
-### :BeamUserName
+### :DuctUserName
 
 Set your display name for collaboration.
 
 **Usage:**
 ```vim
-:BeamUserName <name>
+:DuctUserName <name>
 ```
 
 **Arguments:**
@@ -167,8 +167,8 @@ Set your display name for collaboration.
 
 **Examples:**
 ```vim
-:BeamUserName Alice
-:BeamUserName John Doe
+:DuctUserName Alice
+:DuctUserName John Doe
 ```
 
 **Description:**
@@ -176,13 +176,13 @@ Sets the name displayed next to your cursor in other users' editors. Updates imm
 
 ---
 
-### :BeamUserColor
+### :DuctUserColor
 
 Set your cursor color.
 
 **Usage:**
 ```vim
-:BeamUserColor [color]
+:DuctUserColor [color]
 ```
 
 **Arguments:**
@@ -192,10 +192,10 @@ Set your cursor color.
 
 **Examples:**
 ```vim
-:BeamUserColor                " Opens interactive color picker
-:BeamUserColor green          " Set by simple name
-:BeamUserColor Hot Pink       " Set by descriptive name
-:BeamUserColor #FF6B6B        " Set by hex code
+:DuctUserColor                " Opens interactive color picker
+:DuctUserColor green          " Set by simple name
+:DuctUserColor Hot Pink       " Set by descriptive name
+:DuctUserColor #FF6B6B        " Set by hex code
 ```
 
 **Available Colors:**
@@ -234,7 +234,7 @@ Sets the color used for your cursor and name label in other users' editors. Colo
 Add to your `~/.config/nvim/init.lua`:
 
 ```lua
-require('vimbeam').setup({
+require('viduct').setup({
   -- WebSocket URL for document sync (Automerge)
   sync_url = 'ws://localhost:1234',
 
@@ -262,8 +262,8 @@ require('vimbeam').setup({
 ### Start a New Session
 
 ```vim
-:BeamConnect
-:BeamCreate
+:DuctConnect
+:DuctCreate
 " Share the document ID with collaborators
 " Start editing!
 ```
@@ -271,30 +271,30 @@ require('vimbeam').setup({
 ### Join an Existing Session
 
 ```vim
-:BeamQuick 4DbPtgHxqM6snzcLJRL3qV9khUym
+:DuctQuick 4DbPtgHxqM6snzcLJRL3qV9khUym
 " Or separately:
-:BeamConnect
-:BeamOpen 4DbPtgHxqM6snzcLJRL3qV9khUym
+:DuctConnect
+:DuctOpen 4DbPtgHxqM6snzcLJRL3qV9khUym
 ```
 
 ### Customize Your Identity
 
 ```vim
-:BeamUserName Alice
-:BeamUserColor Teal
+:DuctUserName Alice
+:DuctUserColor Teal
 ```
 
 ### Check Status
 
 ```vim
-:BeamInfo
+:DuctInfo
 ```
 
 ### End Session
 
 ```vim
-:BeamClose       " Close document but stay connected
-:BeamDisconnect  " Fully disconnect
+:DuctClose       " Close document but stay connected
+:DuctDisconnect  " Fully disconnect
 ```
 
 ---
@@ -302,9 +302,9 @@ require('vimbeam').setup({
 ## Troubleshooting
 
 ### "Not connected" error
-Run `:BeamConnect` first, or use `:BeamQuick` which connects automatically.
+Run `:DuctConnect` first, or use `:DuctQuick` which connects automatically.
 
-### Empty buffer after :BeamOpen
+### Empty buffer after :DuctOpen
 Wait 5-10 seconds for initial sync. Large documents take longer.
 
 ### Can't see other users' cursors
@@ -317,7 +317,7 @@ Run `:PlugInstall` (vim-plug) or your plugin manager's install command, then res
 
 ## Server Requirements
 
-Vimbeam requires two WebSocket servers:
+Viduct requires two WebSocket servers:
 
 ```bash
 # Terminal 1: Sync server (document changes)
@@ -337,6 +337,6 @@ make awareness  # Awareness server
 
 ## See Also
 
-- [Vimbeam Repository](https://github.com/computerscienceiscool/vimbeam)
-- [Protocol Documentation](https://github.com/computerscienceiscool/vimbeam/blob/main/docs/PROTOCOL.md)
+- [Viduct Repository](https://github.com/computerscienceiscool/viduct)
+- [Protocol Documentation](https://github.com/computerscienceiscool/viduct/blob/main/docs/PROTOCOL.md)
 - [Message Flow](message-flow.md)

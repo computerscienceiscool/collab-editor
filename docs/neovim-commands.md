@@ -1,21 +1,21 @@
-# Neovim Commands - Moved to Vimbeam
+# Neovim Commands - Moved to Viduct
 
-This documentation has been moved to the Vimbeam repository.
+This documentation has been moved to the Viduct repository.
 
-**[github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)**
+**[github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)**
 
 ## Quick Reference
 
 | Command | Description |
 |---------|-------------|
-| `:BeamConnect` | Connect to the collaboration servers |
-| `:BeamDisconnect` | Disconnect from the servers |
-| `:BeamCreate` | Create a new collaborative document |
-| `:BeamOpen <id>` | Open an existing document by ID |
-| `:BeamClose` | Close the current document |
-| `:BeamInfo` | Show connection status |
-| `:BeamUserName <name>` | Set your display name |
-| `:BeamUserColor [color]` | Set your cursor color |
-| `:BeamQuick <id>` | Connect and open in one step |
+| `:DuctConnect` | Connect to the collaboration servers |
+| `:DuctDisconnect` | Disconnect from the servers |
+| `:DuctCreate` | Create a new collaborative document |
+| `:DuctOpen <id>` | Open an existing document by ID |
+| `:DuctClose` | Close the current document |
+| `:DuctInfo` | Show connection status |
+| `:DuctUserName <name>` | Set your display name |
+| `:DuctUserColor [color]` | Set your cursor color |
+| `:DuctQuick <id>` | Connect and open in one step |
 
-For complete command documentation, see the [Vimbeam repository](https://github.com/computerscienceiscool/vimbeam).
+For complete command documentation, see the [Viduct repository](https://github.com/computerscienceiscool/viduct).

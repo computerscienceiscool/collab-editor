@@ -1,25 +1,25 @@
-# Neovim Plugin - Moved to Vimbeam
+# Neovim Plugin - Moved to Viduct
 
 The Neovim collaborative editing plugin has been moved to its own repository:
 
-**[github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)**
+**[github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)**
 
 ## Installation
 
-Install Vimbeam using your preferred plugin manager:
+Install Viduct using your preferred plugin manager:
 
 ### vim-plug
 ```vim
-Plug 'computerscienceiscool/vimbeam', { 'do': 'cd node-helper && npm install' }
+Plug 'computerscienceiscool/viduct', { 'do': 'cd node-helper && npm install' }
 ```
 
 ### lazy.nvim
 ```lua
 {
-  'computerscienceiscool/vimbeam',
+  'computerscienceiscool/viduct',
   build = 'cd node-helper && npm install',
   config = function()
-    require('vimbeam').setup({
+    require('viduct').setup({
       sync_url = 'ws://localhost:1234',
       awareness_url = 'ws://localhost:1235',
     })
@@ -30,10 +30,10 @@ Plug 'computerscienceiscool/vimbeam', { 'do': 'cd node-helper && npm install' }
 ### packer.nvim
 ```lua
 use {
-  'computerscienceiscool/vimbeam',
+  'computerscienceiscool/viduct',
   run = 'cd node-helper && npm install',
   config = function()
-    require('vimbeam').setup({
+    require('viduct').setup({
       sync_url = 'ws://localhost:1234',
       awareness_url = 'ws://localhost:1235',
     })
@@ -54,8 +54,8 @@ use {
 
 2. In Neovim:
    ```vim
-   :BeamConnect
-   :BeamCreate
+   :DuctConnect
+   :DuctCreate
    ```
 
 3. Share the document URL with browser users:
@@ -67,14 +67,14 @@ use {
 
 | Command | Description |
 |---------|-------------|
-| `:BeamConnect` | Connect to the collaboration servers |
-| `:BeamDisconnect` | Disconnect from the servers |
-| `:BeamCreate` | Create a new collaborative document |
-| `:BeamOpen <id>` | Open an existing document by ID |
-| `:BeamClose` | Close the current document |
-| `:BeamInfo` | Show connection status |
-| `:BeamUserName <name>` | Set your display name |
-| `:BeamUserColor [color]` | Set your cursor color |
-| `:BeamQuick <id>` | Connect and open in one step |
+| `:DuctConnect` | Connect to the collaboration servers |
+| `:DuctDisconnect` | Disconnect from the servers |
+| `:DuctCreate` | Create a new collaborative document |
+| `:DuctOpen <id>` | Open an existing document by ID |
+| `:DuctClose` | Close the current document |
+| `:DuctInfo` | Show connection status |
+| `:DuctUserName <name>` | Set your display name |
+| `:DuctUserColor [color]` | Set your cursor color |
+| `:DuctQuick <id>` | Connect and open in one step |
 
-For complete documentation, see the [Vimbeam repository](https://github.com/computerscienceiscool/vimbeam).
+For complete documentation, see the [Viduct repository](https://github.com/computerscienceiscool/viduct).

@@ -19,9 +19,9 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 085 - Add regression tests alongside fixes to prevent regressions
 - [ ] 086 - Add Vitest coverage for error banner and UI helpers
 - [ ] 087 - Develop unit test strategy for the app
-- [x] 078 - Neovim plugin tests (moved to Vimbeam repo: github.com/computerscienceiscool/vimbeam)
+- [x] 078 - Neovim plugin tests (moved to Viduct repo: github.com/computerscienceiscool/viduct)
 - [ ] 131 - Refactor xss-prevention.spec.js: Extract duplicate testFilename(), sanitizeFilename(), and helper functions (defined 4+ times each) into shared test utilities. File is 1300+ lines with significant repetition.
-- [x] 148 - Neovim cursor debouncing (moved to Vimbeam repo: github.com/computerscienceiscool/vimbeam)
+- [x] 148 - Neovim cursor debouncing (moved to Viduct repo: github.com/computerscienceiscool/viduct)
 - [ ] 149 - Code quality: Extract magic numbers (timeouts, intervals) to named constants. Hardcoded values scattered across automergeSetup.js, app.js, etc.
 - [ ] 150 - Performance: Use Promise.allSettled() for parallel WASM init instead of sequential loading in app.js:150-180. Reduces startup time.
 - [ ] 151 - Testing: Add unit tests for utility modules (clientId.js, timeUtils.js, documentRegistry.js, sanitizeFilename.js). Currently no unit test coverage.
@@ -42,7 +42,7 @@ This list was migrated from the legacy `TODO.md` at the repo root.
 - [ ] 134 - ESLint setup: Add .eslintrc.js with rules for unused variables, consistent imports, and code style. Integrate with Vite build and add pre-commit hook. Currently no linting enforced.
 - [ ] 135 - CI/CD pipeline: Create .github/workflows for automated testing (Playwright), linting, and build verification on PRs. Add deployment workflow for Docker registry push.
 - [ ] 138 - Rust API docs: Document /health, /export, /load, /save endpoints in docs/api.md. Include request/response formats, error codes, and curl examples. Currently undocumented.
-- [ ] 139 - Troubleshooting guide: Create docs/troubleshooting.md covering common issues: WebSocket connection failures, IndexedDB quota, WASM loading errors, sync conflicts. (Vimbeam setup docs in separate repo)
+- [ ] 139 - Troubleshooting guide: Create docs/troubleshooting.md covering common issues: WebSocket connection failures, IndexedDB quota, WASM loading errors, sync conflicts. (Viduct setup docs in separate repo)
 - [ ] 140 - Performance guide: Document optimization strategies in docs/performance.md: debouncing settings, IndexedDB cleanup, WASM module loading, large document handling, memory management for long sessions.
 - [ ] 141 - GitHub docs expansion: Expand docs/github.md with token permissions required, rate limiting handling, error recovery, and workflow examples for common use cases.
 - [ ] 142 - Docker infrastructure: Complete Makefile docker targets (push/pull partially defined). Add docker-compose.yml for full stack (sync server, awareness server, Rust backend). Document in docs/deployment.md.

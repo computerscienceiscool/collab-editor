@@ -23,14 +23,14 @@ http://localhost:8080/?doc=b51f0dd8-bc93-4a3d-a0e5-417a8ac812c4
 ```
 ### Collaborating from Neovim (Optional)
 
-For users who prefer terminal-based editing, the **Vimbeam** plugin enables real-time collaboration with browser users. The plugin provides:
+For users who prefer terminal-based editing, the **Viduct** plugin enables real-time collaboration with browser users. The plugin provides:
 - Bidirectional sync between Neovim and browser
 - Remote cursor indicators showing where collaborators are editing
 - Instant synchronization of all changes
 
-**Install Vimbeam**: [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)
+**Install Viduct**: [github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)
 
-**Note:** Many users will use the web interface - Vimbeam is optional for advanced users who prefer vim-based editing.
+**Note:** Many users will use the web interface - Viduct is optional for advanced users who prefer vim-based editing.
 ---
 
 ## The Interface
@@ -607,7 +607,7 @@ The editor is designed to be accessible to all users:
 - **PromiseGrid protocol compliance** demonstrates real decentralized computing capabilities.
 - **Keyboard shortcuts are stored locally** - each user can have completely different shortcuts.
 - **Real-time markdown preview** updates automatically without requiring manual refresh.
-- **Neovim integration** is available via the Vimbeam plugin (see [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam))
+- **Neovim integration** is available via the Viduct plugin (see [github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct))
 - For protocol/presence details, see [docs/message-flow.md](message-flow.md).
 
 ---

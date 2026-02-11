@@ -28,7 +28,7 @@ For the latest browser editor code, issues, and documentation, refer to that rep
 - Typing indicators and presence tracking
 - Toggleable user activity log
 - Offline support with automatic syncing (via IndexedDB)
-- Cross-platform collaboration with Neovim users via [vimbeam](https://github.com/computerscienceiscool/vimbeam)
+- Cross-platform collaboration with Neovim users via [viduct](https://github.com/computerscienceiscool/viduct)
 
 ### Document Style Menu System
 - **Complete menu bar**: File, Edit, Format, Tools, View, and Help menus
@@ -81,14 +81,14 @@ For the latest browser editor code, issues, and documentation, refer to that rep
 - **Menu integration**: Access via File menu or keyboard shortcuts (Ctrl+Alt+G)
 - **Multi-user workflow**: Real-time collaboration with GitHub version control
 
-### Neovim Plugin (Vimbeam)
+### Neovim Plugin (Viduct)
    - **Real-time collaboration**: Edit documents from Neovim alongside browser users
    - **Bidirectional sync**: Changes flow instantly between Neovim and browser
    - **Remote cursor indicators**: See where collaborators are editing
    - **Simple commands**: Connect, open, and collaborate with a few vim commands
    - **Same protocol**: Uses identical Automerge sync as web client
    - **Cross-platform editing**: Collaborate between terminal and browser users
-   - **Standalone plugin**: Available at [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)
+   - **Standalone plugin**: Available at [github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)
 
 ### PromiseGrid Integration Highlights
 
@@ -137,11 +137,11 @@ To create a new document, visit `http://localhost:8080/` without any parameters.
 
 ### Collaborating from Neovim
 
-You can also edit documents from Neovim alongside browser users! The **Vimbeam** plugin provides real-time bidirectional sync, remote cursor indicators, and seamless collaboration.
+You can also edit documents from Neovim alongside browser users! The **Viduct** plugin provides real-time bidirectional sync, remote cursor indicators, and seamless collaboration.
 
-**Install Vimbeam**: [github.com/computerscienceiscool/vimbeam](https://github.com/computerscienceiscool/vimbeam)
+**Install Viduct**: [github.com/computerscienceiscool/viduct](https://github.com/computerscienceiscool/viduct)
 
-See the Vimbeam repository for complete installation and usage instructions.
+See the Viduct repository for complete installation and usage instructions.
 
 
 ---
@@ -283,8 +283,8 @@ For information about document URLs and sharing, see [docs/user-docs.md](docs/us
 - [docs/menu-development.md](docs/menu-development.md) — How to extend and add new menu features
 - [docs/grokker-wasm.md](docs/grokker-wasm.md) — Grokker integration details for advanced text analysis (WASM-based) of commit messages
 - [docs/diff-view.md](docs/diff-view.md) — How the diff view feature works 
-- [Vimbeam Plugin](https://github.com/computerscienceiscool/vimbeam) — Real-time collaborative editing from Neovim (external repository)
-- [Vimbeam Commands](docs/vimbeam-commands.md) — Complete command reference for the Vimbeam Neovim plugin
+- [Viduct Plugin](https://github.com/computerscienceiscool/viduct) — Real-time collaborative editing from Neovim (external repository)
+- [Viduct Commands](docs/viduct-commands.md) — Complete command reference for the Viduct Neovim plugin
 
 ---
 

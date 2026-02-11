@@ -1,6 +1,6 @@
 # Playwright Test Information
 
-> **Note**: Neovim plugin tests are in the [Vimbeam repository](https://github.com/computerscienceiscool/vimbeam).
+> **Note**: Neovim plugin tests are in the [Viduct repository](https://github.com/computerscienceiscool/viduct).
 
 Complete documentation for the Playwright testing setup in the Collaborative Text Editor project.
 
