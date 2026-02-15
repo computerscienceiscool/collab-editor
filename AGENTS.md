@@ -30,8 +30,14 @@
 - Keep tests deterministic; avoid network calls unless explicitly required.
 
 ## TODO Tracking
-- Preferred: track work in `TODO/` with an index at `TODO/TODO.md` (number `001`, `002`, …; don’t renumber; sort by priority).
-- Mark completion with checkboxes (e.g., `- [ ] 005 - ...` → `- [x] 005 - ...`).
+- Preferred: track work in `TODO/` with an index at `TODO/TODO.md`; number using letter-prefixed IDs (see below); don't renumber; sort by priority.
+- TODO IDs use `LNNN` format (letter prefix + 3 digits), e.g. `S015`, `J016`.
+  - Prefixes: `S` = Steve, `J` = JJ.
+  - Default repo prefix for this repo: `S` (Steve started it).
+- Transition rule: if an existing TODO is referenced without a letter (e.g., `015`), treat it as the default prefix + same integer (i.e., `S015`).
+- Keep integer parts globally unique during transition: avoid creating both `J001` and `S001` in the same repo until all existing TODOs are renamed.
+- When bulk-renaming existing TODO files to add prefixes, use `git mv` (not `mv`/`rm`) and do the renames in one commit without mixing other work.
+- Mark completion with checkboxes (e.g., `- [ ] S005 - ...` → `- [x] S005 - ...`).
 - Legacy: root `TODO.md` exists for historical reference; update `TODO/TODO.md` going forward.
 
 ## Commit & Pull Request Guidelines
