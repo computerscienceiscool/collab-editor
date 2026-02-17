@@ -1,7 +1,9 @@
 // File: src/setup/editorSetup.js
 import { EditorView, minimalSetup } from 'codemirror';
 import { EditorState, Compartment, Annotation } from '@codemirror/state';
-import { remoteCursorPlugin } from '../ui/remoteCursorPlugin.js';
+import { remoteCursorPlugin } from '@collab-editor/awareness';
+import * as cmView from '@codemirror/view';
+import * as cmState from '@codemirror/state';
 import { history, undo, redo } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
 import { lineNumbers } from '@codemirror/view';
@@ -108,7 +110,7 @@ export function setupEditor(repo, handle, awareness) {
         }}
       ]),
       lineNumberCompartment.of(lineNumbersEnabled ? lineNumbersExtension : []),
-      ...remoteCursorPlugin(awareness, getClientID()),
+      ...remoteCursorPlugin(cmView, cmState, awareness, getClientID()),
       updateListener
     ]
   });
