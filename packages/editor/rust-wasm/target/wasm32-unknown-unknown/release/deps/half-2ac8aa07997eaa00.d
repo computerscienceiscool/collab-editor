@@ -1,0 +1,12 @@
+/home/jj/lab/collab-editor/rust-wasm/target/wasm32-unknown-unknown/release/deps/half-2ac8aa07997eaa00.d: /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/lib.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/slice.rs
+
+/home/jj/lab/collab-editor/rust-wasm/target/wasm32-unknown-unknown/release/deps/libhalf-2ac8aa07997eaa00.rlib: /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/lib.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/slice.rs
+
+/home/jj/lab/collab-editor/rust-wasm/target/wasm32-unknown-unknown/release/deps/libhalf-2ac8aa07997eaa00.rmeta: /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/lib.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16/convert.rs /home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/slice.rs
+
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/lib.rs:
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat.rs:
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/bfloat/convert.rs:
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16.rs:
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/binary16/convert.rs:
+/home/jj/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-1.8.3/src/slice.rs:
