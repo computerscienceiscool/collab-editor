@@ -37,8 +37,8 @@ ws:
 	npx y-websocket --port $(WS_PORT)
 
 run:
-	@echo "Starting Go backend at http://localhost:$(PORT)"
-	go run main.go
+	@echo "Starting Rust backend at http://localhost:$(PORT)"
+	cd rust-server && cargo run
 
 restart:
 	@echo "Killing anything on ports $(PORT) and $(WS_PORT)..."
@@ -56,11 +56,18 @@ all: install build restart
 	@make -j2 ws run
 
 stop:
-	@echo "Killing anything on ports 8080 and 1234..."
-	@-fuser -k 8080/tcp 2>/dev/null || true
-	@-fuser -k 1234/tcp 2>/dev/null || true
+	@echo "Killing anything on ports  $(PORT) and $(WS_PORT)..."
+	@-fuser -k $(PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(WS_PORT)/tcp 2>/dev/null || true
 
 start:
 	@echo "Restarting ports and running all services..."
 	@make restart
 	@make -j2 ws serve
+
+open-room:
+	@echo "Generating UUID room name..."
+	@uuid=$$(uuidgen); \
+	echo "Opening: http://localhost:$(PORT)/?room=$$uuid"; \
+	xdg-open "http://localhost:$(PORT)/?room=$$uuid" >/dev/null 2>&1 || open "http://localhost:$(PORT)/?room=$$uuid"
+

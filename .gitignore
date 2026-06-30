@@ -1,20 +1,32 @@
-# Node
+# Node.js
 node_modules/
+package-lock.json
 
-# Vite & build outputs
+# Build artifacts
 dist/
 .vite/
 .parcel-cache/
 *.log
 
-# Optional: if you don't want to commit these
-package-lock.json
+# Output (optional, if auto-generated)
 public/bundle.js
 public/style.css
 
-# IDE/editor temp files
+# Rust (optional if you're using Rust)
+target/
+Cargo.lock
+
+# Editor & OS junk
 *.swp
 *.swo
 .DS_Store
-EOF
-node_modules/
+*.tmp
+*.bak
+copilot.log
+
+# Vite dev server & IndexedDB docs
+doc.yjs
+
+# IDEs
+.vscode/
+.idea/
